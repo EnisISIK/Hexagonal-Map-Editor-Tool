@@ -54,6 +54,8 @@ public class Chunk
 	public ChunkCoord chunkCoordinates;
 
 	GameObject chunkObject;
+	int chunkCountX;
+	int chunkCountZ;
 
 	MeshRenderer meshRenderer;
 	MeshFilter meshFilter;
@@ -167,7 +169,7 @@ public class Chunk
 
 	};
 	#endregion
-
+	
 	public Chunk(ChunkCoord _chunkCoordinates ,World _world)
     {
 		chunkCoordinates = _chunkCoordinates;
@@ -175,11 +177,20 @@ public class Chunk
 		chunkObject = new GameObject();
 		meshFilter = chunkObject.AddComponent<MeshFilter>();
 		meshRenderer = chunkObject.AddComponent<MeshRenderer>();
+		chunkCountX = chunkCoordinates.x;
+		chunkCountZ = chunkCoordinates.z;
+
+		Vector3 chunkPosition;
+		chunkPosition.x = (((chunkCoordinates.x)*5f) + ((chunkCoordinates.z )* 5f) * 0.5f - ((chunkCoordinates.z) * 5f) / 2) * (innerRadius * 2f);
+		chunkPosition.z = ((chunkCoordinates.z) * 5f) * (1f * 1.5f);
 
 		meshRenderer.material = world.material;
 		chunkObject.transform.SetParent(world.transform);
 		//bu position sus geldi bir bak yarın sabah
-		chunkObject.transform.position = new Vector3(chunkCoordinates.x * 5f*2*innerRadius, 0f, chunkCoordinates.z * 5f * 2 * innerRadius);
+		//chunkObject.transform.position = new Vector3(chunkCoordinates.x * 5f*2*innerRadius, 0f, chunkCoordinates.z * 5f * 1.5f * 1f);
+		//chunkObject.transform.position = new Vector3(chunkPosition.x , 0f, chunkPosition.z);
+		chunkObject.transform.position = new Vector3(chunkCoordinates.x, 0f, chunkCoordinates.z);
+		//chunkObject.transform.position = new Vector3(0f, 0f, 0f);
 		chunkObject.name = "Chunk " + chunkCoordinates.x + ", " + chunkCoordinates.z;
 		PopulateVoxelMap();
 		CreateChunk();
@@ -306,10 +317,13 @@ public class Chunk
 					if (!CheckVoxel(y, x, z))
 					{
 						byte blockID = voxelMap[x, (int)y, z];
+						//x = (chunkCountX * 5 + x);
+						//z = (chunkCountZ * 5 + z);
 						Vector3 position;
-						position.x = (x + z * 0.5f - z / 2) * (innerRadius * 2f);
+						position.x = (((chunkCountX * 5 + x) + (chunkCountZ * 5 + z) * 0.5f - (chunkCountZ * 5 + z) / 2) * (innerRadius * 2f)) - chunkCountX;
 						position.y = -1f * y;
-						position.z = z * (1f * 1.5f);
+						position.z = (chunkCountZ * 5 + z) * (1f * 1.5f)-chunkCountZ;
+
 
 						int triangleOffset = vertices.Count;
 						vertices.AddRange(hexVertices.Select(v => v + position));
