@@ -107,12 +107,12 @@ public static class VoxelData {
 	};
 	#endregion
 
-	public static readonly Vector2 _00 = new Vector2(0.50f, 1.00f); // 0.12 , 1f  //0.12, 1 olmalı
-	public static readonly Vector2 _01 = new Vector2(1.00f, 0.50f + (1.00f / (2.00f * Mathf.Sqrt(3.00f))));  // 0.25, 0.78
-	public static readonly Vector2 _02 = new Vector2(1.00f, (1.00f / (2.00f * Mathf.Sqrt(3.00f))));  //0.25, 0.28
-	public static readonly Vector2 _03 = new Vector2(0.50f, 0.00f);  //0.12, 0.75
-	public static readonly Vector2 _04 = new Vector2(0.00f, (1.00f / (2.00f * Mathf.Sqrt(3.00f)))); //0, 0.28
-	public static readonly Vector2 _05 = new Vector2(0.00f, 0.50f + (1.00f / (2.00f * Mathf.Sqrt(3.00f)))); //0, 0.78
+	public static readonly Vector2 _00 = new Vector2(0.50f, 1.00f);
+	public static readonly Vector2 _01 = new Vector2(1.00f, 0.50f + (1.00f / (2.00f * Mathf.Sqrt(3.00f))));
+	public static readonly Vector2 _02 = new Vector2(1.00f, (1.00f / (2.00f * Mathf.Sqrt(3.00f))));
+	public static readonly Vector2 _03 = new Vector2(0.50f, 0.00f);
+	public static readonly Vector2 _04 = new Vector2(0.00f, (1.00f / (2.00f * Mathf.Sqrt(3.00f))));
+	public static readonly Vector2 _05 = new Vector2(0.00f, 0.50f + (1.00f / (2.00f * Mathf.Sqrt(3.00f))));
 
 	public static readonly Vector2 _06 = new Vector2(0f, 0f);
 	public static readonly Vector2 _07 = new Vector2(1f, 0f);

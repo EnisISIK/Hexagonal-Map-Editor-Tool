@@ -27,10 +27,6 @@ public class Chunk
 	byte[,,] voxelMap = new byte[5, 10, 5];
 
 	World world;
-
-	
-	
-
 	
 	public Chunk(ChunkCoord _chunkCoordinates ,World _world)
     {
@@ -50,10 +46,7 @@ public class Chunk
 
 		chunkObject.transform.position = new Vector3(chunkCoordinates.x*5, 0f, chunkCoordinates.z*5);
 		chunkObject.transform.SetParent(world.transform);
-		//bu position sus geldi bir bak yarın sabah
-		//chunkObject.transform.position = new Vector3(chunkCoordinates.x * 5f*2*innerRadius, 0f, chunkCoordinates.z * 5f * 1.5f * 1f);
-		//chunkObject.transform.position = new Vector3(chunkPosition.x , 0f, chunkPosition.z);
-		//chunkObject.transform.position = new Vector3(0f, 0f, 0f);
+
 		chunkObject.name = "Chunk " + chunkCoordinates.x + ", " + chunkCoordinates.z;
 		PopulateVoxelMap();
 		CreateChunk();
@@ -69,7 +62,6 @@ public class Chunk
 			{
 				for (int x = 0; x < VoxelData.ChunkWidth; x++)
 				{
-					//böyle hepsine true deyince olmaz tabi
 					voxelMap[x, (int) y, z] = world.GetHex(new Vector3(x,y,z)+_position);
 				}
 			}
@@ -115,18 +107,13 @@ public class Chunk
 
 	void AddTexture(int textureId, Vector2[] hexUVs)
     {   //1 için
-		float y = textureId / VoxelData.TextureAtlasSizeInBlocks; //0
-		float x = textureId - (y * VoxelData.TextureAtlasSizeInBlocks);  //1
+		float y = textureId / VoxelData.TextureAtlasSizeInBlocks; 
+		float x = textureId - (y * VoxelData.TextureAtlasSizeInBlocks);  
 
-		x *= VoxelData.NormalizedBlockTextureSize; //0.25
-		y *= VoxelData.NormalizedBlockTextureSize; //0
+		x *= VoxelData.NormalizedBlockTextureSize; 
+		y *= VoxelData.NormalizedBlockTextureSize; 
 
-		y = 1f - y - VoxelData.NormalizedBlockTextureSize;  //0.75
-												  //float y = Mathf.Floor(textureId / VoxelData.TextureAtlasSizeInBlocks) / VoxelData.TextureAtlasSizeInBlocks;
-												  //float x = (textureId % VoxelData.TextureAtlasSizeInBlocks) / VoxelData.TextureAtlasSizeInBlocks;
-
-		//Vector2 textureUV = new Vector2(x, y);
-		//uvs.AddRange(hexUVs.Select(u => u + textureUV));
+		y = 1f - y - VoxelData.NormalizedBlockTextureSize;  
 
 		for (int i = 0; i < hexUVs.Length; i++)
 		{
@@ -150,29 +137,24 @@ public class Chunk
 					if (!CheckVoxel(y, x, z))
 					{
 						byte blockID = voxelMap[x, (int)y, z];
-						//x = (chunkCountX * 5 + x);
-						//z = (chunkCountZ * 5 + z);
+
 						Vector3 position;
-						position.x = (((chunkCountX + x) + (chunkCountZ  + z) * 0.5f - (chunkCountZ  + z) / 2) * (VoxelData.innerRadius * 2f))+chunkCountX*2f* VoxelData.innerRadius;// - chunkCountX; bu niye 2f hiçbir fikrim yok. Sanırım bu inner radius
+						position.x = (((chunkCountX + x) + (chunkCountZ  + z) * 0.5f - (chunkCountZ  + z) / 2) * (VoxelData.innerRadius * 2f))+chunkCountX*2f* VoxelData.innerRadius;
 						position.y = -1f * y;
-						position.z = ((chunkCountZ  + z) * (VoxelData.outerRadius * 1.5f)) + chunkCountZ * VoxelData.outerRadius;//-chunkCountZ; bu da neden 1f bilmiyorum onu sormak lazım chatgptye bu da outerradius
+						position.z = ((chunkCountZ  + z) * (VoxelData.outerRadius * 1.5f)) + chunkCountZ * VoxelData.outerRadius;
 
 
 						int triangleOffset = vertices.Count;
 						vertices.AddRange(VoxelData.hexVertices.Select(v => v + position));
 						triangles.AddRange(VoxelData.hexTriangles.Select(t => t + triangleOffset));
 
-						//normals.AddRange(hexNormals);
-						//uvs.AddRange(hexUvs);
-						//AddTexture(3, hexUvs);
-						//AddTexture(world.blocktypes[blockID].GetTextureID(0), hexUvs);
 						AddText(blockID, VoxelData.hexUvs);
 					}
 				}
 			}
 		}
 	}
-	//buraya facecheck ekle
+
 	void CreateChunkWithFaces()
 	{
 		List<Vector3> tempVertices = new List<Vector3>();
@@ -278,14 +260,14 @@ public class Chunk
 				textureIterator++;
             }
 			int textureId = world.blocktypes[blockID].GetTextureID(textureIterator);
-			float y = textureId / VoxelData.TextureAtlasSizeInBlocks; //0
-			float x = textureId - (y * VoxelData.TextureAtlasSizeInBlocks);  //0
+			float y = textureId / VoxelData.TextureAtlasSizeInBlocks; 
+			float x = textureId - (y * VoxelData.TextureAtlasSizeInBlocks);  
 
-			x *= VoxelData.NormalizedBlockTextureSize; //0
-			y *= VoxelData.NormalizedBlockTextureSize; //0
+			x *= VoxelData.NormalizedBlockTextureSize; 
+			y *= VoxelData.NormalizedBlockTextureSize; 
 
-			y = 1f - y - VoxelData.NormalizedBlockTextureSize;  // 0.75f
-													  //x veya y 0 ise çarpma gibi bişeyler eklenebilir.
+			y = 1f - y - VoxelData.NormalizedBlockTextureSize;  
+													  
 			Vector2 textureUV = hexUVs[i];
 			textureUV.x = textureUV.x * VoxelData.NormalizedBlockTextureSize + x;
 			textureUV.y = textureUV.y * VoxelData.NormalizedBlockTextureSize + y;
@@ -299,14 +281,14 @@ public class Chunk
 		for (int i = 0; i < hexUVs.Length; i++)
 		{
 			int textureId = world.blocktypes[blockID].GetTextureID(faceID);
-			float y = textureId / VoxelData.TextureAtlasSizeInBlocks; //0
-			float x = textureId - (y * VoxelData.TextureAtlasSizeInBlocks);  //0
+			float y = textureId / VoxelData.TextureAtlasSizeInBlocks; 
+			float x = textureId - (y * VoxelData.TextureAtlasSizeInBlocks);  
 
-			x *= VoxelData.NormalizedBlockTextureSize; //0
-			y *= VoxelData.NormalizedBlockTextureSize; //0
+			x *= VoxelData.NormalizedBlockTextureSize; 
+			y *= VoxelData.NormalizedBlockTextureSize; 
 
-			y = 1f - y - VoxelData.NormalizedBlockTextureSize;  // 0.75f
-													  //x veya y 0 ise çarpma gibi bişeyler eklenebilir.
+			y = 1f - y - VoxelData.NormalizedBlockTextureSize;  
+													  
 			Vector2 textureUV = hexUVs[i];
 			textureUV.x = textureUV.x * VoxelData.NormalizedBlockTextureSize + x;
 			textureUV.y = textureUV.y * VoxelData.NormalizedBlockTextureSize + y;
@@ -324,8 +306,7 @@ public class Chunk
 		mesh.triangles = triangles.ToArray();
 
 		mesh.RecalculateNormals();
-		//mesh.RecalculateBounds();
-		//mesh.Optimize();
+
 		meshFilter.mesh = mesh;
 	}
 }
