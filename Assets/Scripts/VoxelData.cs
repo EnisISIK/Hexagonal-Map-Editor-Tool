@@ -13,81 +13,181 @@ public static class VoxelData {
         get { return 1f / (float)TextureAtlasSizeInBlocks; }
     }
 
+	public static readonly int WorldSizeInChunks = 50;
+	public static int WorldSizeInBlocks
+	{
+
+		get { return WorldSizeInChunks * ChunkWidth; }
+
+	}
 	public const float outerRadius = 1f;
 
 	public const float innerRadius = outerRadius * 0.866025404f;
 
-	public static readonly Vector3[] voxelVerts = new Vector3[14] {
-		new Vector3(0f, 0f, 0f),
-		new Vector3(0f, 0f, -outerRadius),
-		new Vector3(innerRadius, 0f, -0.5f * outerRadius),
-		new Vector3(innerRadius, 0f, 0.5f * outerRadius),
-		new Vector3(0f, 0f, outerRadius),
-		new Vector3(-innerRadius, 0f, 0.5f * outerRadius),
-		new Vector3(-innerRadius, 0f, -0.5f * outerRadius),
-		new Vector3(0f, 0.5f, 0f),
-		new Vector3(0f, 0.5f, -outerRadius),
-		new Vector3(innerRadius, 0.5f, -0.5f * outerRadius),
-		new Vector3(innerRadius, 0.5f, 0.5f * outerRadius),
-		new Vector3(0f, 0.5f, outerRadius),
-		new Vector3(-innerRadius, 0.5f, 0.5f * outerRadius),
-		new Vector3(-innerRadius, 0.5f, -0.5f * outerRadius)
+	public static readonly Vector3 up = Vector3.up;
+	public static readonly Vector3 down = Vector3.down;
+	public static readonly Vector3 right = Vector3.right;
+	public static readonly Vector3 left = Vector3.left;
+	public static readonly Vector3 frontRight = new Vector3(0.50f, 0, -((Mathf.Sqrt(3.00f)) / 2.00f));
+	public static readonly Vector3 frontLeft = new Vector3(-0.50f, 0, -((Mathf.Sqrt(3.00f)) / 2.00f));
+	public static readonly Vector3 backRight = new Vector3(0.50f, 0, ((Mathf.Sqrt(3.00f)) / 2.00f));
+	public static readonly Vector3 backLeft = new Vector3(-0.50f, 0, ((Mathf.Sqrt(3.00f)) / 2.00f));
 
-	};
+	public static readonly Vector3 p00 = new Vector3(0.00f, 0.50f, 1.00f);
+	public static readonly Vector3 p01 = new Vector3(Mathf.Sqrt(3.00f) / 2.00f, 0.50f, (1.00f / 2.00f));
+	public static readonly Vector3 p02 = new Vector3(Mathf.Sqrt(3.00f) / 2.00f, 0.50f, -(1.00f / 2.00f));
+	public static readonly Vector3 p03 = new Vector3(0.00f, 0.50f, -1.00f);
+	public static readonly Vector3 p04 = new Vector3(-Mathf.Sqrt(3.00f) / 2.00f, 0.50f, -(1.00f / 2.00f));
+	public static readonly Vector3 p05 = new Vector3(-Mathf.Sqrt(3.00f) / 2.00f, 0.50f, (1.00f / 2.00f));
+	public static readonly Vector3 p06 = new Vector3(0.00f, -0.50f, 1.00f);
+	public static readonly Vector3 p07 = new Vector3(Mathf.Sqrt(3.00f) / 2.00f, -0.50f, (1.00f / 2.00f));
+	public static readonly Vector3 p08 = new Vector3(Mathf.Sqrt(3.00f) / 2.00f, -0.50f, -(1.00f / 2.00f));
+	public static readonly Vector3 p09 = new Vector3(0.00f, -0.50f, -1.00f);
+	public static readonly Vector3 p10 = new Vector3(-Mathf.Sqrt(3.00f) / 2.00f, -0.50f, -(1.00f / 2.00f));
+	public static readonly Vector3 p11 = new Vector3(-Mathf.Sqrt(3.00f) / 2.00f, -0.50f, (1.00f / 2.00f));
 
-	public static readonly int[,] voxelTris = new int[8,18] {
-		//-1 for none/skip  //bunlar aşağıdan yukarı gözüküyor galiba bunları değiştir tam tersi olcak şekilde
-		{2,  0, 1, 1, 0,  6,  6, 0, 5, 5, 0, 4, 4, 0, 3, 3, 0, 2}, // Bottom Face
-		{8,  7, 9, 9,  7, 10,10, 7,11,11, 7,12,12, 7,13,13, 7, 8}, // Top Face
-		{1,  8, 2, 2,  8,  9,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}, // Front-Right Face
-		{2,  9, 3, 3,  9, 10,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}, // Side-Right Face
-		{3, 10, 4, 4, 10, 11,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}, // Back-Right Face
-		{4, 11, 5, 5, 11, 12,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}, // Back-Left Face
-		{5, 12, 6, 6, 12, 13,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}, // Side-Left Face
-		{6, 13, 1, 1, 13,  8,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}  // Front-Left Face
-	};
-
-	public static readonly int[,] voxelTrisSpare = new int[8, 18] {
-		//-1 for none/skip  //bunlar aşağıdan yukarı gözüküyor galiba bunları değiştir tam tersi olcak şekilde
-		{0,  6, 5, 0, 5,  4,  0, 4, 3, 0, 3, 2, 0, 2, 1, 0, 1, 6}, // Bottom Face
-		{7,  13, 12, 7,  12, 11,7, 11,10,7, 10,9,7, 9,8,7, 8, 13}, // Top Face
-		{1,  8, 2, 2,  8,  9,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}, // Front-Right Face
-		{2,  9, 3, 3,  9, 10,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}, // Side-Right Face
-		{3, 10, 4, 4, 10, 11,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}, // Back-Right Face
-		{4, 11, 5, 5, 11, 12,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}, // Back-Left Face
-		{5, 12, 6, 6, 12, 13,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}, // Side-Left Face
-		{6, 13, 1, 1, 13,  8,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}  // Front-Left Face
-	};
-
-	public static readonly Vector3[] hexFaceChecks = new Vector3[8]
+	#region Vertices clockwise top to bottom
+	public static readonly Vector3[] hexVertices = new Vector3[]
 	{
-		new Vector3(0f, -1f, 0f), // Bottom Face
-		new Vector3(0f, 1f, 0f), // Top Face
-		new Vector3(-1f, 0f, -1f), // Front-Right Face
-		new Vector3(1f, 0f, 0f), // Side-Right Face
-		new Vector3(1f, 0f, 1f), // Back-Right Face
-		new Vector3(1f, 0f, 1f), // Back-Left Face
-		new Vector3(-1f, 0f, 0f), // Side-Left Face
-		new Vector3(-1f, 0f, -1f)  // Front-Left Face
+		// Top
+		p00, p01, p02, p03, p04, p05,
+		
+		// Bottom
+		p06, p07, p08, p09, p10, p11,
+		
+		// Right
+		p01, p02, p07, p08,
+		
+		// Left
+		p04, p05, p10, p11,
+		
+		// Front Right
+		p02, p03, p08, p09,
+		
+		// Front Left
+		p03, p04, p09, p10,
+		
+		// Back Right
+		p00, p01, p06, p07,
+		
+		// Back Left
+		p05, p00, p11, p06
 	};
+	#endregion
 
-	public static readonly Vector2[] voxelUvs = new Vector2[14] {
+	//buraya face değerlerini gir
+	public static readonly Vector3 f00 = new Vector3(0.00f, 1.00f, 0.00f);
+	public static readonly Vector3 f01 = new Vector3(0.00f, -1.00f, 0.00f);
+	public static readonly Vector3 f02 = new Vector3(1.00f, 0.00f, 0.00f);
+	public static readonly Vector3 f03 = new Vector3(-1.00f, 0.00f, 0.00f);
+	public static readonly Vector3 f04 = new Vector3(0.50f, 0.00f, -((Mathf.Sqrt(3.00f)) / 2.00f));
+	public static readonly Vector3 f05 = new Vector3(-0.50f, 0.00f, -((Mathf.Sqrt(3.00f)) / 2.00f));
+	public static readonly Vector3 f06 = new Vector3(0.50f, 0.00f, ((Mathf.Sqrt(3.00f)) / 2.00f));
+	public static readonly Vector3 f07 = new Vector3(-0.50f, 0.00f, ((Mathf.Sqrt(3.00f)) / 2.00f));
 
-		new Vector2(0f,  0f),
-		new Vector2(0f,  -outerRadius),
-		new Vector2(innerRadius, -0.5f * outerRadius),
-		new Vector2(innerRadius,  0.5f * outerRadius),
-		new Vector2(0f,  outerRadius),
-		new Vector2(-innerRadius,  0.5f * outerRadius),
-		new Vector2(-innerRadius,  -0.5f * outerRadius),
-		new Vector2(0f,  0f),
-		new Vector2(0f,  -outerRadius),
-		new Vector2(innerRadius,  -0.5f * outerRadius),
-		new Vector2(innerRadius,  0.5f * outerRadius),
-		new Vector2(0f,  outerRadius),
-		new Vector2(-innerRadius, 0.5f * outerRadius),
-		new Vector2(-innerRadius,  -0.5f * outerRadius)
+	#region Faces clockwise top to bottom
+	public static readonly Vector3[] hexFaces = new Vector3[]
+	{
+		// Top
+		f00,
+		// Bottom
+		f01,
+		// Right
+		f02,
+		// Left
+		f03,
+		// Front Right
+		f04,
+		// Front Left
+		f05,
+		// Back Right
+		f06,
+		// Back Left
+		f07,
 	};
+	#endregion
+
+	public static readonly Vector2 _00 = new Vector2(0.50f, 1.00f); // 0.12 , 1f  //0.12, 1 olmalı
+	public static readonly Vector2 _01 = new Vector2(1.00f, 0.50f + (1.00f / (2.00f * Mathf.Sqrt(3.00f))));  // 0.25, 0.78
+	public static readonly Vector2 _02 = new Vector2(1.00f, (1.00f / (2.00f * Mathf.Sqrt(3.00f))));  //0.25, 0.28
+	public static readonly Vector2 _03 = new Vector2(0.50f, 0.00f);  //0.12, 0.75
+	public static readonly Vector2 _04 = new Vector2(0.00f, (1.00f / (2.00f * Mathf.Sqrt(3.00f)))); //0, 0.28
+	public static readonly Vector2 _05 = new Vector2(0.00f, 0.50f + (1.00f / (2.00f * Mathf.Sqrt(3.00f)))); //0, 0.78
+
+	public static readonly Vector2 _06 = new Vector2(0f, 0f);
+	public static readonly Vector2 _07 = new Vector2(1f, 0f);
+	public static readonly Vector2 _08 = new Vector2(0f, 1f);
+	public static readonly Vector2 _09 = new Vector2(1f, 1f);
+
+	#region UVs
+	public static readonly Vector2[] hexUvs = new Vector2[]
+	{
+		// Top
+		_00, _01, _02, _03, _04, _05,
+		
+		// Bottom
+		_00, _01, _02, _03, _04, _05,
+		
+		// Right
+		_06, _07, _08, _09,
+		
+		// Left
+		_06, _07, _08, _09,
+		
+		// Front Right
+		_06, _07, _08, _09,
+		
+		// Front Left
+		_06, _07, _08, _09,
+		
+		// Back Right
+		_06, _07, _08, _09,
+		
+		// Back Left
+		_06, _07, _08, _09,
+	};
+	#endregion
+
+	#region Triangles
+	public static readonly int[] hexTriangles = new int[]
+	{
+		// Top
+		0, 1, 3,
+		1, 2, 3,
+		0, 3, 4,
+		0, 4, 5,		
+		
+		// Bottom
+		9, 7, 6,
+		9, 8, 7,
+		10, 9, 6,
+		11, 10, 6,
+		
+		// Right
+		14, 13, 12,
+		14, 15, 13,
+		
+		// Left
+		18, 17, 16,
+		18, 19, 17,
+		
+		// Front Right
+		22, 21, 20,
+		22, 23, 21,
+		
+		// Front Left
+		26, 25, 24,
+		26, 27, 25,
+		
+		// Back Right
+		30, 29, 28,
+		30, 31, 29,
+		
+		// Back Left
+		34, 33, 32,
+		34, 35, 33,
 
 
+	};
+	#endregion
 }

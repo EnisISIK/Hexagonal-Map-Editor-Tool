@@ -10,57 +10,6 @@ public class Chunk
 	[SerializeField] private int numVertices = 6;
 	[SerializeField] private int VoxelVertices = 4;
 
-	public static readonly int TextureAtlasSizeInBlocks = 4;
-	public static float NormalizedBlockTextureSize {
-		get { return 1f / (float)TextureAtlasSizeInBlocks; }
-	}
-
-
-	const float innerRadius = 1f * 0.866025404f;
-	public static readonly Vector3 p00 = new Vector3(0.00f, 0.50f, 1.00f);
-	public static readonly Vector3 p01 = new Vector3(Mathf.Sqrt(3.00f) / 2.00f, 0.50f, (1.00f / 2.00f));
-	public static readonly Vector3 p02 = new Vector3(Mathf.Sqrt(3.00f) / 2.00f, 0.50f, -(1.00f / 2.00f));
-	public static readonly Vector3 p03 = new Vector3(0.00f, 0.50f, -1.00f);
-	public static readonly Vector3 p04 = new Vector3(-Mathf.Sqrt(3.00f) / 2.00f, 0.50f, -(1.00f / 2.00f));
-	public static readonly Vector3 p05 = new Vector3(-Mathf.Sqrt(3.00f) / 2.00f, 0.50f, (1.00f / 2.00f));
-	public static readonly Vector3 p06 = new Vector3(0.00f, -0.50f, 1.00f);
-	public static readonly Vector3 p07 = new Vector3(Mathf.Sqrt(3.00f) / 2.00f, -0.50f, (1.00f / 2.00f));
-	public static readonly Vector3 p08 = new Vector3(Mathf.Sqrt(3.00f) / 2.00f, -0.50f, -(1.00f / 2.00f));
-	public static readonly Vector3 p09 = new Vector3(0.00f, -0.50f, -1.00f);
-	public static readonly Vector3 p10 = new Vector3(-Mathf.Sqrt(3.00f) / 2.00f, -0.50f, -(1.00f / 2.00f));
-	public static readonly Vector3 p11 = new Vector3(-Mathf.Sqrt(3.00f) / 2.00f, -0.50f, (1.00f / 2.00f));
-
-	//buraya face değerlerini gir
-	public static readonly Vector3 f00 = new Vector3(0.00f, 1.00f, 0.00f);
-	public static readonly Vector3 f01 = new Vector3(0.00f, -1.00f, 0.00f);
-	public static readonly Vector3 f02 = new Vector3(1.00f, 0.00f, 0.00f);
-	public static readonly Vector3 f03 = new Vector3(-1.00f, 0.00f, 0.00f);
-	public static readonly Vector3 f04 = new Vector3(0.50f, 0.00f, -((Mathf.Sqrt(3.00f)) / 2.00f));
-	public static readonly Vector3 f05 = new Vector3(-0.50f, 0.00f, -((Mathf.Sqrt(3.00f)) / 2.00f));
-	public static readonly Vector3 f06 = new Vector3(0.50f, 0.00f, ((Mathf.Sqrt(3.00f)) / 2.00f));
-	public static readonly Vector3 f07 = new Vector3(-0.50f, 0.00f, ((Mathf.Sqrt(3.00f)) / 2.00f));
-
-	Vector3 up = Vector3.up;
-	Vector3 down = Vector3.down;
-	Vector3 right = Vector3.right;
-	Vector3 left = Vector3.left;
-	Vector3 frontRight = new Vector3(0.50f, 0, -((Mathf.Sqrt(3.00f)) / 2.00f));
-	Vector3 frontLeft = new Vector3(-0.50f, 0, -((Mathf.Sqrt(3.00f)) / 2.00f));
-	Vector3 backRight = new Vector3(0.50f, 0, ((Mathf.Sqrt(3.00f)) / 2.00f));
-	Vector3 backLeft = new Vector3(-0.50f, 0, ((Mathf.Sqrt(3.00f)) / 2.00f));
-
-	public static readonly Vector2 _00 = new Vector2(0.50f, 1.00f); // 0.12 , 1f  //0.12, 1 olmalı
-	public static readonly Vector2 _01 = new Vector2(1.00f, 0.50f + (1.00f / (2.00f * Mathf.Sqrt(3.00f))));  // 0.25, 0.78
-	public static readonly Vector2 _02 = new Vector2(1.00f, (1.00f / (2.00f * Mathf.Sqrt(3.00f))));  //0.25, 0.28
-	public static readonly Vector2 _03 = new Vector2(0.50f, 0.00f);  //0.12, 0.75
-	public static readonly Vector2 _04 = new Vector2(0.00f, (1.00f / (2.00f * Mathf.Sqrt(3.00f)))); //0, 0.28
-	public static readonly Vector2 _05 = new Vector2(0.00f, 0.50f + (1.00f / (2.00f * Mathf.Sqrt(3.00f)))); //0, 0.78
-
-	public static readonly Vector2 _06 = new Vector2(0f, 0f);
-	public static readonly Vector2 _07 = new Vector2(1f, 0f);
-	public static readonly Vector2 _08 = new Vector2(0f, 1f);
-	public static readonly Vector2 _09 = new Vector2(1f, 1f);
-
 	public ChunkCoord chunkCoordinates;
 
 	GameObject chunkObject;
@@ -79,128 +28,9 @@ public class Chunk
 
 	World world;
 
-	#region Vertices clockwise top to bottom
-	Vector3[] hexVertices = new Vector3[]
-	{
-		// Top
-		p00, p01, p02, p03, p04, p05,
-		
-		// Bottom
-		p06, p07, p08, p09, p10, p11,
-		
-		// Right
-		p01, p02, p07, p08,
-		
-		// Left
-		p04, p05, p10, p11,
-		
-		// Front Right
-		p02, p03, p08, p09,
-		
-		// Front Left
-		p03, p04, p09, p10,
-		
-		// Back Right
-		p00, p01, p06, p07,
-		
-		// Back Left
-		p05, p00, p11, p06
-	};
-	#endregion
+	
+	
 
-	#region Faces clockwise top to bottom
-	Vector3[] hexFaces = new Vector3[]
-	{
-		// Top
-		f00,
-		// Bottom
-		f01,
-		// Right
-		f02,
-		// Left
-		f03,
-		// Front Right
-		f04,
-		// Front Left
-		f05,
-		// Back Right
-		f06,
-		// Back Left
-		f07,
-	};
-	#endregion
-
-	#region UVs
-	Vector2[] hexUvs = new Vector2[]
-	{
-		// Top
-		_00, _01, _02, _03, _04, _05,
-		
-		// Bottom
-		_00, _01, _02, _03, _04, _05,
-		
-		// Right
-		_06, _07, _08, _09,
-		
-		// Left
-		_06, _07, _08, _09,
-		
-		// Front Right
-		_06, _07, _08, _09,
-		
-		// Front Left
-		_06, _07, _08, _09,
-		
-		// Back Right
-		_06, _07, _08, _09,
-		
-		// Back Left
-		_06, _07, _08, _09,
-	};
-	#endregion
-
-	#region Triangles
-	int[] hexTriangles = new int[]
-	{
-		// Top
-		0, 1, 3,
-		1, 2, 3,
-		0, 3, 4,
-		0, 4, 5,		
-		
-		// Bottom
-		9, 7, 6,
-		9, 8, 7,
-		10, 9, 6,
-		11, 10, 6,
-		
-		// Right
-		14, 13, 12,
-		14, 15, 13,
-		
-		// Left
-		18, 17, 16,
-		18, 19, 17,
-		
-		// Front Right
-		22, 21, 20,
-		22, 23, 21,
-		
-		// Front Left
-		26, 25, 24,
-		26, 27, 25,
-		
-		// Back Right
-		30, 29, 28,
-		30, 31, 29,
-		
-		// Back Left
-		34, 33, 32,
-		34, 35, 33,
-
-
-	};
-	#endregion
 	
 	public Chunk(ChunkCoord _chunkCoordinates ,World _world)
     {
@@ -213,8 +43,8 @@ public class Chunk
 		chunkCountZ = chunkCoordinates.z;
 
 		Vector3 chunkPosition;
-		chunkPosition.x = (((chunkCoordinates.x)*5f) + ((chunkCoordinates.z )* 5f) * 0.5f - ((chunkCoordinates.z) * 5f) / 2) * (innerRadius * 2f);
-		chunkPosition.z = ((chunkCoordinates.z) * 5f) * (1f * 1.5f);
+		chunkPosition.x = (((chunkCoordinates.x)*5f) + ((chunkCoordinates.z )* 5f) * 0.5f - ((chunkCoordinates.z) * 5f) / 2) * (VoxelData.innerRadius * 2f);
+		chunkPosition.z = ((chunkCoordinates.z) * 5f) * (VoxelData.outerRadius * 1.5f);
 
 		meshRenderer.material = world.material;
 
@@ -284,11 +114,11 @@ public class Chunk
 
 	void PopulateVoxelMap()
     {
-		for (float y = 0; y < 10; y++)
+		for (int y = 0; y < VoxelData.ChunkHeight; y++)
 		{
-			for (int z = 0; z < 5; z++)
+			for (int z = 0; z < VoxelData.ChunkWidth; z++)
 			{
-				for (int x = 0; x < 5; x++)
+				for (int x = 0; x < VoxelData.ChunkWidth; x++)
 				{
 					//böyle hepsine true deyince olmaz tabi
 					voxelMap[x, (int) y, z] = world.GetHex(new Vector3(x,y,z)+_position);
@@ -336,13 +166,13 @@ public class Chunk
 
 	void AddTexture(int textureId, Vector2[] hexUVs)
     {   //1 için
-		float y = textureId / TextureAtlasSizeInBlocks; //0
-		float x = textureId - (y * TextureAtlasSizeInBlocks);  //1
+		float y = textureId / VoxelData.TextureAtlasSizeInBlocks; //0
+		float x = textureId - (y * VoxelData.TextureAtlasSizeInBlocks);  //1
 
-		x *= NormalizedBlockTextureSize; //0.25
-		y *= NormalizedBlockTextureSize; //0
+		x *= VoxelData.NormalizedBlockTextureSize; //0.25
+		y *= VoxelData.NormalizedBlockTextureSize; //0
 
-		y = 1f - y - NormalizedBlockTextureSize;  //0.75
+		y = 1f - y - VoxelData.NormalizedBlockTextureSize;  //0.75
 												  //float y = Mathf.Floor(textureId / VoxelData.TextureAtlasSizeInBlocks) / VoxelData.TextureAtlasSizeInBlocks;
 												  //float x = (textureId % VoxelData.TextureAtlasSizeInBlocks) / VoxelData.TextureAtlasSizeInBlocks;
 
@@ -352,8 +182,8 @@ public class Chunk
 		for (int i = 0; i < hexUVs.Length; i++)
 		{
 			Vector2 textureUV = hexUVs[i];
-			textureUV.x = textureUV.x * NormalizedBlockTextureSize + x;
-			textureUV.y = textureUV.y * NormalizedBlockTextureSize + y;
+			textureUV.x = textureUV.x * VoxelData.NormalizedBlockTextureSize + x;
+			textureUV.y = textureUV.y * VoxelData.NormalizedBlockTextureSize + y;
 
 			uvs.Add(textureUV);
 		}
@@ -362,11 +192,11 @@ public class Chunk
 	void CreateChunk()
     {
 		List<Vector3> tempVertices = new List<Vector3>();
-		for (float y = 0; y < 10; y++)
+		for (float y = 0; y < VoxelData.ChunkHeight; y++)
 		{
-			for (int z = 0; z < 5; z++)
+			for (int z = 0; z < VoxelData.ChunkWidth; z++)
 			{
-				for (int x = 0; x < 5; x++)
+				for (int x = 0; x < VoxelData.ChunkWidth; x++)
 				{
 					if (!CheckVoxel(y, x, z))
 					{
@@ -374,20 +204,20 @@ public class Chunk
 						//x = (chunkCountX * 5 + x);
 						//z = (chunkCountZ * 5 + z);
 						Vector3 position;
-						position.x = (((chunkCountX + x) + (chunkCountZ  + z) * 0.5f - (chunkCountZ  + z) / 2) * (innerRadius * 2f))+chunkCountX*2f* innerRadius;// - chunkCountX; bu niye 2f hiçbir fikrim yok. Sanırım bu inner radius
+						position.x = (((chunkCountX + x) + (chunkCountZ  + z) * 0.5f - (chunkCountZ  + z) / 2) * (VoxelData.innerRadius * 2f))+chunkCountX*2f* VoxelData.innerRadius;// - chunkCountX; bu niye 2f hiçbir fikrim yok. Sanırım bu inner radius
 						position.y = -1f * y;
-						position.z = ((chunkCountZ  + z) * (1f * 1.5f)) + chunkCountZ * 1f;//-chunkCountZ; bu da neden 1f bilmiyorum onu sormak lazım chatgptye bu da outerradius
+						position.z = ((chunkCountZ  + z) * (VoxelData.outerRadius * 1.5f)) + chunkCountZ * VoxelData.outerRadius;//-chunkCountZ; bu da neden 1f bilmiyorum onu sormak lazım chatgptye bu da outerradius
 
 
 						int triangleOffset = vertices.Count;
-						vertices.AddRange(hexVertices.Select(v => v + position));
-						triangles.AddRange(hexTriangles.Select(t => t + triangleOffset));
+						vertices.AddRange(VoxelData.hexVertices.Select(v => v + position));
+						triangles.AddRange(VoxelData.hexTriangles.Select(t => t + triangleOffset));
 
 						//normals.AddRange(hexNormals);
 						//uvs.AddRange(hexUvs);
 						//AddTexture(3, hexUvs);
 						//AddTexture(world.blocktypes[blockID].GetTextureID(0), hexUvs);
-						AddText(blockID, hexUvs);
+						AddText(blockID, VoxelData.hexUvs);
 					}
 				}
 			}
@@ -397,80 +227,80 @@ public class Chunk
 	void CreateChunkWithFaces()
 	{
 		List<Vector3> tempVertices = new List<Vector3>();
-		for (float y = 0; y < 10; y++)
+		for (float y = 0; y < VoxelData.ChunkHeight; y++)
 		{
-			for (int z = 0; z < 5; z++)
+			for (int z = 0; z < VoxelData.ChunkWidth; z++)
 			{
-				for (int x = 0; x < 5; x++)
+				for (int x = 0; x < VoxelData.ChunkWidth; x++)
 				{
 					int hexOffset = 0;
 					int triangleOffset = 0;
 					for(int i = 0; i < 2; i++)
                     {
-						float _y = y + hexFaces[i].y;
-						float _z = z + hexFaces[i].z;
-						float _x = x + hexFaces[i].x;
+						float _y = y + VoxelData.hexFaces[i].y;
+						float _z = z + VoxelData.hexFaces[i].z;
+						float _x = x + VoxelData.hexFaces[i].x;
 
 						if (!CheckVoxel(_y,_x, _z))
                         {
 							byte blockID = voxelMap[x, (int)y, z];
 
 							Vector3 position;
-							position.x = (((chunkCountX + x) + (chunkCountZ + z) * 0.5f - (chunkCountZ + z) / 2) * (innerRadius * 2f)) + chunkCountX * 2f * innerRadius;// - chunkCountX; bu niye 2f hiçbir fikrim yok. Sanırım bu inner radius
+							position.x = (((chunkCountX + x) + (chunkCountZ + z) * 0.5f - (chunkCountZ + z) / 2) * (VoxelData.innerRadius * 2f)) + chunkCountX * 2f * VoxelData.innerRadius;// - chunkCountX; bu niye 2f hiçbir fikrim yok. Sanırım bu inner radius
 							position.y = -1f * y;
-							position.z = ((chunkCountZ + z) * (1f * 1.5f)) + chunkCountZ * 1f;
+							position.z = ((chunkCountZ + z) * (VoxelData.outerRadius * 1.5f)) + chunkCountZ * VoxelData.outerRadius;
 
-							vertices.Add(hexVertices[hexOffset] + position);
-							vertices.Add(hexVertices[hexOffset+1] + position);
-							vertices.Add(hexVertices[hexOffset+2] + position);
-							vertices.Add(hexVertices[hexOffset+3] + position);
-							vertices.Add(hexVertices[hexOffset+4] + position);
-							vertices.Add(hexVertices[hexOffset+5] + position);
+							vertices.Add(VoxelData.hexVertices[hexOffset] + position);
+							vertices.Add(VoxelData.hexVertices[hexOffset+1] + position);
+							vertices.Add(VoxelData.hexVertices[hexOffset+2] + position);
+							vertices.Add(VoxelData.hexVertices[hexOffset+3] + position);
+							vertices.Add(VoxelData.hexVertices[hexOffset+4] + position);
+							vertices.Add(VoxelData.hexVertices[hexOffset+5] + position);
 							hexOffset += 6;
 
-							triangles.Add(hexTriangles[triangleOffset]);
-							triangles.Add(hexTriangles[triangleOffset + 1]);
-							triangles.Add(hexTriangles[triangleOffset + 2]);
-							triangles.Add(hexTriangles[triangleOffset + 3]);
-							triangles.Add(hexTriangles[triangleOffset + 4]);
-							triangles.Add(hexTriangles[triangleOffset + 5]);
-							triangles.Add(hexTriangles[triangleOffset + 6]);
-							triangles.Add(hexTriangles[triangleOffset + 7]);
-							triangles.Add(hexTriangles[triangleOffset + 8]);
-							triangles.Add(hexTriangles[triangleOffset + 9]);
-							triangles.Add(hexTriangles[triangleOffset + 10]);
-							triangles.Add(hexTriangles[triangleOffset + 11]);
+							triangles.Add(VoxelData.hexTriangles[triangleOffset]);
+							triangles.Add(VoxelData.hexTriangles[triangleOffset + 1]);
+							triangles.Add(VoxelData.hexTriangles[triangleOffset + 2]);
+							triangles.Add(VoxelData.hexTriangles[triangleOffset + 3]);
+							triangles.Add(VoxelData.hexTriangles[triangleOffset + 4]);
+							triangles.Add(VoxelData.hexTriangles[triangleOffset + 5]);
+							triangles.Add(VoxelData.hexTriangles[triangleOffset + 6]);
+							triangles.Add(VoxelData.hexTriangles[triangleOffset + 7]);
+							triangles.Add(VoxelData.hexTriangles[triangleOffset + 8]);
+							triangles.Add(VoxelData.hexTriangles[triangleOffset + 9]);
+							triangles.Add(VoxelData.hexTriangles[triangleOffset + 10]);
+							triangles.Add(VoxelData.hexTriangles[triangleOffset + 11]);
 							triangleOffset += 12;
 
 							//AddText(blockID, hexUvs);
 						}
                     }
-					for(int i = 2; i < hexFaces.Length; i++)
+					for(int i = 2; i < VoxelData.hexFaces.Length; i++)
                     {
-						float _y = y + hexFaces[i].y;
-						float _z = z + hexFaces[i].z;
-						float _x = x + hexFaces[i].x;
+						float _y = y + VoxelData.hexFaces[i].y;
+						float _z = z + VoxelData.hexFaces[i].z;
+						float _x = x + VoxelData.hexFaces[i].x;
 						if (!CheckVoxel(_y, _x, _z))
 						{
 							byte blockID = voxelMap[x, (int)y, z];
 
 							Vector3 position;
-							position.x = (((chunkCountX + x) + (chunkCountZ + z) * 0.5f - (chunkCountZ + z) / 2) * (innerRadius * 2f)) + chunkCountX * 2f * innerRadius;// - chunkCountX; bu niye 2f hiçbir fikrim yok. Sanırım bu inner radius
+							position.x = (((chunkCountX + x) + (chunkCountZ + z) * 0.5f - (chunkCountZ + z) / 2) * (VoxelData.innerRadius * 2f)) + chunkCountX * 2f * VoxelData.innerRadius;// - chunkCountX; bu niye 2f hiçbir fikrim yok. Sanırım bu inner radius
 							position.y = -1f * y;
 							position.z = ((chunkCountZ + z) * (1f * 1.5f)) + chunkCountZ * 1f;
 
-							vertices.Add(hexVertices[hexOffset]+ position);
-							vertices.Add(hexVertices[hexOffset + 1] + position);
-							vertices.Add(hexVertices[hexOffset + 2] + position);
-							vertices.Add(hexVertices[hexOffset + 3] + position);
+							vertices.Add(VoxelData.hexVertices[hexOffset]+ position);
+							vertices.Add(VoxelData.hexVertices[hexOffset + 1] + position);
+							vertices.Add(VoxelData.hexVertices[hexOffset + 2] + position);
+							vertices.Add(VoxelData.hexVertices[hexOffset + 3] + position);
 							hexOffset += 4;
 
-							triangles.Add(hexTriangles[triangleOffset]);
-							triangles.Add(hexTriangles[triangleOffset + 1]);
-							triangles.Add(hexTriangles[triangleOffset + 2]);
-							triangles.Add(hexTriangles[triangleOffset + 3]);
-							triangles.Add(hexTriangles[triangleOffset + 4]);
-							triangles.Add(hexTriangles[triangleOffset + 5]);
+							triangles.Add(VoxelData.hexTriangles[triangleOffset]);
+							triangles.Add(VoxelData.hexTriangles[triangleOffset + 1]);
+							triangles.Add(VoxelData.hexTriangles[triangleOffset + 2]);
+							triangles.Add(VoxelData.hexTriangles[triangleOffset + 3]);
+							triangles.Add(VoxelData.hexTriangles[triangleOffset + 4]);
+							triangles.Add(VoxelData.hexTriangles[triangleOffset + 5]);
 							triangleOffset += 6;
 
 							//AddText(blockID, hexUvs);
@@ -499,17 +329,17 @@ public class Chunk
 				textureIterator++;
             }
 			int textureId = world.blocktypes[blockID].GetTextureID(textureIterator);
-			float y = textureId / TextureAtlasSizeInBlocks; //0
-			float x = textureId - (y * TextureAtlasSizeInBlocks);  //0
+			float y = textureId / VoxelData.TextureAtlasSizeInBlocks; //0
+			float x = textureId - (y * VoxelData.TextureAtlasSizeInBlocks);  //0
 
-			x *= NormalizedBlockTextureSize; //0
-			y *= NormalizedBlockTextureSize; //0
+			x *= VoxelData.NormalizedBlockTextureSize; //0
+			y *= VoxelData.NormalizedBlockTextureSize; //0
 
-			y = 1f - y - NormalizedBlockTextureSize;  // 0.75f
+			y = 1f - y - VoxelData.NormalizedBlockTextureSize;  // 0.75f
 													  //x veya y 0 ise çarpma gibi bişeyler eklenebilir.
 			Vector2 textureUV = hexUVs[i];
-			textureUV.x = textureUV.x * NormalizedBlockTextureSize + x;
-			textureUV.y = textureUV.y * NormalizedBlockTextureSize + y;
+			textureUV.x = textureUV.x * VoxelData.NormalizedBlockTextureSize + x;
+			textureUV.y = textureUV.y * VoxelData.NormalizedBlockTextureSize + y;
 
 			uvs.Add(textureUV);
 		}
@@ -520,17 +350,17 @@ public class Chunk
 		for (int i = 0; i < hexUVs.Length; i++)
 		{
 			int textureId = world.blocktypes[blockID].GetTextureID(faceID);
-			float y = textureId / TextureAtlasSizeInBlocks; //0
-			float x = textureId - (y * TextureAtlasSizeInBlocks);  //0
+			float y = textureId / VoxelData.TextureAtlasSizeInBlocks; //0
+			float x = textureId - (y * VoxelData.TextureAtlasSizeInBlocks);  //0
 
-			x *= NormalizedBlockTextureSize; //0
-			y *= NormalizedBlockTextureSize; //0
+			x *= VoxelData.NormalizedBlockTextureSize; //0
+			y *= VoxelData.NormalizedBlockTextureSize; //0
 
-			y = 1f - y - NormalizedBlockTextureSize;  // 0.75f
+			y = 1f - y - VoxelData.NormalizedBlockTextureSize;  // 0.75f
 													  //x veya y 0 ise çarpma gibi bişeyler eklenebilir.
 			Vector2 textureUV = hexUVs[i];
-			textureUV.x = textureUV.x * NormalizedBlockTextureSize + x;
-			textureUV.y = textureUV.y * NormalizedBlockTextureSize + y;
+			textureUV.x = textureUV.x * VoxelData.NormalizedBlockTextureSize + x;
+			textureUV.y = textureUV.y * VoxelData.NormalizedBlockTextureSize + y;
 
 			uvs.Add(textureUV);
 		}

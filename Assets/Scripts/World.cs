@@ -7,7 +7,7 @@ public class World : MonoBehaviour
     public Material material;
     public BlockType[] blocktypes;
 
-    Chunk[,] chunks = new Chunk[5, 5];
+    Chunk[,] chunks = new Chunk[VoxelData.WorldSizeInChunks, VoxelData.WorldSizeInChunks];
 
     private void Start()
     {
@@ -16,9 +16,9 @@ public class World : MonoBehaviour
 
     void GenerateWorld()
     {
-        for(int x = 0; x < 5; x++)
+        for(int x = 0; x < VoxelData.WorldSizeInChunks; x++)
         {
-            for (int z = 0; z < 5; z++)
+            for (int z = 0; z < VoxelData.WorldSizeInChunks; z++)
             {
                 CreateNewChunk(x, z);
             }
@@ -45,7 +45,7 @@ public class World : MonoBehaviour
 
     bool IsChunkInWorld(ChunkCoord coord)
     {
-        if (coord.x>0 && coord.x<5-1 && coord.z > 0 && coord.z < 5 - 1) //5'ler world size in cunks
+        if (coord.x>0 && coord.x< VoxelData.WorldSizeInChunks - 1 && coord.z > 0 && coord.z < VoxelData.WorldSizeInChunks - 1) //5'ler world size in cunks
         {
             return true; 
         }
@@ -54,7 +54,7 @@ public class World : MonoBehaviour
 
     bool IsHexInWorld(Vector3 pos)
     {
-        if (pos.x > 0 && pos.x < 24 && pos.y > 0 && pos.y < 9  && pos.z > 0 && pos.z < 24) //25'ler world size in hex 10 da chunk height
+        if (pos.x > 0 && pos.x < VoxelData.WorldSizeInBlocks-1 && pos.y > 0 && pos.y < VoxelData.ChunkHeight-1  && pos.z > 0 && pos.z < VoxelData.WorldSizeInBlocks - 1) //25'ler world size in hex 10 da chunk height
         {
             return true;
         }
