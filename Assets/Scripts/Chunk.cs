@@ -49,7 +49,8 @@ public class Chunk
 
 		chunkObject.name = "Chunk " + chunkCoordinates.x + ", " + chunkCoordinates.z;
 		PopulateVoxelMap();
-		CreateChunk();
+		//CreateChunk();
+		CreateChunkRendered();
 		CreateMesh();
 
 	}
@@ -154,7 +155,89 @@ public class Chunk
 			}
 		}
 	}
+	void CreateChunkRendered()
+    {
+		List<Vector3> tempVertices = new List<Vector3>();
+		for (float y = 0; y < VoxelData.ChunkHeight; y++)
+		{
+			for (int z = 0; z < VoxelData.ChunkWidth; z++)
+			{
+				for (int x = 0; x < VoxelData.ChunkWidth; x++)
+				{
+					byte blockID = voxelMap[x, (int)y, z];
 
+					int triangleOffset = vertices.Count;
+					RenderUp(new Vector3(x, y, z),blockID,triangleOffset);
+					RenderDown(new Vector3(x, y, z), blockID,triangleOffset);
+					RenderEast(new Vector3(x, y, z), blockID,triangleOffset);
+					RenderWest(new Vector3(x, y, z), blockID,triangleOffset);
+					RenderSouthEast(new Vector3(x, y, z), blockID,triangleOffset);
+					RenderSouthWest(new Vector3(x, y, z), blockID,triangleOffset);
+					RenderNorthEast(new Vector3(x, y, z), blockID,triangleOffset);
+					RenderNorthWest(new Vector3(x, y, z), blockID,triangleOffset);
+				}
+			}
+		}
+	}
+
+	void AddHexagon(Vector3 pos,int blockID,Vector3[] hexVert , int[] hexTri, Vector2[] hexUV,int triangleOffset)
+    {
+		Vector3 position;
+		position.x = (((chunkCountX + pos.x) + (chunkCountZ + pos.z) * 0.5f - (chunkCountZ + pos.z) / 2) * (VoxelData.innerRadius * 2f)) + chunkCountX * 2f * VoxelData.innerRadius;
+		position.y = -1f * pos.y;
+		position.z = ((chunkCountZ + pos.z) * (VoxelData.outerRadius * 1.5f)) + chunkCountZ * VoxelData.outerRadius;
+
+		vertices.AddRange(hexVert.Select(v => v + position));
+		triangles.AddRange(hexTri.Select(t => t + triangleOffset));
+		//uvs.AddRange(VoxelData.topUvs.Select(u => u));
+		for(int i = 0; i < hexUV.Length; i++)
+        {
+			int textureId = world.blocktypes[blockID].GetTextureID(0);
+			float y = textureId / VoxelData.TextureAtlasSizeInBlocks;
+			float x = textureId - (y * VoxelData.TextureAtlasSizeInBlocks);
+
+			x *= VoxelData.NormalizedBlockTextureSize;
+			y *= VoxelData.NormalizedBlockTextureSize;
+
+			y = 1f - y - VoxelData.NormalizedBlockTextureSize;
+
+			Vector2 textureUV = hexUV[i];
+			textureUV.x = textureUV.x * VoxelData.NormalizedBlockTextureSize + x;
+			textureUV.y = textureUV.y * VoxelData.NormalizedBlockTextureSize + y;
+
+			uvs.Add(textureUV);
+		}
+	}
+	
+	void AddQuad(Vector3 pos, int blockID, Vector3[] hexVert, int[] hexTri, Vector2[] hexUV)
+    {
+		Vector3 position;
+		position.x = (((chunkCountX + pos.x) + (chunkCountZ + pos.z) * 0.5f - (chunkCountZ + pos.z) / 2) * (VoxelData.innerRadius * 2f)) + chunkCountX * 2f * VoxelData.innerRadius;
+		position.y = -1f * pos.y;
+		position.z = ((chunkCountZ + pos.z) * (VoxelData.outerRadius * 1.5f)) + chunkCountZ * VoxelData.outerRadius;
+
+		int triangleOffset = vertices.Count;
+		vertices.AddRange(hexVert.Select(v => v + position));
+		triangles.AddRange(hexTri.Select(t => t + triangleOffset));
+		//uvs.AddRange(VoxelData.topUvs.Select(u => u));
+		for (int i = 0; i < hexUV.Length; i++)
+		{
+			int textureId = world.blocktypes[blockID].GetTextureID(0);
+			float y = textureId / VoxelData.TextureAtlasSizeInBlocks;
+			float x = textureId - (y * VoxelData.TextureAtlasSizeInBlocks);
+
+			x *= VoxelData.NormalizedBlockTextureSize;
+			y *= VoxelData.NormalizedBlockTextureSize;
+
+			y = 1f - y - VoxelData.NormalizedBlockTextureSize;
+
+			Vector2 textureUV = hexUV[i];
+			textureUV.x = textureUV.x * VoxelData.NormalizedBlockTextureSize + x;
+			textureUV.y = textureUV.y * VoxelData.NormalizedBlockTextureSize + y;
+
+			uvs.Add(textureUV);
+		}
+	}
 	void CreateChunkWithFaces()
 	{
 		List<Vector3> tempVertices = new List<Vector3>();
@@ -241,6 +324,81 @@ public class Chunk
 			}
 		}
 	}
+
+	private void RenderUp(Vector3 neighboor,byte blockID,int triangleOffset)
+    {
+        if (CheckVoxel(neighboor.y, neighboor.x, neighboor.z))//if works add facechecks here
+        {
+			return;
+        }
+
+		AddHexagon(neighboor,blockID,VoxelData.topVertices,VoxelData.topTriangles,VoxelData.topUvs, triangleOffset);
+    }
+	private void RenderDown(Vector3 neighboor, byte blockID,int triangleOffset)
+	{
+		if (CheckVoxel(neighboor.y, neighboor.x, neighboor.z))//if works add facechecks here
+		{
+			return;
+		}
+
+		AddHexagon(neighboor, blockID, VoxelData.bottomVertices, VoxelData.bottomTriangles, VoxelData.bottomUvs,triangleOffset);
+	}
+	private void RenderEast(Vector3 neighboor, byte blockID,int triangleOffset)
+	{
+		if (CheckVoxel(neighboor.y, neighboor.x, neighboor.z))//if works add facechecks here
+		{
+			return;
+		}
+
+		AddHexagon(neighboor, blockID, VoxelData.rightVertices, VoxelData.rightTriangles, VoxelData.rightUvs,triangleOffset);
+	}
+	private void RenderWest(Vector3 neighboor, byte blockID,int triangleOffset)
+	{
+		if (CheckVoxel(neighboor.y, neighboor.x, neighboor.z))//if works add facechecks here
+		{
+			return;
+		}
+
+		AddHexagon(neighboor, blockID, VoxelData.leftVertices, VoxelData.leftTriangles, VoxelData.leftUvs,triangleOffset);
+	}
+	private void RenderSouthEast(Vector3 neighboor, byte blockID,int triangleOffset)
+	{
+		if (CheckVoxel(neighboor.y, neighboor.x, neighboor.z))//if works add facechecks here
+		{
+			return;
+		}
+
+		AddHexagon(neighboor, blockID, VoxelData.frontRightVertices, VoxelData.frontRightTriangles, VoxelData.frontRightUvs,triangleOffset);
+	}
+	private void RenderSouthWest(Vector3 neighboor, byte blockID,int triangleOffset)
+	{
+		if (CheckVoxel(neighboor.y, neighboor.x, neighboor.z))//if works add facechecks here
+		{
+			return;
+		}
+
+		AddHexagon(neighboor, blockID, VoxelData.frontLeftVertices, VoxelData.frontLeftTriangles, VoxelData.frontLeftUvs, triangleOffset);
+	}
+	private void RenderNorthEast(Vector3 neighboor, byte blockID,int triangleOffset)
+	{
+		if (CheckVoxel(neighboor.y, neighboor.x, neighboor.z))//if works add facechecks here
+		{
+			return;
+		}
+
+		AddHexagon(neighboor, blockID, VoxelData.backRightVertices, VoxelData.backRightTriangles, VoxelData.backRightUvs, triangleOffset);
+	}
+	private void RenderNorthWest(Vector3 neighboor, byte blockID,int triangleOffset)
+	{
+		if (CheckVoxel(neighboor.y, neighboor.x, neighboor.z))//if works add facechecks here
+		{
+			return;
+		}
+
+		AddHexagon(neighboor, blockID, VoxelData.backLeftVertices, VoxelData.backLeftTriangles, VoxelData.backLeftUvs,triangleOffset);
+	}
+
+
 	void AddText(int blockID, Vector2[] hexUVs)
     {
 
