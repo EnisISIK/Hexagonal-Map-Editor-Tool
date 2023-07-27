@@ -7,12 +7,61 @@ public class World : MonoBehaviour
     public Material material;
     public BlockType[] blocktypes;
 
+    Chunk[,] chunks = new Chunk[5, 5];
+
     private void Start()
     {
-        Chunk newChunk = new Chunk(new ChunkCoord(0,0),this);
-        Chunk newChunk2 = new Chunk(new ChunkCoord(0, 1), this);
-        Chunk newChunk3 = new Chunk(new ChunkCoord(1, 0), this);
-        Chunk newChunk4 = new Chunk(new ChunkCoord(1, 1), this);
+        GenerateWorld();
+    }
+
+    void GenerateWorld()
+    {
+        for(int x = 0; x < 5; x++)
+        {
+            for (int z = 0; z < 5; z++)
+            {
+                CreateNewChunk(x, z);
+            }
+        }
+    }
+
+    public byte GetHex(Vector3 pos)
+    {
+        //face check ekleme zamanın gelmiş o olmadığı için çalışmıyor
+        //ayrıca efficiency de getirir bize
+        if (!IsHexInWorld(pos))
+        {
+            return 0;
+        }
+        else
+        {
+            return 2;
+        }
+    }
+    void CreateNewChunk(int _x, int _z)
+    {
+        chunks[_x,_z] = new Chunk(new ChunkCoord(_x, _z), this);
+    }
+
+    bool IsChunkInWorld(ChunkCoord coord)
+    {
+        if (coord.x>0 && coord.x<5-1 && coord.z > 0 && coord.z < 5 - 1) //5'ler world size in cunks
+        {
+            return true; 
+        }
+        else { return false; }
+    }
+
+    bool IsHexInWorld(Vector3 pos)
+    {
+        if (pos.x > 0 && pos.x < 24 && pos.y > 0 && pos.y < 9  && pos.z > 0 && pos.z < 24) //25'ler world size in hex 10 da chunk height
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 }
 

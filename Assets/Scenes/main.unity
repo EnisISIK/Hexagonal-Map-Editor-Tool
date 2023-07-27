@@ -244,6 +244,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   material: {fileID: 2100000, guid: 5c06fc5a7d893244b8cd1c6c268ab79d, type: 2}
   blocktypes:
+  - blockName: Air
+    isSolid: 0
+    topFaceTexture: 7
+    bottomFaceTexture: 7
+    rightFaceTexture: 7
+    leftFaceTexture: 7
+    frontrightFaceTexture: 7
+    frontleftFaceTexture: 7
+    backrightFaceTexture: 7
+    backleftFaceTexture: 7
   - blockName: Stone
     isSolid: 1
     topFaceTexture: 3
