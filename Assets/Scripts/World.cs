@@ -35,7 +35,7 @@ public class World : MonoBehaviour
         }
         else
         {
-            return 2;
+            return 3;
         }
     }
     void CreateNewChunk(int _x, int _z)
@@ -54,8 +54,8 @@ public class World : MonoBehaviour
 
     bool IsHexInWorld(Vector3 pos)
     {
-        if (pos.x > 0 && pos.x < VoxelData.WorldSizeInBlocks-1 && pos.y > 0 && pos.y < VoxelData.ChunkHeight-1  && pos.z > 0 && pos.z < VoxelData.WorldSizeInBlocks - 1) //25'ler world size in hex 10 da chunk height
-        {
+        if (pos.x >= 0 && pos.x < VoxelData.WorldSizeInBlocks && pos.y >= 0 && pos.y < VoxelData.ChunkHeight  && pos.z >= 0 && pos.z < VoxelData.WorldSizeInBlocks ) //25'ler world size in hex 10 da chunk height
+        { //düzgün çalışmıyore ayrıca triangles da çalışmıyore
             return true;
         }
         else

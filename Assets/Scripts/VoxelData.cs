@@ -13,7 +13,7 @@ public static class VoxelData {
         get { return 1f / (float)TextureAtlasSizeInBlocks; }
     }
 
-	public static readonly int WorldSizeInChunks = 50;
+	public static readonly int WorldSizeInChunks = 5;
 	public static int WorldSizeInBlocks
 	{
 
@@ -155,6 +155,12 @@ public static class VoxelData {
 	public static readonly Vector3 f06 = new Vector3(0.50f, 0.00f, ((Mathf.Sqrt(3.00f)) / 2.00f));
 	public static readonly Vector3 f07 = new Vector3(-0.50f, 0.00f, ((Mathf.Sqrt(3.00f)) / 2.00f));
 
+	public static readonly Vector3 f08 = new Vector3(1.00f, 0.00f, 1.00f);
+	public static readonly Vector3 f09 = new Vector3(-1.00f, 0.00f, -1.00f);
+
+	public static readonly Vector3 f10 = new Vector3(-1.00f, 0.00f, 1.00f);
+	public static readonly Vector3 f11 = new Vector3(1.00f, 0.00f, -1.00f);
+
 	#region Faces clockwise top to bottom
 	public static readonly Vector3[] hexFaces = new Vector3[]
 	{
@@ -225,8 +231,7 @@ public static class VoxelData {
 		_00, _01, _02, _03, _04, _05,
 
 	};
-	#endregion
-	#region UVs
+
 	public static readonly Vector2[] bottomUvs = new Vector2[]
 	{
 		
@@ -235,8 +240,7 @@ public static class VoxelData {
 
 
 	};
-	#endregion
-	#region UVs
+
 	public static readonly Vector2[] rightUvs = new Vector2[]
 	{
 				
@@ -244,8 +248,7 @@ public static class VoxelData {
 		_06, _07, _08, _09,
 
 	};
-	#endregion
-	#region UVs
+
 	public static readonly Vector2[] leftUvs = new Vector2[]
 	{
 				
@@ -254,8 +257,7 @@ public static class VoxelData {
 
 
 	};
-	#endregion
-	#region UVs
+
 	public static readonly Vector2[] frontRightUvs = new Vector2[]
 	{
 				
@@ -265,8 +267,7 @@ public static class VoxelData {
 
 
 	};
-	#endregion
-	#region UVs
+
 	public static readonly Vector2[] frontLeftUvs = new Vector2[]
 	{
 		// Front Left
@@ -275,8 +276,7 @@ public static class VoxelData {
 		
 
 	};
-	#endregion
-	#region UVs
+
 	public static readonly Vector2[] backRightUvs = new Vector2[]
 	{
 		// Back Right
@@ -284,8 +284,7 @@ public static class VoxelData {
 
 
 	};
-	#endregion
-	#region UVs
+
 	public static readonly Vector2[] backLeftUvs = new Vector2[]
 	{
 				
