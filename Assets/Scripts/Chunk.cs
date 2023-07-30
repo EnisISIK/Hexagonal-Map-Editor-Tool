@@ -102,18 +102,18 @@ public class Chunk
 		int y = Mathf.FloorToInt(_y);
 		int z = Mathf.FloorToInt(_z);
 
-		if (x < 0 || x > VoxelData.ChunkWidth - 1 || y < 0 || y > VoxelData.ChunkHeight - 1 || z < 0 || z > VoxelData.ChunkWidth - 1)
+		/*if (x < 0 || x > VoxelData.ChunkWidth - 1 || y < 0 || y > VoxelData.ChunkHeight - 1 || z < 0 || z > VoxelData.ChunkWidth - 1)
 			return false;
 
 
-		return world.blocktypes[voxelMap[x, y, z]].isSolid;
-		/*if (!IsHexInChunk(_y, _x, _z))
+		return world.blocktypes[voxelMap[x, y, z]].isSolid;*/
+		if (!IsHexInChunk(y, x, z))
         {
-			return world.blocktypes[world.GetHex(new Vector3(_x, _y, _z)+position)].isSolid;
+			return world.blocktypes[world.GetHex(new Vector3(x, y, z)+position)].isSolid;
         }
 
 
-		return world.blocktypes[voxelMap[(int)_x, (int)_y, (int)_z]].isSolid;*/
+		return world.blocktypes[voxelMap[x, y, z]].isSolid;
 	}
 
 	void AddTexture(int textureId, Vector2[] hexUVs)
