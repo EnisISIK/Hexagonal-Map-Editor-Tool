@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public static class VoxelData {
+public static class HexData {
 
 	public static readonly int ChunkWidth = 5;
 	public static readonly int ChunkHeight = 10;
