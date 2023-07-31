@@ -146,42 +146,16 @@ public static class VoxelData {
 	#endregion
 
 	//buraya face değerlerini gir
-	public static readonly Vector3 f00 = new Vector3(0.00f, 1.00f, 0.00f);
-	public static readonly Vector3 f01 = new Vector3(0.00f, -1.00f, 0.00f);
-	public static readonly Vector3 f02 = new Vector3(1.00f, 0.00f, 0.00f);
-	public static readonly Vector3 f03 = new Vector3(-1.00f, 0.00f, 0.00f);
-	public static readonly Vector3 f04 = new Vector3(0.50f, 0.00f, -((Mathf.Sqrt(3.00f)) / 2.00f));
-	public static readonly Vector3 f05 = new Vector3(-0.50f, 0.00f, -((Mathf.Sqrt(3.00f)) / 2.00f));
-	public static readonly Vector3 f06 = new Vector3(0.50f, 0.00f, ((Mathf.Sqrt(3.00f)) / 2.00f));
-	public static readonly Vector3 f07 = new Vector3(-0.50f, 0.00f, ((Mathf.Sqrt(3.00f)) / 2.00f));
+	public static readonly Vector3 fu = new Vector3(0.00f, 1.00f, 0.00f);
+	public static readonly Vector3 fd = new Vector3(0.00f, -1.00f, 0.00f);
+	public static readonly Vector3 fe = new Vector3(1.00f, 0.00f, 0.00f);
+	public static readonly Vector3 fw = new Vector3(-1.00f, 0.00f, 0.00f);
 
-	public static readonly Vector3 f08 = new Vector3(1.00f, 0.00f, 1.00f);
-	public static readonly Vector3 f09 = new Vector3(-1.00f, 0.00f, -1.00f);
+	public static readonly Vector3 fne = new Vector3(1.00f, 0.00f, 1.00f);
+	public static readonly Vector3 fsw = new Vector3(-1.00f, 0.00f, -1.00f);
 
-	public static readonly Vector3 f10 = new Vector3(-1.00f, 0.00f, 1.00f);
-	public static readonly Vector3 f11 = new Vector3(1.00f, 0.00f, -1.00f);
-
-	#region Faces clockwise top to bottom
-	public static readonly Vector3[] hexFaces = new Vector3[]
-	{
-		// Top
-		f00,
-		// Bottom
-		f01,
-		// Right
-		f02,
-		// Left
-		f03,
-		// Front Right
-		f04,
-		// Front Left
-		f05,
-		// Back Right
-		f06,
-		// Back Left
-		f07,
-	};
-	#endregion
+	public static readonly Vector3 fnw = new Vector3(-1.00f, 0.00f, 1.00f);
+	public static readonly Vector3 fse = new Vector3(1.00f, 0.00f, -1.00f);
 
 	public static readonly Vector2 _00 = new Vector2(0.50f, 1.00f);
 	public static readonly Vector2 _01 = new Vector2(1.00f, 0.50f + (1.00f / (2.00f * Mathf.Sqrt(3.00f))));
