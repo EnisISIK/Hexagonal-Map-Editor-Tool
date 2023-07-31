@@ -21,7 +21,7 @@ public class Chunk
 	List<Vector2> uvs = new List<Vector2>();
 	List<Vector3> normals = new List<Vector3>();
 
-	public bool IsActive
+	public bool isActive
 	{
 		get { return chunkObject.activeSelf; }
 		set { chunkObject.SetActive(value); }
@@ -116,14 +116,14 @@ public class Chunk
 					byte blockID = hexMap[x, (int)y, z];
 
 					triangleOffsetValue = vertices.Count;
-					RenderUp(new Vector3(x, y, z),blockID, triangleOffsetValue);
-					RenderDown(new Vector3(x, y, z), blockID, triangleOffsetValue);
-					RenderEast(new Vector3(x, y, z), blockID, triangleOffsetValue);
-					RenderWest(new Vector3(x, y, z), blockID, triangleOffsetValue);
-					RenderSouthEast(new Vector3(x, y, z), blockID, triangleOffsetValue);
-					RenderSouthWest(new Vector3(x, y, z), blockID, triangleOffsetValue);
-					RenderNorthEast(new Vector3(x, y, z), blockID, triangleOffsetValue);
-					RenderNorthWest(new Vector3(x, y, z), blockID, triangleOffsetValue);
+					RenderUp(new Vector3(x, y, z),blockID);
+					RenderDown(new Vector3(x, y, z), blockID);
+					RenderEast(new Vector3(x, y, z), blockID);
+					RenderWest(new Vector3(x, y, z), blockID);
+					RenderSouthEast(new Vector3(x, y, z), blockID);
+					RenderSouthWest(new Vector3(x, y, z), blockID);
+					RenderNorthEast(new Vector3(x, y, z), blockID);
+					RenderNorthWest(new Vector3(x, y, z), blockID);
 				}
 			}
 		}
@@ -161,7 +161,7 @@ public class Chunk
 		}
 	}
 
-	private void RenderUp(Vector3 neighboor,byte blockID,int triangleOffset)
+	private void RenderUp(Vector3 neighboor,byte blockID)
     {
         if (CheckHexagon(neighboor.y+HexData.fu.y, neighboor.x + HexData.fu.x, neighboor.z + HexData.fu.z))
 		{
@@ -172,7 +172,7 @@ public class Chunk
 		AddHexagon(neighboor,blockID,HexData.topVertices,HexData.topTriangles,HexData.topUvs, triangleOffsetValue, 0);
     }
 
-	private void RenderDown(Vector3 neighboor, byte blockID,int triangleOffset)
+	private void RenderDown(Vector3 neighboor, byte blockID)
 	{
 		if (CheckHexagon(neighboor.y + HexData.fd.y, neighboor.x + HexData.fd.x, neighboor.z + HexData.fd.z))
 		{
@@ -183,7 +183,7 @@ public class Chunk
 		AddHexagon(neighboor, blockID, HexData.bottomVertices, HexData.bottomTriangles, HexData.bottomUvs, triangleOffsetValue, 1);
 	}
 
-	private void RenderEast(Vector3 neighboor, byte blockID,int triangleOffset)
+	private void RenderEast(Vector3 neighboor, byte blockID)
 	{
 		if (CheckHexagon(neighboor.y + HexData.fe.y, neighboor.x + HexData.fe.x, neighboor.z + HexData.fe.z))
 		{
@@ -194,7 +194,7 @@ public class Chunk
 		AddHexagon(neighboor, blockID, HexData.rightVertices, HexData.rightTriangles, HexData.rightUvs, triangleOffsetValue, 2);
 	}
 
-	private void RenderWest(Vector3 neighboor, byte blockID,int triangleOffset)
+	private void RenderWest(Vector3 neighboor, byte blockID)
 	{
 		if (CheckHexagon(neighboor.y + HexData.fw.y, neighboor.x + HexData.fw.x, neighboor.z + HexData.fw.z))
 		{
@@ -205,7 +205,7 @@ public class Chunk
 		AddHexagon(neighboor, blockID, HexData.leftVertices, HexData.leftTriangles, HexData.leftUvs, triangleOffsetValue, 3);
 	}
 
-	private void RenderSouthEast(Vector3 neighboor, byte blockID,int triangleOffset)
+	private void RenderSouthEast(Vector3 neighboor, byte blockID)
 	{
 		if (CheckHexagon(neighboor.y + HexData.fse.y, neighboor.x + HexData.fse.x, neighboor.z + HexData.fse.z))
 		{
@@ -216,7 +216,7 @@ public class Chunk
 		AddHexagon(neighboor, blockID, HexData.frontRightVertices, HexData.frontRightTriangles, HexData.frontRightUvs, triangleOffsetValue, 4);
 	}
 
-	private void RenderSouthWest(Vector3 neighboor, byte blockID,int triangleOffset)
+	private void RenderSouthWest(Vector3 neighboor, byte blockID)
 	{
 		if (CheckHexagon(neighboor.y + HexData.fsw.y, neighboor.x + HexData.fsw.x, neighboor.z + HexData.fsw.z))
 		{
@@ -227,7 +227,7 @@ public class Chunk
 		AddHexagon(neighboor, blockID, HexData.frontLeftVertices, HexData.frontLeftTriangles, HexData.frontLeftUvs, triangleOffsetValue, 5);
 	}
 
-	private void RenderNorthEast(Vector3 neighboor, byte blockID,int triangleOffset)
+	private void RenderNorthEast(Vector3 neighboor, byte blockID)
 	{
 		if (CheckHexagon(neighboor.y + HexData.fne.y, neighboor.x + HexData.fne.x, neighboor.z + HexData.fne.z))
 		{
@@ -238,7 +238,7 @@ public class Chunk
 		AddHexagon(neighboor, blockID, HexData.backRightVertices, HexData.backRightTriangles, HexData.backRightUvs, triangleOffsetValue, 6);
 	}
 
-	private void RenderNorthWest(Vector3 neighboor, byte blockID,int triangleOffset)
+	private void RenderNorthWest(Vector3 neighboor, byte blockID)
 	{
 		if (CheckHexagon(neighboor.y + HexData.fnw.y, neighboor.x + HexData.fnw.x, neighboor.z + HexData.fnw.z))
 		{
@@ -272,5 +272,15 @@ public class ChunkCoord{
     {
 		x = _x;
 		z = _z;
+    }
+
+	public bool Equals(ChunkCoord other)
+    {
+		if (other == null)
+			return false;
+		else if (other.x == x && other.z == z)
+			return true;
+		else
+			return false;
     }
 }

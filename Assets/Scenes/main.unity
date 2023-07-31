@@ -242,6 +242,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c757062e244a41643967c66b07ec9115, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  player: {fileID: 1616302746}
+  spawnPosition: {x: 0, y: 0, z: 0}
   material: {fileID: 2100000, guid: 5c06fc5a7d893244b8cd1c6c268ab79d, type: 2}
   blocktypes:
   - blockName: Air

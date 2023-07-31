@@ -4,31 +4,95 @@ using UnityEngine;
 
 public class World : MonoBehaviour
 {
+    public Transform player;
+    public Vector3 spawnPosition;
+
     public Material material;
     public BlockType[] blocktypes;
 
     Chunk[,] chunks = new Chunk[HexData.WorldSizeInChunks, HexData.WorldSizeInChunks];
 
+    List<ChunkCoord> activeChunks = new List<ChunkCoord>();
+    ChunkCoord playerCurrentChunkCoord;
+    ChunkCoord playerLastChunkCoord;
+
+    // TODO: may implement a system for chunk that holds real calculated position and position relative to other chunks separate
     private void Start()
     {
+        int centerChunk = (HexData.WorldSizeInChunks * HexData.ChunkWidth) / 2;
+        spawnPosition.x = (centerChunk + centerChunk * 0.5f - centerChunk / 2) * (HexData.innerRadius * 2f);
+        spawnPosition.y = HexData.ChunkHeight + 2f;
+        spawnPosition.z = centerChunk * (HexData.outerRadius * 1.5f);
         GenerateWorld();
+        playerLastChunkCoord = GetChunkCoordFromVector3(player.position);
     }
-
+    private void Update()
+    {
+        playerCurrentChunkCoord = GetChunkCoordFromVector3(player.position);
+        if (!playerCurrentChunkCoord.Equals(playerLastChunkCoord))
+            CheckViewDistance();
+            playerLastChunkCoord = playerCurrentChunkCoord;
+    }
     void GenerateWorld()
     {
-        for(int x = 0; x < HexData.WorldSizeInChunks; x++)
+        for(int x = (HexData.WorldSizeInChunks / 2)-HexData.ViewDistanceinChunks; x < (HexData.WorldSizeInChunks / 2) + HexData.ViewDistanceinChunks; x++)
         {
-            for (int z = 0; z < HexData.WorldSizeInChunks; z++)
+            for (int z = (HexData.WorldSizeInChunks / 2) - HexData.ViewDistanceinChunks; z < (HexData.WorldSizeInChunks / 2) + HexData.ViewDistanceinChunks; z++)
             {
                 CreateNewChunk(x, z);
             }
+        }
+        player.position = spawnPosition;
+    }
+    
+    ChunkCoord GetChunkCoordFromVector3(Vector3 pos)
+    {
+        float coordplacex = (pos.x / (HexData.innerRadius * 2f)) - (pos.z * 0.5f) + (pos.z / 2);
+        float coordplacez = (pos.z / (HexData.outerRadius * 1.5f));
+        int x = Mathf.FloorToInt(coordplacex / HexData.ChunkWidth);
+        int z = Mathf.FloorToInt(coordplacez / HexData.ChunkWidth);
+        return new ChunkCoord(x, z);
+
+    }
+    void CheckViewDistance()
+    {
+        ChunkCoord coord = GetChunkCoordFromVector3(player.position);
+
+        List<ChunkCoord> previouslyActiveChunks = new List<ChunkCoord>(activeChunks);
+
+        for (int x = coord.x - HexData.ViewDistanceinChunks; x < coord.x + HexData.ViewDistanceinChunks; x++)
+        {
+            for (int z = coord.z - HexData.ViewDistanceinChunks; z < coord.z + HexData.ViewDistanceinChunks; z++)
+            {
+                if (IsChunkInWorld(new ChunkCoord(x,z)))
+                {
+                    if(chunks[x,z]== null)
+                    {
+                        CreateNewChunk(x,z);
+                    }
+                    else if(!chunks[x,z].isActive)
+                    {
+                        chunks[x, z].isActive = true;
+                        activeChunks.Add(new ChunkCoord(x, z));
+                    }
+                }
+                for(int i= 0; i < previouslyActiveChunks.Count; i++)
+                {
+                    if (previouslyActiveChunks[i].Equals(new ChunkCoord(x,z)))
+                    {
+                        previouslyActiveChunks.RemoveAt(i);
+                    }
+                }
+            }
+        }
+        foreach(ChunkCoord _chunk in previouslyActiveChunks)
+        {
+            chunks[_chunk.x, _chunk.z].isActive = false;
         }
     }
 
     public byte GetHex(Vector3 pos)
     {
-        //face check ekleme zamanın gelmiş o olmadığı için çalışmıyor
-        //ayrıca efficiency de getirir bize
         if (!IsHexInWorld(pos))
         {
             return 0;
@@ -41,27 +105,19 @@ public class World : MonoBehaviour
     void CreateNewChunk(int _x, int _z)
     {
         chunks[_x,_z] = new Chunk(new ChunkCoord(_x, _z), this);
+        activeChunks.Add(new ChunkCoord(_x, _z));
     }
 
     bool IsChunkInWorld(ChunkCoord coord)
     {
-        if (coord.x>0 && coord.x< HexData.WorldSizeInChunks - 1 && coord.z > 0 && coord.z < HexData.WorldSizeInChunks - 1) //5'ler world size in cunks
-        {
-            return true; 
-        }
-        else { return false; }
+        return coord.x >= 0 && coord.x < HexData.WorldSizeInChunks && coord.z >= 0 && coord.z < HexData.WorldSizeInChunks; //5'ler world size in cunks
+
     }
 
     bool IsHexInWorld(Vector3 pos)
     {
-        if (pos.x >= 0 && pos.x < HexData.WorldSizeInBlocks && pos.y >= 0 && pos.y < HexData.ChunkHeight  && pos.z >= 0 && pos.z < HexData.WorldSizeInBlocks ) //25'ler world size in hex 10 da chunk height
-        { //düzgün çalışmıyore ayrıca triangles da çalışmıyore
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return pos.x >= 0 && pos.x < HexData.WorldSizeInBlocks && pos.y >= 0 && pos.y < HexData.ChunkHeight && pos.z >= 0 && pos.z < HexData.WorldSizeInBlocks; //25'ler world size in hex 10 da chunk height
+
     }
 }
 
