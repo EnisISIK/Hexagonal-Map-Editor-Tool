@@ -22,6 +22,7 @@ public class World : MonoBehaviour
     // TODO: may implement a system for chunk that holds real calculated position and position relative to other chunks separate
     // TODO: make blocktypes enum or a scriptable object
     // TODO: add creation stack
+    // TODO: work on random generated seeds
 
     private void Start()
     {
