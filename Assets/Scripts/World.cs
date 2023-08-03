@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class World : MonoBehaviour
 {
+    public int seed;
+    public BiomeAttributes biome;
+
     public Transform player;
     public Vector3 spawnPosition;
 
@@ -17,8 +20,12 @@ public class World : MonoBehaviour
     ChunkCoord playerLastChunkCoord;
 
     // TODO: may implement a system for chunk that holds real calculated position and position relative to other chunks separate
+    // TODO: make blocktypes enum or a scriptable object
+    // TODO: add creation stack
+
     private void Start()
     {
+        Random.InitState(seed);
         int centerChunk = (HexData.WorldSizeInChunks * HexData.ChunkWidth) / 2;
         spawnPosition.x = (centerChunk + centerChunk * 0.5f - centerChunk / 2) * (HexData.innerRadius * 2f);
         spawnPosition.y = HexData.ChunkHeight + 2f;
@@ -93,14 +100,49 @@ public class World : MonoBehaviour
 
     public byte GetHex(Vector3 pos)
     {
+        int yPos = Mathf.FloorToInt(pos.y);
         if (!IsHexInWorld(pos))
+        {
+            return 0;
+        }
+
+        /* Basic Terrain Pass*/
+        int terrainHeight = Mathf.FloorToInt(biome.terrainHeight*Noise.Get2DPerlin(new Vector2(pos.x, pos.z), 0 , biome.terrainScale)+biome.solidGroundHeight);
+        byte voxelValue = 0;
+
+        if (yPos == terrainHeight)
+        {
+            voxelValue = 2;
+        }
+        else if (yPos < terrainHeight && yPos > terrainHeight - 4)
+        {
+            voxelValue = 4;
+        }
+        else if (yPos > terrainHeight)
         {
             return 0;
         }
         else
         {
-            return 3;
+            voxelValue = 1;
         }
+
+        /*Second Pass*/
+
+        if(voxelValue == 1)
+        {
+            foreach(Lode lode in biome.lodes)
+            {
+                if(yPos > lode.minHeight && yPos < lode.maxHeight)
+                {
+                    if (Noise.Get3DPerlin(pos, lode.noiseOffset, lode.scale, lode.threshold))
+                    {
+                        voxelValue = lode.blockID;
+                    }
+                }
+            }
+        }
+        return voxelValue;
     }
     void CreateNewChunk(int _x, int _z)
     {

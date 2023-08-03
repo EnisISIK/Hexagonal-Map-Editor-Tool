@@ -242,6 +242,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c757062e244a41643967c66b07ec9115, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  seed: 0
+  biome: {fileID: 11400000, guid: c20aa5343402e3c4d9209446ad924795, type: 2}
   player: {fileID: 1616302746}
   spawnPosition: {x: 0, y: 0, z: 0}
   material: {fileID: 2100000, guid: 5c06fc5a7d893244b8cd1c6c268ab79d, type: 2}
@@ -269,13 +271,13 @@ MonoBehaviour:
   - blockName: Grass
     isSolid: 1
     topFaceTexture: 0
-    bottomFaceTexture: 2
-    rightFaceTexture: 2
-    leftFaceTexture: 3
-    frontrightFaceTexture: 4
-    frontleftFaceTexture: 5
-    backrightFaceTexture: 6
-    backleftFaceTexture: 7
+    bottomFaceTexture: 0
+    rightFaceTexture: 15
+    leftFaceTexture: 15
+    frontrightFaceTexture: 15
+    frontleftFaceTexture: 15
+    backrightFaceTexture: 15
+    backleftFaceTexture: 15
   - blockName: Wood
     isSolid: 1
     topFaceTexture: 4
@@ -286,6 +288,26 @@ MonoBehaviour:
     frontleftFaceTexture: 5
     backrightFaceTexture: 5
     backleftFaceTexture: 5
+  - blockName: Dirt
+    isSolid: 1
+    topFaceTexture: 15
+    bottomFaceTexture: 15
+    rightFaceTexture: 15
+    leftFaceTexture: 15
+    frontrightFaceTexture: 15
+    frontleftFaceTexture: 15
+    backrightFaceTexture: 15
+    backleftFaceTexture: 15
+  - blockName: Coal
+    isSolid: 1
+    topFaceTexture: 9
+    bottomFaceTexture: 9
+    rightFaceTexture: 9
+    leftFaceTexture: 9
+    frontrightFaceTexture: 9
+    frontleftFaceTexture: 9
+    backrightFaceTexture: 9
+    backleftFaceTexture: 9
 --- !u!4 &827900869
 Transform:
   m_ObjectHideFlags: 0
