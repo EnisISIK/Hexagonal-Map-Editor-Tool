@@ -16,13 +16,19 @@ public class World : MonoBehaviour
     Chunk[,] chunks = new Chunk[HexData.WorldSizeInChunks, HexData.WorldSizeInChunks];
 
     List<ChunkCoord> activeChunks = new List<ChunkCoord>();
-    ChunkCoord playerCurrentChunkCoord;
+    public ChunkCoord playerCurrentChunkCoord;
     ChunkCoord playerLastChunkCoord;
+    List<ChunkCoord> chunksToCreate= new List<ChunkCoord>();
+
+    private bool isCreatingChunks;
+
+    public GameObject debugScreen;
 
     // TODO: may implement a system for chunk that holds real calculated position and position relative to other chunks separate
     // TODO: make blocktypes enum or a scriptable object
     // TODO: add creation stack
     // TODO: work on random generated seeds
+    // FIX: some of the chunks do not reload after getting into view distance when you go beyond that chunk disappears and never reloads
 
     private void Start()
     {
@@ -38,8 +44,20 @@ public class World : MonoBehaviour
     {
         playerCurrentChunkCoord = GetChunkCoordFromVector3(player.position);
         if (!playerCurrentChunkCoord.Equals(playerLastChunkCoord))
+        { 
             CheckViewDistance();
-            playerLastChunkCoord = playerCurrentChunkCoord;
+            playerLastChunkCoord = playerCurrentChunkCoord; 
+        }
+
+        if (chunksToCreate.Count > 0 && !isCreatingChunks)
+        {
+            StartCoroutine("CreateChunks");
+        }
+
+        if (Input.GetKeyDown(KeyCode.F3))
+        {
+            debugScreen.SetActive(!debugScreen.activeSelf);
+        }
     }
     void GenerateWorld()
     {
@@ -47,12 +65,27 @@ public class World : MonoBehaviour
         {
             for (int z = (HexData.WorldSizeInChunks / 2) - HexData.ViewDistanceinChunks; z < (HexData.WorldSizeInChunks / 2) + HexData.ViewDistanceinChunks; z++)
             {
-                CreateNewChunk(x, z);
+                chunks[x, z] = new Chunk(new ChunkCoord(x, z), this, true);
+                activeChunks.Add(new ChunkCoord(x, z));
             }
         }
         player.position = spawnPosition;
     }
-    
+
+    IEnumerator CreateChunks()
+    {
+        isCreatingChunks = true;
+        
+        while(chunksToCreate.Count > 0)
+        {
+            chunks[chunksToCreate[0].x, chunksToCreate[0].z].Init();
+            chunksToCreate.RemoveAt(0);
+            yield return null;
+        }
+
+        isCreatingChunks = false;
+    }
+
     ChunkCoord GetChunkCoordFromVector3(Vector3 pos)
     {
         float coordplacex = (pos.x / (HexData.innerRadius * 2f)) - (pos.z * 0.5f) + (pos.z / 2);
@@ -64,9 +97,11 @@ public class World : MonoBehaviour
     }
     void CheckViewDistance()
     {
-        ChunkCoord coord = GetChunkCoordFromVector3(player.position);
+        ChunkCoord coord = GetChunkCoordFromVector3(player.position); //çalışıyor gibi ama active chunk reset olayına dikkat et. O sayıları değiştir bakıyım nolcak patlayacaz mı
 
         List<ChunkCoord> previouslyActiveChunks = new List<ChunkCoord>(activeChunks);
+
+        activeChunks.Clear();
 
         for (int x = coord.x - HexData.ViewDistanceinChunks; x < coord.x + HexData.ViewDistanceinChunks; x++)
         {
@@ -76,13 +111,14 @@ public class World : MonoBehaviour
                 {
                     if(chunks[x,z]== null)
                     {
-                        CreateNewChunk(x,z);
+                        chunks[x, z] = new Chunk(new ChunkCoord(x, z), this,false);
+                        chunksToCreate.Add(new ChunkCoord(x, z));
                     }
                     else if(!chunks[x,z].isActive)
                     {
                         chunks[x, z].isActive = true;
-                        activeChunks.Add(new ChunkCoord(x, z));
                     }
+                    activeChunks.Add(new ChunkCoord(x, z));
                 }
                 for(int i= 0; i < previouslyActiveChunks.Count; i++)
                 {
@@ -96,9 +132,23 @@ public class World : MonoBehaviour
         foreach(ChunkCoord _chunk in previouslyActiveChunks)
         {
             chunks[_chunk.x, _chunk.z].isActive = false;
+            activeChunks.Remove(new ChunkCoord(_chunk.x, _chunk.z));
         }
     }
+    public bool CheckForHex(Vector3 pos)
+    {
+        ChunkCoord thisChunk = new ChunkCoord(pos);
 
+        if (!IsHexInWorld(pos))
+        {
+            return false;
+        }
+        if (chunks[thisChunk.x, thisChunk.z]!=null&& chunks[thisChunk.x, thisChunk.z].isHexMapPopulated)
+        {
+            return blocktypes[chunks[thisChunk.x, thisChunk.z].GetHexFromGlobalVector3(pos)].isSolid;
+        }
+        return blocktypes[GetHex(pos)].isSolid;
+    }
     public byte GetHex(Vector3 pos)
     {
         int yPos = Mathf.FloorToInt(pos.y);
@@ -144,11 +194,6 @@ public class World : MonoBehaviour
             }
         }
         return voxelValue;
-    }
-    void CreateNewChunk(int _x, int _z)
-    {
-        chunks[_x,_z] = new Chunk(new ChunkCoord(_x, _z), this);
-        activeChunks.Add(new ChunkCoord(_x, _z));
     }
 
     bool IsChunkInWorld(ChunkCoord coord)

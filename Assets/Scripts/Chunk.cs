@@ -20,11 +20,19 @@ public class Chunk
 	List<int> triangles = new List<int>();
 	List<Vector2> uvs = new List<Vector2>();
 	List<Vector3> normals = new List<Vector3>();
-
+	
+	private bool _isActive;
+	public bool isHexMapPopulated = false;
 	public bool isActive
 	{
-		get { return chunkObject.activeSelf; }
-		set { chunkObject.SetActive(value); }
+		get { return _isActive; }
+		set {
+			_isActive = value;
+			if(chunkObject != null)
+            {
+				chunkObject.SetActive(value);
+            }
+		}
 	}
 
 	public Vector3 position
@@ -32,33 +40,40 @@ public class Chunk
 		get { return chunkObject.transform.position; }
 	}
 
-	byte[,,] hexMap = new byte[HexData.ChunkWidth, HexData.ChunkHeight, HexData.ChunkWidth ];
+	public byte[,,] hexMap = new byte[HexData.ChunkWidth, HexData.ChunkHeight, HexData.ChunkWidth ];
 
 	World world;
 
 	int triangleOffsetValue = 0;
-	public Chunk(ChunkCoord _chunkCoordinates ,World _world)
+	public Chunk(ChunkCoord _chunkCoordinates ,World _world,bool generateOnLoad)
     {
 		chunkCoordinates = _chunkCoordinates;
 		world = _world;
-		chunkObject = new GameObject();
-		meshFilter = chunkObject.AddComponent<MeshFilter>();
-		meshRenderer = chunkObject.AddComponent<MeshRenderer>();
+		isActive = true;
+
 		chunkCountX = chunkCoordinates.x;
 		chunkCountZ = chunkCoordinates.z;
 
+		if (generateOnLoad)
+			Init();
+	}
+
+	public void Init()
+    {
+		chunkObject = new GameObject();
+		meshFilter = chunkObject.AddComponent<MeshFilter>();
+		meshRenderer = chunkObject.AddComponent<MeshRenderer>();
+
 		meshRenderer.material = world.material;
 
-		chunkObject.transform.position = new Vector3(chunkCoordinates.x*HexData.ChunkWidth, 0f, chunkCoordinates.z* HexData.ChunkWidth);
+		chunkObject.transform.position = new Vector3(chunkCoordinates.x * HexData.ChunkWidth, 0f, chunkCoordinates.z * HexData.ChunkWidth);
 		chunkObject.transform.SetParent(world.transform);
 
 		chunkObject.name = "Chunk " + chunkCoordinates.x + ", " + chunkCoordinates.z;
 		PopulateHexMap();
 		CreateChunkRendered();
 		CreateMesh();
-
 	}
-
 	void PopulateHexMap()
     {
 		for (int y = 0; y < HexData.ChunkHeight; y++)
@@ -71,6 +86,8 @@ public class Chunk
 				}
 			}
 		}
+
+		isHexMapPopulated = true;
 	}
 
 	bool IsHexInChunk(float _y, float _x, float _z)
@@ -94,11 +111,23 @@ public class Chunk
 
 		if (!IsHexInChunk(y, x, z))
         {
-			return world.blocktypes[world.GetHex(new Vector3(x, y, z)+position)].isSolid;
+			return world.CheckForHex(new Vector3(x, y, z)+position);
         }
 
 
 		return world.blocktypes[hexMap[x, y, z]].isSolid;
+	}
+
+	public byte GetHexFromGlobalVector3(Vector3 pos)
+	{
+		int xCheck = Mathf.FloorToInt(pos.x);
+		int yCheck = Mathf.FloorToInt(pos.y);
+		int zCheck = Mathf.FloorToInt(pos.z);
+
+		xCheck -= Mathf.FloorToInt(chunkObject.transform.position.x);
+		zCheck -= Mathf.FloorToInt(chunkObject.transform.position.z);
+
+		return hexMap[xCheck,yCheck, zCheck];
 	}
 
 	void CreateChunkRendered()
@@ -278,11 +307,26 @@ public class ChunkCoord{
 	public int x;
 	public int z;
 
+	public ChunkCoord()
+    {
+		x = 0;
+		z = 0;
+    }
+
 	public ChunkCoord(int _x, int _z)
     {
 		x = _x;
 		z = _z;
     }
+
+	public ChunkCoord(Vector3 pos)
+    {
+		int xCheck = Mathf.FloorToInt(pos.x);
+		int zCheck = Mathf.FloorToInt(pos.z);
+
+		x = xCheck / HexData.ChunkWidth;
+		z = zCheck / HexData.ChunkWidth;
+	}
 
 	public bool Equals(ChunkCoord other)
     {
