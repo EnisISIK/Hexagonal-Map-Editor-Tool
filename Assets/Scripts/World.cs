@@ -13,9 +13,12 @@ public class World : MonoBehaviour
     public Material material;
     public BlockType[] blocktypes;
 
-    Chunk[,] chunks = new Chunk[HexData.WorldSizeInChunks, HexData.WorldSizeInChunks];
+    Chunk[,] chunks = new Chunk[HexData.WorldSizeInChunks+100, HexData.WorldSizeInChunks + 100];
+    public static Dictionary<Vector3Int, Chunk> chunksDictionary;
 
     List<ChunkCoord> activeChunks = new List<ChunkCoord>();
+    public static Dictionary<Vector2Int, ChunkCoord> activeChunksDictionary;
+
     public ChunkCoord playerCurrentChunkCoord;
     ChunkCoord playerLastChunkCoord;
     List<ChunkCoord> chunksToCreate= new List<ChunkCoord>();
@@ -23,20 +26,28 @@ public class World : MonoBehaviour
     private bool isCreatingChunks;
 
     public GameObject debugScreen;
+    private float[,] noiseMap;
 
     // TODO: may implement a system for chunk that holds real calculated position and position relative to other chunks separate
     // TODO: make blocktypes enum or a scriptable object
     // TODO: add creation stack
     // TODO: work on random generated seeds
     // FIX: some of the chunks do not reload after getting into view distance when you go beyond that chunk disappears and never reloads
+    // FIX: perlin noise is same for values below zero
 
     private void Start()
     {
+
+        chunksDictionary = new Dictionary<Vector3Int, Chunk>();
+        activeChunksDictionary = new Dictionary<Vector2Int, ChunkCoord>();
+
         Random.InitState(seed);
         int centerChunk = (HexData.WorldSizeInChunks * HexData.ChunkWidth) / 2;
         spawnPosition.x = (centerChunk + centerChunk * 0.5f - centerChunk / 2) * (HexData.innerRadius * 2f);
         spawnPosition.y = HexData.ChunkHeight + 2f;
         spawnPosition.z = centerChunk * (HexData.outerRadius * 1.5f);
+        noiseMap = Noise.GenerateNoiseMap(HexData.WorldSizeInBlocks, HexData.ChunkHeight, biome.terrainScale);
+
         GenerateWorld();
         playerLastChunkCoord = GetChunkCoordFromVector3(player.position);
     }
@@ -65,7 +76,8 @@ public class World : MonoBehaviour
         {
             for (int z = (HexData.WorldSizeInChunks / 2) - HexData.ViewDistanceinChunks; z < (HexData.WorldSizeInChunks / 2) + HexData.ViewDistanceinChunks; z++)
             {
-                chunks[x, z] = new Chunk(new ChunkCoord(x, z), this, true);
+                chunksDictionary.Add(new Vector3Int(x, 0, z), new Chunk(new ChunkCoord(x, z), this, true));
+                //chunks[x, z] = new Chunk(new ChunkCoord(x, z), this, true);
                 activeChunks.Add(new ChunkCoord(x, z));
             }
         }
@@ -78,7 +90,8 @@ public class World : MonoBehaviour
         
         while(chunksToCreate.Count > 0)
         {
-            chunks[chunksToCreate[0].x, chunksToCreate[0].z].Init();
+            chunksDictionary[new Vector3Int(chunksToCreate[0].x, 0, chunksToCreate[0].z)].Init();
+            //chunks[chunksToCreate[0].x, chunksToCreate[0].z].Init();
             chunksToCreate.RemoveAt(0);
             yield return null;
         }
@@ -107,19 +120,21 @@ public class World : MonoBehaviour
         {
             for (int z = coord.z - HexData.ViewDistanceinChunks; z < coord.z + HexData.ViewDistanceinChunks; z++)
             {
-                if (IsChunkInWorld(new ChunkCoord(x,z)))
-                {
-                    if(chunks[x,z]== null)
+                //if (IsChunkInWorld(new ChunkCoord(x,z)))
+                //{
+                    if (!chunksDictionary.ContainsKey(new Vector3Int(x, 0, z))) //(chunks[x,z]== null)
                     {
-                        chunks[x, z] = new Chunk(new ChunkCoord(x, z), this,false);
+                        chunksDictionary.Add(new Vector3Int(x, 0, z), new Chunk(new ChunkCoord(x, z), this, false));
+                        //chunks[x, z] = new Chunk(new ChunkCoord(x, z), this,false);
                         chunksToCreate.Add(new ChunkCoord(x, z));
                     }
-                    else if(!chunks[x,z].isActive)
+                    else if (!chunksDictionary[new Vector3Int(x, 0, z)].isActive) //(!chunks[x,z].isActive)
                     {
-                        chunks[x, z].isActive = true;
+                        chunksDictionary[new Vector3Int(x, 0, z)].isActive = true;
+                        //chunks[x, z].isActive = true;
                     }
                     activeChunks.Add(new ChunkCoord(x, z));
-                }
+                //}
                 for(int i= 0; i < previouslyActiveChunks.Count; i++)
                 {
                     if (previouslyActiveChunks[i].Equals(new ChunkCoord(x,z)))
@@ -131,7 +146,8 @@ public class World : MonoBehaviour
         }
         foreach(ChunkCoord _chunk in previouslyActiveChunks)
         {
-            chunks[_chunk.x, _chunk.z].isActive = false;
+            chunksDictionary[new Vector3Int(_chunk.x, 0, _chunk.z)].isActive = false;
+            //chunks[_chunk.x, _chunk.z].isActive = false;
             activeChunks.Remove(new ChunkCoord(_chunk.x, _chunk.z));
         }
     }
@@ -143,9 +159,9 @@ public class World : MonoBehaviour
         {
             return false;
         }
-        if (chunks[thisChunk.x, thisChunk.z]!=null&& chunks[thisChunk.x, thisChunk.z].isHexMapPopulated)
+        if(chunksDictionary.ContainsKey(new Vector3Int(thisChunk.x, 0, thisChunk.z))&& chunksDictionary[new Vector3Int(thisChunk.x, 0, thisChunk.z)].isHexMapPopulated) //(chunks[thisChunk.x, thisChunk.z]!=null&& chunks[thisChunk.x, thisChunk.z].isHexMapPopulated)
         {
-            return blocktypes[chunks[thisChunk.x, thisChunk.z].GetHexFromGlobalVector3(pos)].isSolid;
+            return blocktypes[chunksDictionary[new Vector3Int(thisChunk.x, 0, thisChunk.z)].GetHexFromGlobalVector3(pos)].isSolid; //blocktypes[chunks[thisChunk.x, thisChunk.z].GetHexFromGlobalVector3(pos)].isSolid;
         }
         return blocktypes[GetHex(pos)].isSolid;
     }
@@ -158,7 +174,9 @@ public class World : MonoBehaviour
         }
 
         /* Basic Terrain Pass*/
+        
         int terrainHeight = Mathf.FloorToInt(biome.terrainHeight*Noise.Get2DPerlin(new Vector2(pos.x, pos.z), 0 , biome.terrainScale)+biome.solidGroundHeight);
+        //int terrainHeight = Mathf.FloorToInt(noiseMap[(int) pos.x,(int) pos.z]+ biome.solidGroundHeight);
         byte voxelValue = 0;
 
         if (yPos == terrainHeight)
@@ -204,7 +222,8 @@ public class World : MonoBehaviour
 
     bool IsHexInWorld(Vector3 pos)
     {
-        return pos.x >= 0 && pos.x < HexData.WorldSizeInBlocks && pos.y >= 0 && pos.y < HexData.ChunkHeight && pos.z >= 0 && pos.z < HexData.WorldSizeInBlocks; //25'ler world size in hex 10 da chunk height
+        return pos.x >= -800 && pos.x < HexData.WorldSizeInBlocks+ 800 && pos.y >= 0 && pos.y < HexData.ChunkHeight && pos.z >= -800 && pos.z < HexData.WorldSizeInBlocks+ 800; //25'ler world size in hex 10 da chunk height
+        //return pos.y >= 0 && pos.y < HexData.ChunkHeight; //25'ler world size in hex 10 da chunk height
 
     }
 }

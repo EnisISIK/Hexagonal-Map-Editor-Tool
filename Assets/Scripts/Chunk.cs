@@ -111,6 +111,7 @@ public class Chunk
 
 		if (!IsHexInChunk(y, x, z))
         {
+			//return world.blocktypes[world.GetHex(new Vector3(x, y, z) + position)].isSolid;
 			return world.CheckForHex(new Vector3(x, y, z)+position);
         }
 
@@ -120,14 +121,38 @@ public class Chunk
 
 	public byte GetHexFromGlobalVector3(Vector3 pos)
 	{
+
 		int xCheck = Mathf.FloorToInt(pos.x);
 		int yCheck = Mathf.FloorToInt(pos.y);
 		int zCheck = Mathf.FloorToInt(pos.z);
 
 		xCheck -= Mathf.FloorToInt(chunkObject.transform.position.x);
 		zCheck -= Mathf.FloorToInt(chunkObject.transform.position.z);
+		//Çalışmazsa buraya bir try catch yaz rytech izleyip
+		try
+		{
+			return hexMap[xCheck, yCheck, zCheck];
+		}
+        catch
+        {
+			return world.GetHex(pos);
+			//return 0; //buraya gethex cart curt ekleyip kullanmayı denesene bir bakalım
+        }
+		/*
+		int xCheck = Mathf.Abs(Mathf.FloorToInt(pos.x));
+		int yCheck = Mathf.Abs(Mathf.FloorToInt(pos.y));
+		int zCheck = Mathf.Abs(Mathf.FloorToInt(pos.z));
 
-		return hexMap[xCheck,yCheck, zCheck];
+		xCheck -= Mathf.Abs(Mathf.FloorToInt(chunkObject.transform.position.x));
+		zCheck -= Mathf.Abs(Mathf.FloorToInt(chunkObject.transform.position.z));
+		try { 
+			return hexMap[xCheck, yCheck, zCheck]; }
+        catch
+        {
+			return 0; 
+        }*/
+		//bu şekilde olunca delikli oluyor diğer türlü olunca ise renderli kalıyor
+
 	}
 
 	void CreateChunkRendered()
@@ -307,13 +332,7 @@ public class ChunkCoord{
 	public int x;
 	public int z;
 
-	public ChunkCoord()
-    {
-		x = 0;
-		z = 0;
-    }
-
-	public ChunkCoord(int _x, int _z)
+	public ChunkCoord(int _x=0, int _z=0)
     {
 		x = _x;
 		z = _z;
