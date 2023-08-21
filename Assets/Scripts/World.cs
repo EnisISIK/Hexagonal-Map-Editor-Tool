@@ -28,12 +28,13 @@ public class World : MonoBehaviour
     public GameObject debugScreen;
     private float[,] noiseMap;
 
-    // TODO: may implement a system for chunk that holds real calculated position and position relative to other chunks separate
+    // TODO: may implement a system for chunk that holds real calculated position and position relative to other chunks separate(done, just need a bit cleaning)
     // TODO: make blocktypes enum or a scriptable object
     // TODO: add creation stack
     // TODO: work on random generated seeds
     // FIX: some of the chunks do not reload after getting into view distance when you go beyond that chunk disappears and never reloads
     // FIX: perlin noise is same for values below zero
+    // TODO: clean code and turn repeating codes to functions
 
     private void Start()
     {
@@ -44,7 +45,7 @@ public class World : MonoBehaviour
         Random.InitState(seed);
         int centerChunk = (HexData.WorldSizeInChunks * HexData.ChunkWidth) / 2;
         spawnPosition.x = (centerChunk + centerChunk * 0.5f - centerChunk / 2) * (HexData.innerRadius * 2f);
-        spawnPosition.y = HexData.ChunkHeight + 2f;
+        spawnPosition.y = HexData.ChunkHeight -50f;
         spawnPosition.z = centerChunk * (HexData.outerRadius * 1.5f);
         noiseMap = Noise.GenerateNoiseMap(HexData.WorldSizeInBlocks, HexData.ChunkHeight, biome.terrainScale);
 
@@ -108,6 +109,95 @@ public class World : MonoBehaviour
         return new ChunkCoord(x, z);
 
     }
+
+    public Vector3 GetVector3FromGlobalVector3(Vector3 pos)
+    {
+        float coordplacex = (pos.x / (HexData.innerRadius * 2f)) - (pos.z * 0.5f) + (pos.z / 2);
+        float coordplacez = (pos.z / (HexData.outerRadius * 1.5f));
+        int x = Mathf.RoundToInt(coordplacex);
+        int z = Mathf.RoundToInt(coordplacez);
+
+        return new Vector3(x, pos.y, z);
+
+    }
+
+    public Chunk GetChunkFromVector3(Vector3 pos)
+    {
+        float coordplacex = Mathf.RoundToInt((pos.x / (HexData.innerRadius * 2f)) - (pos.z * 0.5f) + (pos.z / 2));
+        float coordplacez = Mathf.RoundToInt((pos.z / (HexData.outerRadius * 1.5f)));
+
+        int x = Mathf.FloorToInt(coordplacex / HexData.ChunkWidth);
+        int z = Mathf.FloorToInt(coordplacez / HexData.ChunkWidth);
+
+        return chunksDictionary[new Vector3Int(x, 0, z)];
+
+    }
+    public Chunk GetChunkFromChunkVector3(Vector3 pos)
+    {
+
+        int x = Mathf.FloorToInt(pos.x / HexData.ChunkWidth);
+        int z = Mathf.FloorToInt(pos.z / HexData.ChunkWidth);
+
+        return chunksDictionary[new Vector3Int(x, 0, z)];
+
+    }
+
+    public Vector3 AxialToOddr(Vector2 hex)
+    {
+        float x = hex.x;
+        float y = hex.y + (hex.x - (Mathf.FloorToInt(hex.x) & 1)) / 2;
+
+        return new Vector3(y,0,x);
+    }
+    public Vector2 CubeToAxial(Vector3 hex)
+    {
+        float q = hex.z;
+        float r = hex.x;
+
+        return new Vector2(r,q);
+    }
+    public Vector3 AxialToCube(Vector2 hex)
+    {
+        float q = hex.y;
+        float r = hex.x;
+        float s = -q - r;
+
+        return new Vector3(r, s, q);
+    }
+
+    public Vector3 PixelToHex(Vector3 pos)
+    {
+        float q = (Mathf.Sqrt(3) / 3 * pos.x - 1.0f/3*pos.z);
+        float r = (                            2.0f/3*pos.z);
+
+        return AxialToOddr(AxialRound(new Vector2(r,q)));
+    }
+
+    public Vector3 CubeRound(Vector3 pos)
+    {
+        int q = Mathf.RoundToInt(pos.z);
+        int r = Mathf.RoundToInt(pos.x);
+        int s = Mathf.RoundToInt(pos.y);
+
+        float qDiff = Mathf.Abs(q - pos.z);
+        float rDiff = Mathf.Abs(r - pos.x);
+        float sDiff = Mathf.Abs(s - pos.y);
+
+        if (qDiff > rDiff && qDiff > sDiff)
+            q = -r - s;
+        else if (rDiff > sDiff)
+            r = -q - s;
+        else
+            s = -q - r;
+
+        return new Vector3(r, s, q);
+    }
+
+    public Vector2 AxialRound(Vector2 pos)
+    {
+        return CubeToAxial(CubeRound(AxialToCube(pos)));
+    }
+
     void CheckViewDistance()
     {
         ChunkCoord coord = GetChunkCoordFromVector3(player.position); //çalışıyor gibi ama active chunk reset olayına dikkat et. O sayıları değiştir bakıyım nolcak patlayacaz mı
@@ -153,7 +243,7 @@ public class World : MonoBehaviour
     }
     public bool CheckForHex(Vector3 pos)
     {
-        ChunkCoord thisChunk = new ChunkCoord(pos);
+        ChunkCoord thisChunk = new ChunkCoord(pos);//GetChunkCoordFromVector3(pos);   bunu değiştirdin çalıştı
 
         if (!IsHexInWorld(pos))
         {

@@ -71,8 +71,7 @@ public class Chunk
 
 		chunkObject.name = "Chunk " + chunkCoordinates.x + ", " + chunkCoordinates.z;
 		PopulateHexMap();
-		CreateChunkRendered();
-		CreateMesh();
+		UpdateChunk();
 	}
 	void PopulateHexMap()
     {
@@ -119,9 +118,73 @@ public class Chunk
 		return world.blocktypes[hexMap[x, y, z]].isSolid;
 	}
 
-	public byte GetHexFromGlobalVector3(Vector3 pos)
+	public void EditHex(Vector3 pos, byte newID)
 	{
 
+		int xCheck = Mathf.FloorToInt(pos.x);
+		int yCheck = Mathf.FloorToInt(pos.y);
+		int zCheck = Mathf.FloorToInt(pos.z);
+
+		xCheck -= Mathf.FloorToInt(chunkObject.transform.position.x);
+		zCheck -= Mathf.FloorToInt(chunkObject.transform.position.z);
+
+		hexMap[xCheck, yCheck, zCheck] = newID;
+
+		UpdateSurroundingHex(xCheck, yCheck, zCheck);
+
+		UpdateChunk();
+
+	}
+	public void UpdateSurroundingHex(int x, int y, int z)
+	{
+		Vector3 thisHex = new Vector3(x, y, z);
+
+		for (int p = 0; p < 8; p++)
+		{
+
+			Vector3 currentHex = thisHex + HexData.faces[p];
+
+			if (!IsHexInChunk((int)currentHex.x, (int)currentHex.y, (int)currentHex.z))
+			{
+
+				world.GetChunkFromChunkVector3(currentHex + position).UpdateChunk();
+
+			}
+
+		}
+	}
+
+	public Vector3 GetWorldChunkPosition(Vector3 pos)
+    {
+		int zCheck = Mathf.FloorToInt((pos.z - (1.5f * HexData.outerRadius * position.z)) / (HexData.outerRadius * 1.5f));
+		int yCheck = Mathf.FloorToInt(pos.y);
+		float newFloat2 = (Mathf.RoundToInt((pos.x - (chunkCountX * (HexData.ChunkWidth * 2) * HexData.innerRadius)) / (HexData.innerRadius * 2f))) - (zCheck * 0.5f) + (zCheck / 2);  //bu çalışıyor gibi
+		int xCheck = Mathf.FloorToInt(newFloat2);
+
+		xCheck += Mathf.FloorToInt(chunkObject.transform.position.x);
+		zCheck += Mathf.FloorToInt(chunkObject.transform.position.z);
+
+		return new Vector3(xCheck, yCheck, zCheck);
+	}
+
+	public byte GetHexFromGlobalVector3(Vector3 pos)
+	{
+        /*		_position.x = (((_x) + ( _z) * 0.5f - ( _z) / 2) * (HexData.innerRadius * 2f)) + (chunkCountX * (HexData.ChunkWidth * 2 ) * HexData.innerRadius - position.x);
+		_position.y = 1f * _y;
+		_position.z = ((_z) * (HexData.outerRadius * 1.5f)) + (chunkCountZ*(HexData.ChunkWidth*1.5f) * HexData.outerRadius-position.z);
+		
+		 bunun tersini yaz buraya xcheck için fln*/
+
+        if (pos.z == 18 && pos.x == 16)
+        {
+			Debug.Log("hahaha");
+        }
+		int ZCheck = Mathf.FloorToInt((pos.z - (1.5f * HexData.outerRadius * position.z)) / (HexData.outerRadius * 1.5f));
+		float newFloat = ((int)(pos.x - (2 * HexData.innerRadius * position.x)) / (HexData.innerRadius * 2f)) - (ZCheck * 0.5f) + (ZCheck / 2);
+		float newFloat2 = (Mathf.RoundToInt((pos.x - (chunkCountX * (HexData.ChunkWidth * 2) * HexData.innerRadius)) / (HexData.innerRadius * 2f))) - (ZCheck * 0.5f) + (ZCheck / 2);  //bu çalışıyor gibi
+		
+		int XCheck = Mathf.FloorToInt(newFloat2);
+		int shit = Mathf.FloorToInt(0);
 		int xCheck = Mathf.FloorToInt(pos.x);
 		int yCheck = Mathf.FloorToInt(pos.y);
 		int zCheck = Mathf.FloorToInt(pos.z);
@@ -155,8 +218,10 @@ public class Chunk
 
 	}
 
-	void CreateChunkRendered()
-    {
+	void UpdateChunk()
+	{
+		ClearMesh();
+
 		for (float y = 0; y < HexData.ChunkHeight; y++)
 		{
 			for (int z = 0; z < HexData.ChunkWidth; z++)
@@ -179,6 +244,8 @@ public class Chunk
 				}
 			}
 		}
+
+		CreateMesh();
 	}
 
 	void AddHexagon(Vector3 pos,int blockID,Vector3[] hexVert , int[] hexTri, Vector2[] hexUV,int triangleOffset,int textureIDNum)
@@ -190,7 +257,7 @@ public class Chunk
 		Vector3 _position;
 		_position.x = (((_x) + ( _z) * 0.5f - ( _z) / 2) * (HexData.innerRadius * 2f)) + (chunkCountX * (HexData.ChunkWidth * 2 ) * HexData.innerRadius - position.x);
 		_position.y = 1f * _y;
-		_position.z = ((_z) * (HexData.outerRadius * 1.5f)) + (chunkCountZ*(HexData.ChunkWidth*1.5f) * HexData.outerRadius-position.z);
+		_position.z = ((_z) * (HexData.outerRadius * 1.5f)) + (chunkCountZ * (HexData.ChunkWidth * 1.5f) * HexData.outerRadius-position.z);
 		
 		vertices.AddRange(hexVert.Select(v => v + _position));
 		triangles.AddRange(hexTri.Select(t => t + triangleOffset));
@@ -324,6 +391,15 @@ public class Chunk
 		mesh.RecalculateNormals();
 
 		meshFilter.mesh = mesh;
+	}
+
+	void ClearMesh()
+	{
+		triangleOffsetValue = 0;
+		vertices.Clear();
+		uvs.Clear();
+		triangles.Clear();
+
 	}
 }
 

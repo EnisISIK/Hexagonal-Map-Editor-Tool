@@ -13,9 +13,9 @@ public static class HexData {
 	public static readonly int ChunkWidth = 16;
 	public static readonly int ChunkHeight = 128;
 
-	public static readonly int ViewDistanceinChunks = 16;
+	public static readonly int ViewDistanceinChunks = 5;
 
-	public static readonly int WorldSizeInChunks = 100;
+	public static readonly int WorldSizeInChunks = 10;
 	public static int WorldSizeInBlocks
 	{
 
@@ -44,18 +44,18 @@ public static class HexData {
     #endregion
 
     #region Vertices clockwise top to bottom
-    public static readonly Vector3 p00 = new Vector3(0.00f, 0.50f, 1.00f);
-	public static readonly Vector3 p01 = new Vector3(Mathf.Sqrt(3.00f) / 2.00f, 0.50f, (1.00f / 2.00f));
-	public static readonly Vector3 p02 = new Vector3(Mathf.Sqrt(3.00f) / 2.00f, 0.50f, -(1.00f / 2.00f));
-	public static readonly Vector3 p03 = new Vector3(0.00f, 0.50f, -1.00f);
-	public static readonly Vector3 p04 = new Vector3(-Mathf.Sqrt(3.00f) / 2.00f, 0.50f, -(1.00f / 2.00f));
-	public static readonly Vector3 p05 = new Vector3(-Mathf.Sqrt(3.00f) / 2.00f, 0.50f, (1.00f / 2.00f));
-	public static readonly Vector3 p06 = new Vector3(0.00f, -0.50f, 1.00f);
-	public static readonly Vector3 p07 = new Vector3(Mathf.Sqrt(3.00f) / 2.00f, -0.50f, (1.00f / 2.00f));
-	public static readonly Vector3 p08 = new Vector3(Mathf.Sqrt(3.00f) / 2.00f, -0.50f, -(1.00f / 2.00f));
-	public static readonly Vector3 p09 = new Vector3(0.00f, -0.50f, -1.00f);
-	public static readonly Vector3 p10 = new Vector3(-Mathf.Sqrt(3.00f) / 2.00f, -0.50f, -(1.00f / 2.00f));
-	public static readonly Vector3 p11 = new Vector3(-Mathf.Sqrt(3.00f) / 2.00f, -0.50f, (1.00f / 2.00f));
+    public static readonly Vector3 p00 = new Vector3(0.00f, 1.00f, 1.00f);
+	public static readonly Vector3 p01 = new Vector3(Mathf.Sqrt(3.00f) / 2.00f, 1.00f, (1.00f / 2.00f));
+	public static readonly Vector3 p02 = new Vector3(Mathf.Sqrt(3.00f) / 2.00f, 1.00f, -(1.00f / 2.00f));
+	public static readonly Vector3 p03 = new Vector3(0.00f, 1.00f, -1.00f);
+	public static readonly Vector3 p04 = new Vector3(-Mathf.Sqrt(3.00f) / 2.00f, 1.00f, -(1.00f / 2.00f));
+	public static readonly Vector3 p05 = new Vector3(-Mathf.Sqrt(3.00f) / 2.00f, 1.00f, (1.00f / 2.00f));
+	public static readonly Vector3 p06 = new Vector3(0.00f, 0.00f, 1.00f);
+	public static readonly Vector3 p07 = new Vector3(Mathf.Sqrt(3.00f) / 2.00f, 0.00f, (1.00f / 2.00f));
+	public static readonly Vector3 p08 = new Vector3(Mathf.Sqrt(3.00f) / 2.00f, 0.00f, -(1.00f / 2.00f));
+	public static readonly Vector3 p09 = new Vector3(0.00f, 0.00f, -1.00f);
+	public static readonly Vector3 p10 = new Vector3(-Mathf.Sqrt(3.00f) / 2.00f, 0.00f, -(1.00f / 2.00f));
+	public static readonly Vector3 p11 = new Vector3(-Mathf.Sqrt(3.00f) / 2.00f, 0.00f, (1.00f / 2.00f));
 
 	
 	public static readonly Vector3[] topVertices = new Vector3[]
@@ -119,6 +119,18 @@ public static class HexData {
 
 	public static readonly Vector3 fnw = new Vector3(-1.00f, 0.00f, 1.00f);
 	public static readonly Vector3 fse = new Vector3(1.00f, 0.00f, -1.00f);
+
+	public static readonly Vector3[] faces = new Vector3[]
+	{
+		fu,
+		fd,
+		fe,
+		fw,
+		fne,
+		fsw,
+		fnw,
+		fse
+	};
 	#endregion
 
 	#region UVs clockwise top to bottom

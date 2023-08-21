@@ -2,6 +2,11 @@
 
 public class HexMapCamera : MonoBehaviour
 {
+	private World world;
+
+	public Transform highlightBlock;
+	public Transform placeBlock;
+	public Transform cam;
 
 	Transform swivel, stick;
 	float zoom = 1f;
@@ -11,13 +16,35 @@ public class HexMapCamera : MonoBehaviour
 	public float moveSpeedMinZoom, moveSpeedMaxZoom;
 	public float rotationSpeed;
 
+	public float checkIncrement = 0.1f;
+	public float reach = 8f;
+
 	void Awake()
 	{
 		swivel = transform.GetChild(0);
 		stick = swivel.GetChild(0);
 	}
+
+	private void Start()
+	{
+		world = GameObject.Find("World").GetComponent<World>();
+	}
+
 	void Update()
 	{
+		if (highlightBlock.gameObject.activeSelf)
+		{
+
+			// Destroy block.
+			if (Input.GetMouseButtonDown(1))
+				world.GetChunkFromVector3(highlightBlock.position).EditHex(world.GetVector3FromGlobalVector3(highlightBlock.position), 0);
+
+			// Place block.
+			if (Input.GetMouseButtonDown(0))
+				world.GetChunkFromVector3(placeBlock.position).EditHex(world.GetVector3FromGlobalVector3(placeBlock.position), 2);
+
+		}
+
 		float zoomDelta = Input.GetAxis("Mouse ScrollWheel");
 		if (zoomDelta != 0f)
 		{
@@ -36,6 +63,8 @@ public class HexMapCamera : MonoBehaviour
 		{
 			AdjustPosition(xDelta, zDelta);
 		}
+
+		placeCursorBlocks();
 	}
 
 	public float moveSpeed;
@@ -74,5 +103,35 @@ public class HexMapCamera : MonoBehaviour
 			rotationAngle -= 360f;
 		}
 		transform.localRotation = Quaternion.Euler(0f, rotationAngle, 0f);
+	}
+
+	private void placeCursorBlocks()
+	{
+		float step = checkIncrement;
+		Vector3 lastPos = new Vector3();
+
+		while (step < reach)
+		{
+			Vector3 pos = cam.position + (cam.forward * step);
+			//pos = world.GetVector3FromGlobalVector3(pos);
+
+			if (world.CheckForHex(world.GetVector3FromGlobalVector3(pos)))
+			{
+				highlightBlock.position = new Vector3(Mathf.FloorToInt(pos.x), Mathf.FloorToInt(pos.y), Mathf.FloorToInt(pos.z));
+				placeBlock.position = lastPos;
+
+				highlightBlock.gameObject.SetActive(true);
+				placeBlock.gameObject.SetActive(true);
+
+				return;
+			}
+
+			lastPos = new Vector3(Mathf.FloorToInt(pos.x), Mathf.FloorToInt(pos.y), Mathf.FloorToInt(pos.z));
+
+			step += checkIncrement;
+		}
+
+		highlightBlock.gameObject.SetActive(false);
+		placeBlock.gameObject.SetActive(false);
 	}
 }
