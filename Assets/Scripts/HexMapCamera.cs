@@ -36,13 +36,17 @@ public class HexMapCamera : MonoBehaviour
 		{
 
 			// Destroy block.
-			if (Input.GetMouseButtonDown(1))
-				world.GetChunkFromVector3(highlightBlock.position).EditHex(world.GetVector3FromGlobalVector3(highlightBlock.position), 0);
+			if (Input.GetMouseButtonDown(1)){
 
+				Vector3 destroyPos = world.PixelToHex(highlightBlock.position);
+				world.GetChunkFromChunkVector3(destroyPos).EditHex(destroyPos, 0);  //şimdidide raycastta bir problem var onu çöz tamamdır
+				Debug.Log(world.PixelToHex(highlightBlock.position));
+			}
 			// Place block.
-			if (Input.GetMouseButtonDown(0))
-				world.GetChunkFromVector3(placeBlock.position).EditHex(world.GetVector3FromGlobalVector3(placeBlock.position), 2);
-
+			if (Input.GetMouseButtonDown(0)){
+				Vector3 placePos = world.PixelToHex(placeBlock.position);
+				world.GetChunkFromChunkVector3(placePos).EditHex(placePos, 1);
+			}
 		}
 
 		float zoomDelta = Input.GetAxis("Mouse ScrollWheel");
@@ -113,11 +117,11 @@ public class HexMapCamera : MonoBehaviour
 		while (step < reach)
 		{
 			Vector3 pos = cam.position + (cam.forward * step);
-			//pos = world.GetVector3FromGlobalVector3(pos);
+			Vector3 checkPos = world.PixelToHex(pos);
 
-			if (world.CheckForHex(world.GetVector3FromGlobalVector3(pos)))
+			if (world.CheckForHex(checkPos))
 			{
-				highlightBlock.position = new Vector3(Mathf.FloorToInt(pos.x), Mathf.FloorToInt(pos.y), Mathf.FloorToInt(pos.z));
+				highlightBlock.position = new Vector3(pos.x, pos.y, pos.z);
 				placeBlock.position = lastPos;
 
 				highlightBlock.gameObject.SetActive(true);
@@ -126,7 +130,7 @@ public class HexMapCamera : MonoBehaviour
 				return;
 			}
 
-			lastPos = new Vector3(Mathf.FloorToInt(pos.x), Mathf.FloorToInt(pos.y), Mathf.FloorToInt(pos.z));
+			lastPos = new Vector3(pos.x, pos.y, pos.z);
 
 			step += checkIncrement;
 		}
