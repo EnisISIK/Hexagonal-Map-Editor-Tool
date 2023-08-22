@@ -119,7 +119,6 @@ public class Chunk
 
 	public void EditHex(Vector3 pos, byte newID)
 	{	
-		//does it fail on negative values
 		int xCheck = Mathf.FloorToInt(pos.x);
 		int yCheck = Mathf.FloorToInt(pos.y);
 		int zCheck = Mathf.FloorToInt(pos.z);

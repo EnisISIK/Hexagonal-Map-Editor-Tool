@@ -117,7 +117,7 @@ public class World : MonoBehaviour
 
     void CheckViewDistance()
     {
-        ChunkCoord coord = GetChunkCoordFromVector3(HexPrism.PixelToHex(player.position)); //çalışıyor gibi ama active chunk reset olayına dikkat et. O sayıları değiştir bakıyım nolcak patlayacaz mı
+        ChunkCoord coord = GetChunkCoordFromVector3(HexPrism.PixelToHex(player.position)); 
 
         List<ChunkCoord> previouslyActiveChunks = new List<ChunkCoord>(activeChunks);
 
@@ -150,15 +150,15 @@ public class World : MonoBehaviour
     }
     public bool CheckForHex(Vector3 pos)
     {
-        ChunkCoord thisChunk = new ChunkCoord(pos);
+        ChunkCoord thisChunk = GetChunkCoordFromVector3(pos);
 
         if (!IsHexInWorld(pos))
         {
             return false;
         }
-        if(chunksDictionary.ContainsKey(new Vector3Int(thisChunk.x, 0, thisChunk.z))&& chunksDictionary[new Vector3Int(thisChunk.x, 0, thisChunk.z)].isHexMapPopulated) //(chunks[thisChunk.x, thisChunk.z]!=null&& chunks[thisChunk.x, thisChunk.z].isHexMapPopulated)
+        if(chunksDictionary.ContainsKey(new Vector3Int(thisChunk.x, 0, thisChunk.z))&& chunksDictionary[new Vector3Int(thisChunk.x, 0, thisChunk.z)].isHexMapPopulated) 
         {
-            return blocktypes[chunksDictionary[new Vector3Int(thisChunk.x, 0, thisChunk.z)].GetHexFromGlobalVector3(pos)].isSolid; //blocktypes[chunks[thisChunk.x, thisChunk.z].GetHexFromGlobalVector3(pos)].isSolid;
+            return blocktypes[chunksDictionary[new Vector3Int(thisChunk.x, 0, thisChunk.z)].GetHexFromGlobalVector3(pos)].isSolid; 
         }
         return blocktypes[GetHex(pos)].isSolid;
     }

@@ -45,7 +45,10 @@ public static class HexPrism
         float q = (Mathf.Sqrt(3) / 3 * pos.x - 1.0f / 3 * pos.z);
         float r = (2.0f / 3 * pos.z);
 
-        return AxialToOddr(AxialRound(new Vector2(r, q)));
+        Vector3 hexPos = AxialToOddr(AxialRound(new Vector2(r, q)));
+        hexPos.y = pos.y;
+
+        return hexPos;
     }
     public static Vector3 HexToPixel(Vector3 pos)
     {
