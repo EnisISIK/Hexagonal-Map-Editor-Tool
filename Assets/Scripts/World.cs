@@ -48,11 +48,11 @@ public class World : MonoBehaviour
         spawnPosition.z = centerChunk * (HexData.outerRadius * 1.5f);
 
         GenerateWorld();
-        playerLastChunkCoord = GetChunkCoordFromVector3(PixelToHex(player.position));
+        playerLastChunkCoord = GetChunkCoordFromVector3(HexPrism.PixelToHex(player.position));
     }
     private void Update()
     {
-        playerCurrentChunkCoord = GetChunkCoordFromVector3(PixelToHex(player.position));
+        playerCurrentChunkCoord = GetChunkCoordFromVector3(HexPrism.PixelToHex(player.position));
         if (!playerCurrentChunkCoord.Equals(playerLastChunkCoord))
         { 
             CheckViewDistance();
@@ -115,68 +115,9 @@ public class World : MonoBehaviour
 
     }
 
-    public Vector3 AxialToOddr(Vector2 hex)
-    {
-        float x = hex.x;
-        float y = hex.y + (hex.x - (Mathf.FloorToInt(hex.x) & 1)) / 2;
-
-        return new Vector3(y,0,x);
-    }
-    public Vector2 CubeToAxial(Vector3 hex)
-    {
-        float q = hex.z;
-        float r = hex.x;
-
-        return new Vector2(r,q);
-    }
-    public Vector3 AxialToCube(Vector2 hex)
-    {
-        float q = hex.y;
-        float r = hex.x;
-        float s = -q - r;
-
-        return new Vector3(r, s, q);
-    }
-
-    public Vector3 PixelToHex(Vector3 pos)
-    {
-        float q = (Mathf.Sqrt(3) / 3 * pos.x - 1.0f/3*pos.z);
-        float r = (                            2.0f/3*pos.z);
-
-        Vector3 hexPos = AxialToOddr(AxialRound(new Vector2(r, q)));
-        hexPos.y = pos.y;
-
-        return hexPos;
-    }
-
-    public Vector3 CubeRound(Vector3 pos)
-    {
-        int q = Mathf.RoundToInt(pos.z);
-        int r = Mathf.RoundToInt(pos.x);
-        int s = Mathf.RoundToInt(pos.y);
-
-        float qDiff = Mathf.Abs(q - pos.z);
-        float rDiff = Mathf.Abs(r - pos.x);
-        float sDiff = Mathf.Abs(s - pos.y);
-
-        if (qDiff > rDiff && qDiff > sDiff)
-            q = -r - s;
-        else if (rDiff > sDiff)
-            r = -q - s;
-        else
-            s = -q - r;
-
-        return new Vector3(r, s, q);
-    }
-
-    public Vector2 AxialRound(Vector2 pos)
-    {
-        return CubeToAxial(CubeRound(AxialToCube(pos)));
-    }
-
     void CheckViewDistance()
     {
-        ChunkCoord coord = GetChunkCoordFromVector3(PixelToHex(player.position)); //çalışıyor gibi ama active chunk reset olayına dikkat et. O sayıları değiştir bakıyım nolcak patlayacaz mı
+        ChunkCoord coord = GetChunkCoordFromVector3(HexPrism.PixelToHex(player.position)); //çalışıyor gibi ama active chunk reset olayına dikkat et. O sayıları değiştir bakıyım nolcak patlayacaz mı
 
         List<ChunkCoord> previouslyActiveChunks = new List<ChunkCoord>(activeChunks);
 

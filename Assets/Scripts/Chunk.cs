@@ -195,14 +195,9 @@ public class Chunk
 
 	private void AddHex(Vector3 pos,Vector3[] hexVert , int[] hexTri,int triangleOffset)
     {
-		int _x = (int) pos.x;
-		int _y = (int)pos.y;
-		int _z = (int)pos.z;
-
-		Vector3 _position;
-		_position.x = (((_x) + ( _z) * 0.5f - ( _z) / 2) * (HexData.innerRadius * 2f)) + (chunkCountX * (HexData.ChunkWidth * 2 ) * HexData.innerRadius - position.x);
-		_position.y = 1f * _y;
-		_position.z = ((_z) * (HexData.outerRadius * 1.5f)) + (chunkCountZ * (HexData.ChunkWidth * 1.5f) * HexData.outerRadius-position.z);
+		Vector3 _position = HexPrism.HexToPixel(pos);
+		_position.x += (chunkCountX * (HexData.ChunkWidth * 2 ) * HexData.innerRadius - position.x);
+		_position.z += (chunkCountZ * (HexData.ChunkWidth * 1.5f) * HexData.outerRadius-position.z);
 		
 		vertices.AddRange(hexVert.Select(v => v + _position));
 		triangles.AddRange(hexTri.Select(t => t + triangleOffset));
