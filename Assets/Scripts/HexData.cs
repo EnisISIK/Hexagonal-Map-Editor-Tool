@@ -13,7 +13,7 @@ public static class HexData {
 	public static readonly int ChunkWidth = 16;
 	public static readonly int ChunkHeight = 128;
 
-	public static readonly int ViewDistanceinChunks = 5;
+	public static readonly int ViewDistanceinChunks = 2;
 
 	public static readonly int WorldSizeInChunks = 10;
 	public static int WorldSizeInBlocks
@@ -25,7 +25,7 @@ public static class HexData {
     #endregion
 
     #region TextureAtlas metrics
-    public static readonly int TextureAtlasSizeInBlocks = 4;
+    public static readonly int TextureAtlasSizeInBlocks = 16;
 	public static float NormalizedBlockTextureSize
     {
         get { return 1f / (float)TextureAtlasSizeInBlocks; }
@@ -161,37 +161,37 @@ public static class HexData {
 	public static readonly Vector2[] rightUvs = new Vector2[]
 	{	
 		// Right
-		_06, _07, _08, _09,
+		_09, _08, _07, _06,
 	};
 
 	public static readonly Vector2[] leftUvs = new Vector2[]
 	{	
 		// Left
-		_06, _07, _08, _09,
+		_09, _08, _07, _06,
 	};
 
 	public static readonly Vector2[] frontRightUvs = new Vector2[]
 	{		
 		// Front Right
-		_06, _07, _08, _09,
+		_09, _08, _07, _06,
 	};
 
 	public static readonly Vector2[] frontLeftUvs = new Vector2[]
 	{
 		// Front Left
-		_06, _07, _08, _09,
+		_09, _08, _07, _06,
 	};
 
 	public static readonly Vector2[] backRightUvs = new Vector2[]
 	{
 		// Back Right
-		_06, _07, _08, _09,
+		_09, _08, _07, _06,
 	};
 
 	public static readonly Vector2[] backLeftUvs = new Vector2[]
 	{	
 		// Back Left
-		_06, _07, _08, _09,
+		_09, _08, _07, _06,
 	};
 	#endregion
 

@@ -19,9 +19,13 @@ public class World : MonoBehaviour
     List<ChunkCoord> activeChunks = new List<ChunkCoord>();
     public static Dictionary<Vector2Int, ChunkCoord> activeChunksDictionary;
 
+    Queue<HexMod> modifications = new Queue<HexMod>();
+    bool applyingModifications = false;
+
     public ChunkCoord playerCurrentChunkCoord;
     ChunkCoord playerLastChunkCoord;
     List<ChunkCoord> chunksToCreate= new List<ChunkCoord>();
+    List<Chunk> chunksToUpdate = new List<Chunk>();
 
     private bool isCreatingChunks;
 
@@ -58,11 +62,23 @@ public class World : MonoBehaviour
             CheckViewDistance();
             playerLastChunkCoord = playerCurrentChunkCoord; 
         }
-
+        if (modifications.Count > 0 && !applyingModifications)
+        {
+            StartCoroutine("ApplyModifications");
+        }
+        if (chunksToCreate.Count > 0)
+        {
+            CreateChunk();
+        }
+        if (chunksToUpdate.Count > 0)
+        {
+            UpdateChunks();
+        }
+        /*
         if (chunksToCreate.Count > 0 && !isCreatingChunks)
         {
             StartCoroutine("CreateChunks");
-        }
+        }*/
 
         if (Input.GetKeyDown(KeyCode.F3))
         {
@@ -79,7 +95,82 @@ public class World : MonoBehaviour
                 activeChunks.Add(new ChunkCoord(x, z));
             }
         }
+        //Dangerous
+        while (modifications.Count > 0)
+        {
+            HexMod structureHex = modifications.Dequeue();
+            ChunkCoord structureChunkCoord = GetChunkCoordFromVector3(structureHex.position);
+            //bunu değiştirmen gerekebilir. Tehlikeli!!
+            if (!chunksDictionary.ContainsKey(new Vector3Int(structureChunkCoord.x, 0, structureChunkCoord.z)))
+            {
+                chunksDictionary[new Vector3Int(structureChunkCoord.x, 0, structureChunkCoord.z)] = new Chunk(structureChunkCoord, this, true);
+                activeChunks.Add(structureChunkCoord);
+            }
+            chunksDictionary[new Vector3Int(structureChunkCoord.x, 0, structureChunkCoord.z)].modifications.Enqueue(structureHex);
+            if (!chunksToUpdate.Contains(chunksDictionary[new Vector3Int(structureChunkCoord.x, 0, structureChunkCoord.z)]))
+            {
+                chunksToUpdate.Add(chunksDictionary[new Vector3Int(structureChunkCoord.x, 0, structureChunkCoord.z)]);
+            }
+            while (chunksToUpdate.Count > 0)
+            {
+                chunksToUpdate[0].UpdateChunk();
+                chunksToUpdate.RemoveAt(0);
+            }
+        }
         player.position = spawnPosition;
+    }
+    void CreateChunk()
+    {
+        ChunkCoord coord = chunksToCreate[0];
+        chunksToCreate.RemoveAt(0);
+        activeChunks.Add(coord);
+        chunksDictionary[new Vector3Int(coord.x, 0, coord.z)].Init();
+    }
+    void UpdateChunks()
+    {
+        bool updated = false;
+        int index = 0;
+        while (!updated && index < chunksToUpdate.Count - 1)
+        {
+            if (chunksToUpdate[index].isHexMapPopulated)
+            {
+                chunksToUpdate[index].UpdateChunk();
+                chunksToUpdate.RemoveAt(index);
+                updated = true;
+            }
+            else
+            {
+                index++;
+            }
+        }
+    }
+    IEnumerator ApplyModifications()
+    {
+        applyingModifications = true;
+        int count = 0;
+        while (modifications.Count > 0)
+        {
+            HexMod structureHex = modifications.Dequeue();
+            ChunkCoord structureChunkCoord = GetChunkCoordFromVector3(structureHex.position);
+            //bunu değiştirmen gerekebilir. Tehlikeli!!
+            if (!chunksDictionary.ContainsKey(new Vector3Int(structureChunkCoord.x, 0, structureChunkCoord.z)))
+            {
+                chunksDictionary[new Vector3Int(structureChunkCoord.x, 0, structureChunkCoord.z)] = new Chunk(structureChunkCoord, this, true);
+                activeChunks.Add(structureChunkCoord);
+            }
+            chunksDictionary[new Vector3Int(structureChunkCoord.x, 0, structureChunkCoord.z)].modifications.Enqueue(structureHex);
+            if (!chunksToUpdate.Contains(chunksDictionary[new Vector3Int(structureChunkCoord.x, 0, structureChunkCoord.z)]))
+            {
+                chunksToUpdate.Add(chunksDictionary[new Vector3Int(structureChunkCoord.x, 0, structureChunkCoord.z)]);
+            }
+            count++;
+            if (count > 20)
+            {
+                count = 0;
+                yield return null;
+            }
+        }
+        applyingModifications = false;
     }
 
     IEnumerator CreateChunks()
@@ -208,6 +299,21 @@ public class World : MonoBehaviour
                 }
             }
         }
+
+        /*TREE PASS*/
+        if (yPos == terrainHeight)
+        {
+            if (Noise.Get2DPerlin(new Vector2(pos.x, pos.z), 0, biome.treeZoneScale) > biome.treeZoneThreshold)
+            {
+                voxelValue = 5;
+                if (Noise.Get2DPerlin(new Vector2(pos.x, pos.z), 0, biome.treePlacementScale) > biome.treePlacementThreshold)
+                {
+                    voxelValue = 3;
+                    Structure.MakeTree(pos, modifications, biome.minTreeHeight, biome.maxTreeHeight);
+                }
+
+            }
+        }
         return voxelValue;
     }
 
@@ -266,5 +372,22 @@ public class BlockType
                 return 0;
 
         } 
+    }
+}
+public class HexMod
+{
+    public Vector3 position;
+    public byte id;
+
+    public HexMod()
+    {
+        position = new Vector3();
+        id = 0;
+    }
+
+    public HexMod(Vector3 _position, byte _id)
+    {
+        position = _position;
+        id = _id;
     }
 }

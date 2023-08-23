@@ -7,6 +7,8 @@ public class Chunk
 {
 	private readonly World world;
 
+	public Queue<HexMod> modifications = new Queue<HexMod>();
+
 	[SerializeField] private Material material;
 
 	public byte[,,] hexMap = new byte[HexData.ChunkWidth, HexData.ChunkHeight, HexData.ChunkWidth];
@@ -163,8 +165,15 @@ public class Chunk
 
 	}
 
-	void UpdateChunk()
+	public void UpdateChunk()
 	{
+		while (modifications.Count > 0)
+		{
+			HexMod structureHex = modifications.Dequeue();
+			Vector3 structureHexPos = structureHex.position -= position;
+			hexMap[(int)structureHexPos.x, (int)structureHexPos.y, (int)structureHexPos.z] = structureHex.id;
+
+		}
 		ClearMesh();
 		for (float y = 0; y < HexData.ChunkHeight; y++){
 			for (int z = 0; z < HexData.ChunkWidth; z++){

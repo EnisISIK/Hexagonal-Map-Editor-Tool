@@ -456,28 +456,28 @@ MonoBehaviour:
     backleftFaceTexture: 7
   - blockName: Stone
     isSolid: 1
-    topFaceTexture: 3
-    bottomFaceTexture: 3
+    topFaceTexture: 0
+    bottomFaceTexture: 0
+    rightFaceTexture: 0
+    leftFaceTexture: 0
+    frontrightFaceTexture: 0
+    frontleftFaceTexture: 0
+    backrightFaceTexture: 0
+    backleftFaceTexture: 0
+  - blockName: Grass
+    isSolid: 1
+    topFaceTexture: 7
+    bottomFaceTexture: 1
     rightFaceTexture: 2
     leftFaceTexture: 2
     frontrightFaceTexture: 2
     frontleftFaceTexture: 2
     backrightFaceTexture: 2
     backleftFaceTexture: 2
-  - blockName: Grass
-    isSolid: 1
-    topFaceTexture: 0
-    bottomFaceTexture: 0
-    rightFaceTexture: 15
-    leftFaceTexture: 15
-    frontrightFaceTexture: 15
-    frontleftFaceTexture: 15
-    backrightFaceTexture: 15
-    backleftFaceTexture: 15
   - blockName: Wood
     isSolid: 1
-    topFaceTexture: 4
-    bottomFaceTexture: 4
+    topFaceTexture: 6
+    bottomFaceTexture: 6
     rightFaceTexture: 5
     leftFaceTexture: 5
     frontrightFaceTexture: 5
@@ -486,14 +486,14 @@ MonoBehaviour:
     backleftFaceTexture: 5
   - blockName: Dirt
     isSolid: 1
-    topFaceTexture: 15
-    bottomFaceTexture: 15
-    rightFaceTexture: 15
-    leftFaceTexture: 15
-    frontrightFaceTexture: 15
-    frontleftFaceTexture: 15
-    backrightFaceTexture: 15
-    backleftFaceTexture: 15
+    topFaceTexture: 1
+    bottomFaceTexture: 1
+    rightFaceTexture: 1
+    leftFaceTexture: 1
+    frontrightFaceTexture: 1
+    frontleftFaceTexture: 1
+    backrightFaceTexture: 1
+    backleftFaceTexture: 1
   - blockName: Coal
     isSolid: 1
     topFaceTexture: 9
@@ -504,6 +504,16 @@ MonoBehaviour:
     frontleftFaceTexture: 9
     backrightFaceTexture: 9
     backleftFaceTexture: 9
+  - blockName: Leaves
+    isSolid: 1
+    topFaceTexture: 16
+    bottomFaceTexture: 16
+    rightFaceTexture: 16
+    leftFaceTexture: 16
+    frontrightFaceTexture: 16
+    frontleftFaceTexture: 16
+    backrightFaceTexture: 16
+    backleftFaceTexture: 16
   debugScreen: {fileID: 501965286}
 --- !u!4 &827900869
 Transform:
