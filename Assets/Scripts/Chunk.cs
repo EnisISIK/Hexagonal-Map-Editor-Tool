@@ -2,16 +2,19 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using System.Threading.Tasks;
+using System.Collections.Concurrent;
 
 public class Chunk 
 {
 	private readonly World world;
 
 	public Queue<HexMod> modifications = new Queue<HexMod>();
+	public ConcurrentQueue<IEnumerator> updateQueue = new ConcurrentQueue<IEnumerator>();
 
 	[SerializeField] private Material material;
 
-	public byte[,,] hexMap = new byte[HexData.ChunkWidth, HexData.ChunkHeight, HexData.ChunkWidth];
+	public byte[,,] hexMap = null; //new byte[HexData.ChunkWidth, HexData.ChunkHeight, HexData.ChunkWidth];
 
 	public ChunkCoord chunkCoordinates;
 
@@ -27,9 +30,13 @@ public class Chunk
 	private readonly List<int> triangles = new List<int>();
 	private readonly List<Vector2> uvs = new List<Vector2>();
 	private readonly List<Vector3> normals = new List<Vector3>();
-	
+
+	public Vector3 position;
+
 	private bool _isActive;
 	public bool isHexMapPopulated = false;
+
+	public object myLock = new object();
 
 	public bool isActive
 	{
@@ -42,10 +49,6 @@ public class Chunk
 		}
 	}
 
-	public Vector3 position
-	{
-		get { return chunkObject.transform.position; }
-	}
 
 	public Chunk(ChunkCoord _chunkCoordinates ,World _world,bool generateOnLoad)
     {
@@ -71,28 +74,109 @@ public class Chunk
 		chunkObject.transform.position = new Vector3(chunkCoordinates.x * HexData.ChunkWidth, 0f, chunkCoordinates.z * HexData.ChunkWidth);
 		chunkObject.transform.SetParent(world.transform);
 
+		position = chunkObject.transform.position;
+
 		chunkObject.name = "Chunk " + chunkCoordinates.x + ", " + chunkCoordinates.z;
-		PopulateHexMap();
-		UpdateChunk();
+		world.StartCoroutine(PopulateHexMap());
 	}
 
-	void PopulateHexMap()
+	public IEnumerator PopulateHexMap()
     {
-		for (int y = 0; y < HexData.ChunkHeight; y++)
-		{
-			for (int z = 0; z < HexData.ChunkWidth; z++)
-			{
-				for (int x = 0; x < HexData.ChunkWidth; x++)
-				{
-					hexMap[x, (int)y, z] = world.GetHex(new Vector3(x,y,z)+position);
-				}
-			}
-		}
+
+        if (hexMap == null)
+        {
+			world.StartCoroutine(GenerateData(position, x => hexMap = x));
+			yield return new WaitUntil(() => hexMap != null);
+
+        }
 
 		isHexMapPopulated = true;
+
+		//world.StartCoroutine(UpdateChunk());
+		yield return UpdateChunk();
+		CreateMesh();
+		//UpdateChunk();
 	}
 
-	bool IsHexInChunk(float _y, float _x, float _z)
+	public IEnumerator GenerateData(Vector3 chunkPos,System.Action<byte[,,]> callback)
+	{
+		byte[,,] tempData = new byte[HexData.ChunkWidth, HexData.ChunkHeight, HexData.ChunkWidth];
+
+		Task t = Task.Factory.StartNew(delegate
+		{
+			for (int y = 0; y < HexData.ChunkHeight; y++)
+			{
+				for (int z = 0; z < HexData.ChunkWidth; z++)
+				{
+					for (int x = 0; x < HexData.ChunkWidth; x++)
+					{
+						Vector3 pos = new Vector3(x, y, z) + chunkPos;
+
+						int yPos = Mathf.FloorToInt(pos.y);
+						byte voxelValue;
+
+						if (!(pos.y >= 0 && pos.y < HexData.ChunkHeight))
+						{
+							voxelValue = 0;
+							continue;
+						}
+
+						/* Basic Terrain Pass*/
+						int terrainHeight = Mathf.FloorToInt(world.biome.terrainHeight * Noise.Get2DPerlin(new Vector2(pos.x, pos.z), 0, world.biome.terrainScale) + world.biome.solidGroundHeight);
+
+						if (yPos == terrainHeight)
+						{
+							voxelValue = 2;
+						}
+						else if (yPos < terrainHeight && yPos > terrainHeight - 4)
+						{
+							voxelValue = 4;
+						}
+						else if (yPos > terrainHeight)
+						{
+							voxelValue = 0;
+						}
+						else
+						{
+							voxelValue = 1;
+						}
+
+						/*Second Pass*/
+
+						if (voxelValue == 1)
+						{
+							foreach (Lode lode in world.biome.lodes)
+							{
+								if (yPos > lode.minHeight && yPos < lode.maxHeight)
+								{
+									if (Noise.Get3DPerlin(pos, lode.noiseOffset, lode.scale, lode.threshold))
+									{
+										voxelValue = lode.blockID;
+									}
+								}
+							}
+						}
+
+						tempData[x, y, z] = voxelValue;
+					}
+				}
+			}
+		});
+
+		yield return new WaitUntil(() =>
+		{
+			return t.IsCompleted;
+		});
+
+        if (t.Exception!=null)
+        {
+			Debug.LogError(t.Exception);
+        }
+
+		callback(tempData);
+	}
+
+	bool IsHexInChunk(float _x, float _y, float _z)
     {
 		if (_x < 0 || _x > HexData.ChunkWidth-1 || _y < 0 || _y > HexData.ChunkHeight - 1 || _z < 0 || _z > HexData.ChunkWidth - 1)
 		{
@@ -111,7 +195,7 @@ public class Chunk
 		int y = Mathf.FloorToInt(_y);
 		int z = Mathf.FloorToInt(_z);
 
-		if (!IsHexInChunk(y, x, z))
+		if (!IsHexInChunk(x, y, z))
         {
 			return world.CheckForHex(new Vector3(x, y, z)+position);
         }
@@ -120,30 +204,53 @@ public class Chunk
 	}
 
 	public void EditHex(Vector3 pos, byte newID)
-	{	
+	{
 		int xCheck = Mathf.FloorToInt(pos.x);
 		int yCheck = Mathf.FloorToInt(pos.y);
 		int zCheck = Mathf.FloorToInt(pos.z);
 
-		xCheck -= Mathf.FloorToInt(chunkObject.transform.position.x);
-		zCheck -= Mathf.FloorToInt(chunkObject.transform.position.z);
+		xCheck -= Mathf.FloorToInt(position.x);
+		zCheck -= Mathf.FloorToInt(position.z);
 
 		hexMap[xCheck, yCheck, zCheck] = newID;
 
-		UpdateSurroundingHex(xCheck, yCheck, zCheck);
-		UpdateChunk();
-
+		world.StartCoroutine(UpdateSurroundingHex(xCheck, yCheck, zCheck,newID));
 	}
-	public void UpdateSurroundingHex(int x, int y, int z)
+	public IEnumerator UpdateSurroundingHex(int x, int y, int z,int blockID)
 	{
 		Vector3 thisHex = new Vector3(x, y, z);
 
-		for (int p = 0; p < 8; p++){
-			Vector3 currentHex = thisHex + HexData.faces[p];
+		Task t = Task.Factory.StartNew(delegate
+		{
+			if (blockID != 0)
+			{
+				world.chunksToUpdate.Enqueue(this);
+			}
+			for (int p = 0; p < 8; p++)
+			{
+				Vector3 currentHex = thisHex + HexData.faces[p];
 
-			if (!IsHexInChunk((int)currentHex.x, (int)currentHex.y, (int)currentHex.z))
-				world.GetChunkFromChunkVector3(currentHex + position).UpdateChunk();
-		}
+				if (!IsHexInChunk(currentHex.x, currentHex.y,currentHex.z))
+				{
+					if(!world.chunksToUpdate.Contains(world.GetChunkFromChunkVector3(currentHex + position)))
+							world.chunksToUpdate.Enqueue(world.GetChunkFromChunkVector3(currentHex + position));
+				}
+			}
+			if (blockID == 0)
+			{
+				world.chunksToUpdate.Enqueue(this);
+			}
+		});
+		yield return new WaitUntil(() =>
+		{
+			return t.IsCompleted;
+		});
+
+        if (t.Exception != null)
+        {
+			Debug.LogError(t.Exception);
+        }
+
 	}
 
 	public byte GetHexFromGlobalVector3(Vector3 pos)
@@ -152,8 +259,8 @@ public class Chunk
 		int yCheck = Mathf.FloorToInt(pos.y);
 		int zCheck = Mathf.FloorToInt(pos.z);
 
-		xCheck -= Mathf.FloorToInt(chunkObject.transform.position.x);
-		zCheck -= Mathf.FloorToInt(chunkObject.transform.position.z);
+		xCheck -= Mathf.FloorToInt(position.x);
+		zCheck -= Mathf.FloorToInt(position.z);
 		try
 		{
 			return hexMap[xCheck, yCheck, zCheck];
@@ -165,7 +272,7 @@ public class Chunk
 
 	}
 
-	public void UpdateChunk()
+	public IEnumerator UpdateChunk()
 	{
 		while (modifications.Count > 0)
 		{
@@ -175,15 +282,29 @@ public class Chunk
 
 		}
 		ClearMesh();
-		for (float y = 0; y < HexData.ChunkHeight; y++){
-			for (int z = 0; z < HexData.ChunkWidth; z++){
-				for (int x = 0; x < HexData.ChunkWidth; x++){
-					if (world.blocktypes[hexMap[x,(int) y, z]].isSolid)
-						AddHexCell(x, y, z);
+		Task t = Task.Factory.StartNew(delegate
+		{
+			for (float y = 0; y < HexData.ChunkHeight; y++)
+			{
+				for (int z = 0; z < HexData.ChunkWidth; z++)
+				{
+					for (int x = 0; x < HexData.ChunkWidth; x++)
+					{
+						if (world.blocktypes[hexMap[x, (int)y, z]].isSolid)
+							AddHexCell(x, y, z);
+					}
 				}
 			}
-		}
+		});
+		yield return new WaitUntil(() => {
+			return t.IsCompleted;
+		});
+        if (t.Exception != null)
+        {
+			Debug.LogError(t.Exception);
+        }
 		CreateMesh();
+		//world.chunksToDraw.Enqueue(this);
 	}
 
 	private void AddHexCell(int x, float y, int z)
@@ -192,13 +313,13 @@ public class Chunk
 
 		triangleOffsetValue = vertices.Count;
 		RenderUp(new Vector3(x, y, z), blockID);
-		RenderDown(new Vector3(x, y, z), blockID);
 		RenderEast(new Vector3(x, y, z), blockID);
 		RenderWest(new Vector3(x, y, z), blockID);
 		RenderSouthEast(new Vector3(x, y, z), blockID);
 		RenderSouthWest(new Vector3(x, y, z), blockID);
 		RenderNorthEast(new Vector3(x, y, z), blockID);
 		RenderNorthWest(new Vector3(x, y, z), blockID);
+		RenderDown(new Vector3(x, y, z), blockID);
 	}
 
 	private void AddHex(Vector3 pos,Vector3[] hexVert , int[] hexTri,int triangleOffset)
@@ -206,10 +327,12 @@ public class Chunk
 		Vector3 _position = HexPrism.HexToPixel(pos);
 		_position.x += (chunkCountX * (HexData.ChunkWidth * 2 ) * HexData.innerRadius - position.x);
 		_position.z += (chunkCountZ * (HexData.ChunkWidth * 1.5f) * HexData.outerRadius-position.z);
-		
-		vertices.AddRange(hexVert.Select(v => v + _position));
-		triangles.AddRange(hexTri.Select(t => t + triangleOffset));
 
+		int triangleOffsetValuer = vertices.Count;
+		vertices.AddRange(hexVert.Select(v => v + _position));
+		triangles.AddRange(hexTri.Select(t => t + triangleOffsetValuer));
+		if (hexTri.Length == 12) triangleOffsetValuer += 6;
+		else if (hexTri.Length == 6) triangleOffsetValuer += 4;
 	}
 
 	private void AddUvs(int blockID, Vector2[] hexUV, int textureIDNum)
@@ -237,7 +360,6 @@ public class Chunk
     {
         if (CheckHexagon(neighboor.y+HexData.fu.y, neighboor.x + HexData.fu.x, neighboor.z + HexData.fu.z))
 		{
-			triangleOffsetValue -= 6;
 			return;
         }
 
@@ -249,7 +371,6 @@ public class Chunk
 	{
 		if (CheckHexagon(neighboor.y + HexData.fd.y, neighboor.x + HexData.fd.x, neighboor.z + HexData.fd.z))
 		{
-			triangleOffsetValue -= 6;
 			return;
 		}
 
@@ -261,7 +382,6 @@ public class Chunk
 	{
 		if (CheckHexagon(neighboor.y + HexData.fe.y, neighboor.x + HexData.fe.x, neighboor.z + HexData.fe.z))
 		{
-			triangleOffsetValue -= 4;
 			return;
 		}
 
@@ -273,7 +393,6 @@ public class Chunk
 	{
 		if (CheckHexagon(neighboor.y + HexData.fw.y, neighboor.x + HexData.fw.x, neighboor.z + HexData.fw.z))
 		{
-			triangleOffsetValue -= 4;
 			return;
 		}
 
@@ -288,7 +407,6 @@ public class Chunk
 
 		if (CheckHexagon(neighboor.y + HexData.fse.y, newNeighboorX, neighboor.z + HexData.fse.z))
 		{
-			triangleOffsetValue -= 4;
 			return;
 		}
 
@@ -303,7 +421,6 @@ public class Chunk
 
 		if (CheckHexagon(neighboor.y + HexData.fsw.y, newNeighboorX, neighboor.z + HexData.fsw.z))
 		{
-			triangleOffsetValue -= 4;
 			return;
 		}
 
@@ -318,7 +435,6 @@ public class Chunk
 
 		if (CheckHexagon(neighboor.y + HexData.fne.y, newNeighboorX, neighboor.z + HexData.fne.z))
 		{
-			triangleOffsetValue -= 4;
 			return;
 		}
 
@@ -333,7 +449,6 @@ public class Chunk
 
 		if (CheckHexagon(neighboor.y + HexData.fnw.y, newNeighboorX, neighboor.z + HexData.fnw.z))
 		{
-			triangleOffsetValue -= 4;
 			return;
 		}
 
@@ -341,7 +456,7 @@ public class Chunk
 		AddUvs(blockID, HexData.backLeftUvs, 7);
 	}
 
-	void CreateMesh()
+	public void CreateMesh()
     {
 		Mesh mesh = new Mesh();
 

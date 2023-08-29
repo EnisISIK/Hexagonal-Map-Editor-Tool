@@ -36,6 +36,8 @@ public class Player : MonoBehaviour
     public Text selectedBlockText;
     public byte selectedBlockIndex = 1;
 
+    public bool isInteracting;
+
     private void Start()
     {
 
@@ -144,7 +146,7 @@ public class Player : MonoBehaviour
         {
 
             // Destroy block.
-            if (Input.GetMouseButtonDown(0)){
+            if (Input.GetMouseButtonDown(0)&&!world.isUpdatingChunks){
 
                 Vector3 destroyPos = HexPrism.PixelToHex(highlightBlock.position);
                 world.GetChunkFromChunkVector3(destroyPos).EditHex(destroyPos, 0);  //şimdidide raycastta bir problem var onu çöz tamamdır
@@ -153,7 +155,8 @@ public class Player : MonoBehaviour
             //destroy block positionu biraz kayık bir yandakini falan yokediyor bazen
 
             // Place block.
-            if (Input.GetMouseButtonDown(1)) {
+            if (Input.GetMouseButtonDown(1)&&!world.isUpdatingChunks) {
+
                 Vector3 placePos = HexPrism.PixelToHex(placeBlock.position);
                 world.GetChunkFromChunkVector3(placePos).EditHex(placePos, selectedBlockIndex);
             }

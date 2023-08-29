@@ -13,7 +13,7 @@ public static class HexData {
 	public static readonly int ChunkWidth = 16;
 	public static readonly int ChunkHeight = 128;
 
-	public static readonly int ViewDistanceinChunks = 2;
+	public static readonly int ViewDistanceinChunks = 5;
 
 	public static readonly int WorldSizeInChunks = 10;
 	public static int WorldSizeInBlocks
@@ -204,8 +204,59 @@ public static class HexData {
 		0, 3, 4,
 		0, 4, 5,
 	};
-	
+
 	public static readonly int[] bottomTriangles = new int[]
+	{
+		// Bottom
+		3, 1, 0,
+		3, 2, 1,
+		4, 3, 0,
+		5, 4, 0,
+	};
+
+	public static readonly int[] rightTriangles = new int[]
+	{	
+		// Right
+		2, 1, 0,
+		2, 3, 1,
+	};
+
+	public static readonly int[] leftTriangles = new int[]
+	{
+		// Left
+		2, 1, 0,
+		2, 3, 1,
+	};
+
+	public static readonly int[] frontRightTriangles = new int[]
+	{
+		// Front Right
+		2, 1, 0,
+		2, 3, 1,
+	};
+
+	public static readonly int[] frontLeftTriangles = new int[]
+	{
+		// Front Left
+		2, 1, 0,
+		2, 3, 1,
+	};
+
+	public static readonly int[] backRightTriangles = new int[]
+	{
+		// Back Right
+		2, 1, 0,
+		2, 3, 1,
+	};
+
+	public static readonly int[] backLeftTriangles = new int[]
+	{
+		// Back Left
+		2, 1, 0,
+		2, 3, 1,
+	};
+
+	/*public static readonly int[] bottomTriangles = new int[]
 	{
 		// Bottom
 		9, 7, 6,
@@ -254,6 +305,6 @@ public static class HexData {
 		// Back Left
 		34, 33, 32,
 		34, 35, 33,
-	};
+	};*/
 	#endregion
 }

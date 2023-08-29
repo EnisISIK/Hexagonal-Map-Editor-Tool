@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Collections.Concurrent;
+using System.Threading.Tasks;
 
 public class World : MonoBehaviour
 {
@@ -25,11 +27,15 @@ public class World : MonoBehaviour
     public ChunkCoord playerCurrentChunkCoord;
     ChunkCoord playerLastChunkCoord;
     List<ChunkCoord> chunksToCreate= new List<ChunkCoord>();
-    List<Chunk> chunksToUpdate = new List<Chunk>();
-
-    private bool isCreatingChunks;
+    //List<Chunk> chunksToUpdate = new List<Chunk>();
+    public ConcurrentQueue<Chunk> chunksToDraw = new ConcurrentQueue<Chunk>();
+    public ConcurrentQueue<Chunk> chunksToUpdate = new ConcurrentQueue<Chunk>();
 
     public GameObject debugScreen;
+
+    private bool isCreatingChunks;
+    private bool isDrawingChunks;
+    public bool isUpdatingChunks;
 
     // TODO: may implement a system for chunk that holds real calculated position and position relative to other chunks separate(done, just need a bit cleaning)
     // TODO: make blocktypes enum or a scriptable object
@@ -62,29 +68,56 @@ public class World : MonoBehaviour
             CheckViewDistance();
             playerLastChunkCoord = playerCurrentChunkCoord; 
         }
-        if (modifications.Count > 0 && !applyingModifications)
-        {
-            StartCoroutine("ApplyModifications");
-        }
-        if (chunksToCreate.Count > 0)
-        {
-            CreateChunk();
-        }
-        if (chunksToUpdate.Count > 0)
-        {
-            UpdateChunks();
-        }
-        /*
         if (chunksToCreate.Count > 0 && !isCreatingChunks)
         {
             StartCoroutine("CreateChunks");
-        }*/
-
+        }
+        if (chunksToDraw.Count > 0 && !isDrawingChunks)
+        {
+            //StartCoroutine(DrawChunks());
+        }
         if (Input.GetKeyDown(KeyCode.F3))
         {
             debugScreen.SetActive(!debugScreen.activeSelf);
         }
     }
+    private void FixedUpdate()
+    {
+        if (chunksToUpdate.Count > 0 && !isUpdatingChunks)
+        {
+            StartCoroutine(UpdateChunks());
+        }
+    }
+
+    IEnumerator DrawChunks()
+    {
+        isDrawingChunks = true;
+        while (chunksToDraw.Count > 0) { 
+            if (chunksToDraw.TryPeek(out Chunk var))
+                if (var.isHexMapPopulated)
+                    if (chunksToDraw.TryDequeue(out Chunk var1))
+                        var1.CreateMesh();
+            yield return null;
+        }
+        isDrawingChunks = false;
+    }
+    IEnumerator UpdateChunks()
+    {
+        isUpdatingChunks = true;
+        while (chunksToUpdate.Count > 0)
+        {
+            if (chunksToUpdate.TryPeek(out Chunk var))
+                if (var.isHexMapPopulated)
+                    if (chunksToUpdate.TryDequeue(out Chunk var1)) { 
+                        StartCoroutine(var1.UpdateChunk());
+                        yield return null;  //bu yield iki yerdede çalışıyor.  eskiden yield return var1.UpdateChunk(); yapıyordun o daha yavaştı
+                        //var1.CreateMesh();  
+                    }
+            //yield return null;
+        }
+        isUpdatingChunks = false;
+    }
+
     void GenerateWorld()
     {
         for(int x = (HexData.WorldSizeInChunks / 2)-HexData.ViewDistanceinChunks; x < (HexData.WorldSizeInChunks / 2) + HexData.ViewDistanceinChunks; x++)
@@ -95,95 +128,19 @@ public class World : MonoBehaviour
                 activeChunks.Add(new ChunkCoord(x, z));
             }
         }
-        //Dangerous
-        while (modifications.Count > 0)
-        {
-            HexMod structureHex = modifications.Dequeue();
-            ChunkCoord structureChunkCoord = GetChunkCoordFromVector3(structureHex.position);
-            //bunu değiştirmen gerekebilir. Tehlikeli!!
-            if (!chunksDictionary.ContainsKey(new Vector3Int(structureChunkCoord.x, 0, structureChunkCoord.z)))
-            {
-                chunksDictionary[new Vector3Int(structureChunkCoord.x, 0, structureChunkCoord.z)] = new Chunk(structureChunkCoord, this, true);
-                activeChunks.Add(structureChunkCoord);
-            }
-            chunksDictionary[new Vector3Int(structureChunkCoord.x, 0, structureChunkCoord.z)].modifications.Enqueue(structureHex);
-            if (!chunksToUpdate.Contains(chunksDictionary[new Vector3Int(structureChunkCoord.x, 0, structureChunkCoord.z)]))
-            {
-                chunksToUpdate.Add(chunksDictionary[new Vector3Int(structureChunkCoord.x, 0, structureChunkCoord.z)]);
-            }
-            while (chunksToUpdate.Count > 0)
-            {
-                chunksToUpdate[0].UpdateChunk();
-                chunksToUpdate.RemoveAt(0);
-            }
-        }
+       
         player.position = spawnPosition;
     }
-    void CreateChunk()
-    {
-        ChunkCoord coord = chunksToCreate[0];
-        chunksToCreate.RemoveAt(0);
-        activeChunks.Add(coord);
-        chunksDictionary[new Vector3Int(coord.x, 0, coord.z)].Init();
-    }
-    void UpdateChunks()
-    {
-        bool updated = false;
-        int index = 0;
-        while (!updated && index < chunksToUpdate.Count - 1)
-        {
-            if (chunksToUpdate[index].isHexMapPopulated)
-            {
-                chunksToUpdate[index].UpdateChunk();
-                chunksToUpdate.RemoveAt(index);
-                updated = true;
-            }
-            else
-            {
-                index++;
-            }
-        }
-    }
-    IEnumerator ApplyModifications()
-    {
-        applyingModifications = true;
-        int count = 0;
-        while (modifications.Count > 0)
-        {
-            HexMod structureHex = modifications.Dequeue();
-            ChunkCoord structureChunkCoord = GetChunkCoordFromVector3(structureHex.position);
-            //bunu değiştirmen gerekebilir. Tehlikeli!!
-            if (!chunksDictionary.ContainsKey(new Vector3Int(structureChunkCoord.x, 0, structureChunkCoord.z)))
-            {
-                chunksDictionary[new Vector3Int(structureChunkCoord.x, 0, structureChunkCoord.z)] = new Chunk(structureChunkCoord, this, true);
-                activeChunks.Add(structureChunkCoord);
-            }
-            chunksDictionary[new Vector3Int(structureChunkCoord.x, 0, structureChunkCoord.z)].modifications.Enqueue(structureHex);
-            if (!chunksToUpdate.Contains(chunksDictionary[new Vector3Int(structureChunkCoord.x, 0, structureChunkCoord.z)]))
-            {
-                chunksToUpdate.Add(chunksDictionary[new Vector3Int(structureChunkCoord.x, 0, structureChunkCoord.z)]);
-            }
-            count++;
-            if (count > 20)
-            {
-                count = 0;
-                yield return null;
-            }
-        }
-        applyingModifications = false;
-    }
-
     IEnumerator CreateChunks()
     {
         isCreatingChunks = true;
-        
-        while(chunksToCreate.Count > 0)
+
+        while (chunksToCreate.Count > 0)
         {
             chunksDictionary[new Vector3Int(chunksToCreate[0].x, 0, chunksToCreate[0].z)].Init();
             chunksToCreate.RemoveAt(0);
             yield return null;
         }
-
         isCreatingChunks = false;
     }
 
@@ -253,6 +210,27 @@ public class World : MonoBehaviour
         }
         return blocktypes[GetHex(pos)].isSolid;
     }
+
+    public bool CheckTheHex(Vector3 pos,System.Action<bool> callback)
+    {
+        bool doesHexExist;
+        ChunkCoord thisChunk = GetChunkCoordFromVector3(pos);
+
+        if (!IsHexInWorld(pos))
+        {
+            doesHexExist = false;
+        }
+        if (chunksDictionary.ContainsKey(new Vector3Int(thisChunk.x, 0, thisChunk.z)) && chunksDictionary[new Vector3Int(thisChunk.x, 0, thisChunk.z)].isHexMapPopulated)
+        {
+            doesHexExist = blocktypes[chunksDictionary[new Vector3Int(thisChunk.x, 0, thisChunk.z)].GetHexFromGlobalVector3(pos)].isSolid;
+        }
+        else 
+        { 
+            doesHexExist = blocktypes[GetHex(pos)].isSolid; 
+        }
+        callback(doesHexExist);
+        return doesHexExist;
+    }
     public byte GetHex(Vector3 pos)
     {
         int yPos = Mathf.FloorToInt(pos.y);
@@ -300,21 +278,74 @@ public class World : MonoBehaviour
             }
         }
 
-        /*TREE PASS*/
-        if (yPos == terrainHeight)
-        {
-            if (Noise.Get2DPerlin(new Vector2(pos.x, pos.z), 0, biome.treeZoneScale) > biome.treeZoneThreshold)
-            {
-                voxelValue = 5;
-                if (Noise.Get2DPerlin(new Vector2(pos.x, pos.z), 0, biome.treePlacementScale) > biome.treePlacementThreshold)
-                {
-                    voxelValue = 3;
-                    Structure.MakeTree(pos, modifications, biome.minTreeHeight, biome.maxTreeHeight);
-                }
-
-            }
-        }
         return voxelValue;
+    }
+
+    public IEnumerator GenerateHex(Vector3 pos, System.Action<byte> callback)
+    {
+        byte tempData = 1;
+
+        Task t = Task.Factory.StartNew(delegate
+        {
+
+            int yPos = Mathf.FloorToInt(pos.y);
+            byte voxelValue;
+
+            /* Basic Terrain Pass*/
+
+            int terrainHeight = Mathf.FloorToInt(biome.terrainHeight * Noise.Get2DPerlin(new Vector2(pos.x, pos.z), 0, biome.terrainScale) + biome.solidGroundHeight);
+            
+            if (!(pos.y >= 0 && pos.y < HexData.ChunkHeight))
+            {
+                voxelValue = 0;
+            }
+            else if (yPos == terrainHeight)
+            {
+                voxelValue = 2;
+            }
+            else if (yPos < terrainHeight && yPos > terrainHeight - 4)
+            {
+                voxelValue = 4;
+            }
+            else if (yPos > terrainHeight)
+            {
+                voxelValue = 0;
+            }
+            else
+            {
+                voxelValue = 1;
+            }
+
+            /*Second Pass*/
+
+            if (voxelValue == 1)
+            {
+                foreach (Lode lode in biome.lodes)
+                {
+                    if (yPos > lode.minHeight && yPos < lode.maxHeight)
+                    {
+                        if (Noise.Get3DPerlin(pos, lode.noiseOffset, lode.scale, lode.threshold))
+                        {
+                            voxelValue = lode.blockID;
+                        }
+                    }
+                }
+            }
+
+            tempData = voxelValue;
+        });
+
+        yield return new WaitUntil(() =>
+        {
+            return t.IsCompleted;
+        });
+
+        if (t.Exception != null)
+        {
+            Debug.LogError(t.Exception);
+        }
+
+        callback(tempData);
     }
 
     bool IsChunkInWorld(ChunkCoord coord)
