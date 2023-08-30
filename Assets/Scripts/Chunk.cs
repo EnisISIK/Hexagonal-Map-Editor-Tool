@@ -14,7 +14,7 @@ public class Chunk
 
 	[SerializeField] private Material material;
 
-	public byte[,,] hexMap = null; //new byte[HexData.ChunkWidth, HexData.ChunkHeight, HexData.ChunkWidth];
+	public byte[,,] hexMap = null;
 
 	public ChunkCoord chunkCoordinates;
 
@@ -93,9 +93,10 @@ public class Chunk
 		isHexMapPopulated = true;
 
 		//world.StartCoroutine(UpdateChunk());
+		yield return world.ApplyModifications();
+
 		yield return UpdateChunk();
 		CreateMesh();
-		//UpdateChunk();
 	}
 
 	public IEnumerator GenerateData(Vector3 chunkPos,System.Action<byte[,,]> callback)
@@ -155,6 +156,20 @@ public class Chunk
 									}
 								}
 							}
+						}
+						if (yPos == terrainHeight)
+						{
+
+							if (Noise.Get2DPerlin(new Vector2(pos.x, pos.z), 0, world.biome.treeZoneScale) > world.biome.treeZoneThreshold)
+							{
+
+								if (Noise.Get2DPerlin(new Vector2(pos.x, pos.z), 0, world.biome.treePlacementScale) > world.biome.treePlacementThreshold)
+								{
+									ConcurrentQueue<HexMod> structure = Structure.MakeTree(pos, world.biome.minTreeHeight, world.biome.maxTreeHeight);
+									world.modifications.Enqueue(structure);
+								}
+							}
+
 						}
 
 						tempData[x, y, z] = voxelValue;

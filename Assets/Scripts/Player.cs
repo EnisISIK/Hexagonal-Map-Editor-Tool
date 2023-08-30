@@ -33,7 +33,6 @@ public class Player : MonoBehaviour
     public float checkIncrement = 0.1f;
     public float reach = 8f;
 
-    public Text selectedBlockText;
     public byte selectedBlockIndex = 1;
 
     public bool isInteracting;
@@ -45,7 +44,6 @@ public class Player : MonoBehaviour
         world = GameObject.Find("World").GetComponent<World>();
 
         Cursor.lockState = CursorLockMode.Locked;
-       // selectedBlockText.text = world.blocktypes[selectedBlockIndex].blockName + " block selected";
 
     }
 
@@ -138,8 +136,6 @@ public class Player : MonoBehaviour
             if (selectedBlockIndex < 1)
                 selectedBlockIndex = (byte)(world.blocktypes.Length - 1);
 
-            //selectedBlockText.text = world.blocktypes[selectedBlockIndex].blockName + " block selected";
-
         }
 
         if (highlightBlock.gameObject.activeSelf)
@@ -149,7 +145,7 @@ public class Player : MonoBehaviour
             if (Input.GetMouseButtonDown(0)&&!world.isUpdatingChunks){
 
                 Vector3 destroyPos = HexPrism.PixelToHex(highlightBlock.position);
-                world.GetChunkFromChunkVector3(destroyPos).EditHex(destroyPos, 0);  //şimdidide raycastta bir problem var onu çöz tamamdır
+                world.GetChunkFromChunkVector3(destroyPos).EditHex(destroyPos, 0);
                 Debug.Log(HexPrism.PixelToHex(highlightBlock.position));
             }
             //destroy block positionu biraz kayık bir yandakini falan yokediyor bazen

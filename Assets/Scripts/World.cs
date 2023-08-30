@@ -15,19 +15,17 @@ public class World : MonoBehaviour
     public Material material;
     public BlockType[] blocktypes;
 
-    Chunk[,] chunks = new Chunk[HexData.WorldSizeInChunks+100, HexData.WorldSizeInChunks + 100];
     public static Dictionary<Vector3Int, Chunk> chunksDictionary;
 
     List<ChunkCoord> activeChunks = new List<ChunkCoord>();
     public static Dictionary<Vector2Int, ChunkCoord> activeChunksDictionary;
 
-    Queue<HexMod> modifications = new Queue<HexMod>();
-    bool applyingModifications = false;
+    public ConcurrentQueue<ConcurrentQueue<HexMod>> modifications = new ConcurrentQueue<ConcurrentQueue<HexMod>>();
 
     public ChunkCoord playerCurrentChunkCoord;
     ChunkCoord playerLastChunkCoord;
     List<ChunkCoord> chunksToCreate= new List<ChunkCoord>();
-    //List<Chunk> chunksToUpdate = new List<Chunk>();
+
     public ConcurrentQueue<Chunk> chunksToDraw = new ConcurrentQueue<Chunk>();
     public ConcurrentQueue<Chunk> chunksToUpdate = new ConcurrentQueue<Chunk>();
 
@@ -70,7 +68,7 @@ public class World : MonoBehaviour
         }
         if (chunksToCreate.Count > 0 && !isCreatingChunks)
         {
-            StartCoroutine("CreateChunks");
+            StartCoroutine(CreateChunks());
         }
         if (chunksToDraw.Count > 0 && !isDrawingChunks)
         {
@@ -116,6 +114,33 @@ public class World : MonoBehaviour
             //yield return null;
         }
         isUpdatingChunks = false;
+    }
+    public IEnumerator ApplyModifications()
+    {
+        while (modifications.Count > 0)
+        {
+
+            ConcurrentQueue<HexMod> queue;
+            modifications.TryDequeue(out queue);
+
+            while (queue.Count > 0)
+            {
+
+                HexMod v;
+                queue.TryDequeue(out v);
+
+                ChunkCoord c = GetChunkCoordFromVector3(v.position);
+
+                if (chunksDictionary.ContainsKey(new Vector3Int(c.x,0,c.z)))
+                {
+                    chunksDictionary[new Vector3Int(c.x, 0, c.z)].modifications.Enqueue(v);
+                }
+
+
+
+            }
+            yield return null;
+        }
     }
 
     void GenerateWorld()
@@ -278,6 +303,22 @@ public class World : MonoBehaviour
             }
         }
 
+        /* TREE PASS */
+
+        if (yPos == terrainHeight)
+        {
+
+            if (Noise.Get2DPerlin(new Vector2(pos.x, pos.z), 0, biome.treeZoneScale) > biome.treeZoneThreshold)
+            {
+
+                if (Noise.Get2DPerlin(new Vector2(pos.x, pos.z), 0, biome.treePlacementScale) > biome.treePlacementThreshold)
+                {
+                    ConcurrentQueue<HexMod> structure = Structure.MakeTree(pos, biome.minTreeHeight, biome.maxTreeHeight);
+                    modifications.Enqueue(structure);
+                }
+            }
+
+        }
         return voxelValue;
     }
 
