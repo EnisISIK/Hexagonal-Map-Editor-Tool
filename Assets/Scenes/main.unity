@@ -439,7 +439,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   seed: 0
-  biome: {fileID: 11400000, guid: c20aa5343402e3c4d9209446ad924795, type: 2}
+  biomes:
+  - {fileID: 11400000, guid: c20aa5343402e3c4d9209446ad924795, type: 2}
+  - {fileID: 11400000, guid: f3b3edc8f63e6a344a5fb13e711e56ee, type: 2}
+  - {fileID: 11400000, guid: 1185bc9a992057f408dc55edd4c7561e, type: 2}
   player: {fileID: 1295394191}
   spawnPosition: {x: 0, y: 0, z: 0}
   material: {fileID: 2100000, guid: 5c06fc5a7d893244b8cd1c6c268ab79d, type: 2}
@@ -514,7 +517,18 @@ MonoBehaviour:
     frontleftFaceTexture: 16
     backrightFaceTexture: 16
     backleftFaceTexture: 16
+  - blockName: Sand
+    isSolid: 1
+    topFaceTexture: 10
+    bottomFaceTexture: 10
+    rightFaceTexture: 10
+    leftFaceTexture: 10
+    frontrightFaceTexture: 10
+    frontleftFaceTexture: 10
+    backrightFaceTexture: 10
+    backleftFaceTexture: 10
   debugScreen: {fileID: 501965286}
+  isUpdatingChunks: 0
 --- !u!4 &827900869
 Transform:
   m_ObjectHideFlags: 0
@@ -944,8 +958,8 @@ MonoBehaviour:
   placeBlock: {fileID: 41003668}
   checkIncrement: 0.1
   reach: 8
-  selectedBlockText: {fileID: 0}
   selectedBlockIndex: 1
+  isInteracting: 0
 --- !u!4 &1295394191
 Transform:
   m_ObjectHideFlags: 0

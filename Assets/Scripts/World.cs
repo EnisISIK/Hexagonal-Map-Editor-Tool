@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 public class World : MonoBehaviour
 {
     public int seed;
-    public BiomeAttributes biome;
+    public BiomeAttributes[] biomes;
 
     public Transform player;
     public Vector3 spawnPosition;
@@ -43,8 +43,11 @@ public class World : MonoBehaviour
     // FIX: perlin noise is same for values below zero
     // TODO: clean code and turn repeating codes to functions
 
+    float[,] noiseMap = new float[16, 16];
+
     private void Start()
     {
+        noiseMap = Noise.GenerateNoiseMap(16, 16, 23132, 0.25f, 2, 0.5f, 2);
 
         chunksDictionary = new Dictionary<Vector3Int, Chunk>();
         activeChunksDictionary = new Dictionary<Vector2Int, ChunkCoord>();
@@ -264,19 +267,52 @@ public class World : MonoBehaviour
             return 0;
         }
 
-        /* Basic Terrain Pass*/
-        
-        int terrainHeight = Mathf.FloorToInt(biome.terrainHeight*Noise.Get2DPerlin(new Vector2(pos.x, pos.z), 0 , biome.terrainScale)+biome.solidGroundHeight);
+        /* BIOME SELECTION Pass*/
 
+        float sumOfHeights = 0f;
+        int count=0;
+        float strongestWeight=0f;
+        int strongestBiomeIndex = 0;
+
+        for(int i = 0; i < biomes.Length; i++)
+        {
+            float weight = Noise.Get2DPerlin(new Vector2(pos.x, pos.z), biomes[i].offset, biomes[i].scale);
+
+            if(weight>strongestWeight)
+            {
+                strongestWeight = weight;
+                strongestBiomeIndex = i;
+            }
+
+            float height = biomes[i].terrainHeight * Noise.Get2DPerlin(new Vector2(pos.x, pos.z), 0, biomes[i].terrainScale)*weight;
+
+            if (height > 0)
+            {
+                sumOfHeights += height;
+                count++;
+            }
+
+        }
+
+        BiomeAttributes biome = biomes[strongestBiomeIndex];
+
+        sumOfHeights /= count;
+        //float myHeight = noiseMap[Mathf.FloorToInt(pos.x-HexData.ChunkWidth), Mathf.FloorToInt(pos.z - HexData.ChunkWidth)];
+        int terrainHeight = Mathf.FloorToInt(sumOfHeights + biome.solidGroundHeight);
+        /* Basic Terrain Pass*/
+
+        //int terrainHeight = Mathf.FloorToInt(biome.terrainHeight*Noise.Get2DPerlin(new Vector2(pos.x, pos.z), 0 , biome.terrainScale))+biome.solidGroundHeight;
+        //int terrainHeight = Mathf.FloorToInt(biome.terrainHeight * Noise.Generate2DPerlin(new Vector2(pos.x, pos.z), 0.25f, 2, 0.5f, 2) + biome.solidGroundHeight);
+        //alttakini kullanınca yırtılma oluyor neden bir bak
         byte voxelValue = 0;
 
         if (yPos == terrainHeight)
         {
-            voxelValue = 2;
+            voxelValue = biome.surfaceBlock;
         }
         else if (yPos < terrainHeight && yPos > terrainHeight - 4)
         {
-            voxelValue = 4;
+            voxelValue = biome.subSurfaceBlock;
         }
         else if (yPos > terrainHeight)
         {
@@ -305,88 +341,21 @@ public class World : MonoBehaviour
 
         /* TREE PASS */
 
-        if (yPos == terrainHeight)
+        if (yPos == terrainHeight && biome.placeFlora)
         {
 
-            if (Noise.Get2DPerlin(new Vector2(pos.x, pos.z), 0, biome.treeZoneScale) > biome.treeZoneThreshold)
+            if (Noise.Get2DPerlin(new Vector2(pos.x, pos.z), 0, biome.floraZoneScale) > biome.floraZoneThreshold)
             {
 
-                if (Noise.Get2DPerlin(new Vector2(pos.x, pos.z), 0, biome.treePlacementScale) > biome.treePlacementThreshold)
+                if (Noise.Get2DPerlin(new Vector2(pos.x, pos.z), 0, biome.floraPlacementScale) > biome.floraPlacementThreshold)
                 {
-                    ConcurrentQueue<HexMod> structure = Structure.MakeTree(pos, biome.minTreeHeight, biome.maxTreeHeight);
+                    ConcurrentQueue<HexMod> structure = Structure.GenerateMajorFlora(biome.floraIndex,pos, biome.minFloraHeight, biome.maxFloraHeight);
                     modifications.Enqueue(structure);
                 }
             }
 
         }
         return voxelValue;
-    }
-
-    public IEnumerator GenerateHex(Vector3 pos, System.Action<byte> callback)
-    {
-        byte tempData = 1;
-
-        Task t = Task.Factory.StartNew(delegate
-        {
-
-            int yPos = Mathf.FloorToInt(pos.y);
-            byte voxelValue;
-
-            /* Basic Terrain Pass*/
-
-            int terrainHeight = Mathf.FloorToInt(biome.terrainHeight * Noise.Get2DPerlin(new Vector2(pos.x, pos.z), 0, biome.terrainScale) + biome.solidGroundHeight);
-            
-            if (!(pos.y >= 0 && pos.y < HexData.ChunkHeight))
-            {
-                voxelValue = 0;
-            }
-            else if (yPos == terrainHeight)
-            {
-                voxelValue = 2;
-            }
-            else if (yPos < terrainHeight && yPos > terrainHeight - 4)
-            {
-                voxelValue = 4;
-            }
-            else if (yPos > terrainHeight)
-            {
-                voxelValue = 0;
-            }
-            else
-            {
-                voxelValue = 1;
-            }
-
-            /*Second Pass*/
-
-            if (voxelValue == 1)
-            {
-                foreach (Lode lode in biome.lodes)
-                {
-                    if (yPos > lode.minHeight && yPos < lode.maxHeight)
-                    {
-                        if (Noise.Get3DPerlin(pos, lode.noiseOffset, lode.scale, lode.threshold))
-                        {
-                            voxelValue = lode.blockID;
-                        }
-                    }
-                }
-            }
-
-            tempData = voxelValue;
-        });
-
-        yield return new WaitUntil(() =>
-        {
-            return t.IsCompleted;
-        });
-
-        if (t.Exception != null)
-        {
-            Debug.LogError(t.Exception);
-        }
-
-        callback(tempData);
     }
 
     bool IsChunkInWorld(ChunkCoord coord)

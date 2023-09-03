@@ -6,11 +6,24 @@ using UnityEngine;
 
 public static class Structure
 {
+    public static ConcurrentQueue<HexMod> GenerateMajorFlora(int index, Vector3 position, int minTrunkHeight, int maxTrunkHeight)
+    {
+        switch (index)
+        {
+            case 0:
+                return MakeTree(position, minTrunkHeight, maxTrunkHeight);
+            case 1:
+                return MakeCactus(position, minTrunkHeight, maxTrunkHeight);
+        }
+
+        return new ConcurrentQueue<HexMod>();
+    }
+
     public static ConcurrentQueue<HexMod> MakeTree(Vector3 position, int minTrunkHeight, int maxTrunkHeight)
     {
         ConcurrentQueue<HexMod> queue = new ConcurrentQueue<HexMod>();
 
-        int height = (int)(maxTrunkHeight * Noise.Get2DPerlin(new Vector2(position.x, position.z), 250f, 3f));
+        int height = (int)(maxTrunkHeight * Noise.Get2DPerlin(new Vector2(position.x, position.z), 4005f, 2f));
 
         if (height < minTrunkHeight)
             height = minTrunkHeight;
@@ -33,5 +46,20 @@ public static class Structure
 
         return queue;
     }
+    public static ConcurrentQueue<HexMod> MakeCactus(Vector3 position, int minTrunkHeight, int maxTrunkHeight)
+    {
+        ConcurrentQueue<HexMod> queue = new ConcurrentQueue<HexMod>();
 
+        int height = (int)(maxTrunkHeight * Noise.Get2DPerlin(new Vector2(position.x, position.z), 250f, 3f));
+
+        if (height < minTrunkHeight)
+            height = minTrunkHeight;
+
+        for (int i = 1; i <= height; i++)
+        {
+            queue.Enqueue(new HexMod(new Vector3(position.x, position.y + i, position.z), 6));
+        }
+
+        return queue;
+    }
 }

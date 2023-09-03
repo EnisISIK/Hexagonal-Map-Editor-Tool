@@ -4,7 +4,7 @@ using UnityEngine;
 
 public static class Noise
 {
-    public static float [,] GenerateNoiseMap(int mapWidth, int mapHeight, float scale)
+    public static float [,] GenerateNoiseMap(int mapWidth, int mapHeight, float offset,float scale, float octaves, float persistance, float lacunarity)
     {
         float[,] noiseMap = new float[mapWidth, mapHeight];
 
@@ -13,15 +13,48 @@ public static class Noise
             scale = 0.0001f;
         }
 
-        for(int y = 0; y < mapHeight; y++)
+        float maxNoiseHeight = float.MinValue;
+        float minNoiseHeight = float.MaxValue;
+
+        for (int y = 0; y < mapHeight; y++)
         {
             for(int x = 0; x < mapWidth; x++)
             {
-                float sampleX = x / scale;
-                float sampleY = y / scale;
+                
+                float amplitude = 1;
+                float frequency = 1;
+                float noiseHeight = 0;
 
-                float perlinValue = Mathf.PerlinNoise(sampleX, sampleY);
-                noiseMap[x, y] = perlinValue;
+                for (int i = 0; i < octaves; i++)
+                {
+                    float sampleX = (x + 0.1f) / scale * frequency + offset;
+                    float sampleY = (y + 0.1f) / scale * frequency + offset;
+
+                    float perlinValue = Mathf.PerlinNoise(sampleX, sampleY) * 2 - 1;
+                    noiseHeight += perlinValue * amplitude;
+
+                    amplitude *= persistance;
+                    frequency *= lacunarity;
+                }
+
+                if(noiseHeight > maxNoiseHeight)
+                {
+                    maxNoiseHeight = noiseHeight;
+                }
+                else if(noiseHeight< minNoiseHeight)
+                {
+                    minNoiseHeight = noiseHeight;
+                }
+
+                noiseMap[x, y] = noiseHeight;
+            }
+        }
+
+        for(int y =0; y<mapHeight;y++)
+        {
+            for (int x = 0; x < mapWidth; x++)
+            {
+                noiseMap[x, y] = Mathf.InverseLerp(minNoiseHeight, maxNoiseHeight, noiseMap[x, y]);
             }
         }
 
@@ -31,7 +64,28 @@ public static class Noise
     {
         return Mathf.PerlinNoise((position.x+0.1f)/HexData.ChunkWidth*scale+offset, (position.y + 0.1f) / HexData.ChunkWidth * scale + offset);
     }
-    
+    public static float Generate2DPerlin(Vector2 position,float offset, float scale, float octaves, float persistance, float lacunarity)
+    {
+        float perlinValue;
+        float amplitude = 1;
+        float frequency = 1;
+        float noiseValue = 0;
+
+        for(int i = 0; i < octaves; i++)
+        {
+            float sampleX = (position.x+0.1f) / HexData.ChunkWidth * scale * frequency + offset;
+            float sampleY = (position.y+0.1f) / HexData.ChunkWidth * scale * frequency + offset;
+
+            perlinValue = Mathf.PerlinNoise(sampleX, sampleY) * 2 - 1;
+            noiseValue += perlinValue * amplitude;
+
+            amplitude *= persistance;
+            frequency *= lacunarity;
+        }
+
+        return noiseValue;
+    }
+
     public static bool Get3DPerlin(Vector3 position, float offset,float scale, float threshold)
     {
         float x = (position.x + offset + 0.1f) * scale;

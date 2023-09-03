@@ -111,68 +111,7 @@ public class Chunk
 				{
 					for (int x = 0; x < HexData.ChunkWidth; x++)
 					{
-						Vector3 pos = new Vector3(x, y, z) + chunkPos;
-
-						int yPos = Mathf.FloorToInt(pos.y);
-						byte voxelValue;
-
-						if (!(pos.y >= 0 && pos.y < HexData.ChunkHeight))
-						{
-							voxelValue = 0;
-							continue;
-						}
-
-						/* Basic Terrain Pass*/
-						int terrainHeight = Mathf.FloorToInt(world.biome.terrainHeight * Noise.Get2DPerlin(new Vector2(pos.x, pos.z), 0, world.biome.terrainScale) + world.biome.solidGroundHeight);
-
-						if (yPos == terrainHeight)
-						{
-							voxelValue = 2;
-						}
-						else if (yPos < terrainHeight && yPos > terrainHeight - 4)
-						{
-							voxelValue = 4;
-						}
-						else if (yPos > terrainHeight)
-						{
-							voxelValue = 0;
-						}
-						else
-						{
-							voxelValue = 1;
-						}
-
-						/*Second Pass*/
-
-						if (voxelValue == 1)
-						{
-							foreach (Lode lode in world.biome.lodes)
-							{
-								if (yPos > lode.minHeight && yPos < lode.maxHeight)
-								{
-									if (Noise.Get3DPerlin(pos, lode.noiseOffset, lode.scale, lode.threshold))
-									{
-										voxelValue = lode.blockID;
-									}
-								}
-							}
-						}
-						if (yPos == terrainHeight)
-						{
-
-							if (Noise.Get2DPerlin(new Vector2(pos.x, pos.z), 0, world.biome.treeZoneScale) > world.biome.treeZoneThreshold)
-							{
-
-								if (Noise.Get2DPerlin(new Vector2(pos.x, pos.z), 0, world.biome.treePlacementScale) > world.biome.treePlacementThreshold)
-								{
-									ConcurrentQueue<HexMod> structure = Structure.MakeTree(pos, world.biome.minTreeHeight, world.biome.maxTreeHeight);
-									world.modifications.Enqueue(structure);
-								}
-							}
-
-						}
-
-						tempData[x, y, z] = voxelValue;
+						tempData[x, y, z] = world.GetHex(new Vector3(x, y, z) + chunkPos);
 					}
 				}
 			}
