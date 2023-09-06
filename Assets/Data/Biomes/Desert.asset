@@ -20,6 +20,9 @@ MonoBehaviour:
   terrainScale: 0.05
   surfaceBlock: 7
   subSurfaceBlock: 7
+  strength: 6
+  roughness: 1
+  centre: 1
   floraIndex: 1
   floraZoneScale: 1.06
   floraZoneThreshold: 0.75

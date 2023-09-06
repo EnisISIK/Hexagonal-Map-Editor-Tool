@@ -440,7 +440,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   seed: 0
   biomes:
-  - {fileID: 11400000, guid: c20aa5343402e3c4d9209446ad924795, type: 2}
+  - {fileID: 11400000, guid: 70244107e2f8e6942be64cc4fcfa288b, type: 2}
   - {fileID: 11400000, guid: f3b3edc8f63e6a344a5fb13e711e56ee, type: 2}
   - {fileID: 11400000, guid: 1185bc9a992057f408dc55edd4c7561e, type: 2}
   player: {fileID: 1295394191}

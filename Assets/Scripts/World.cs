@@ -43,11 +43,9 @@ public class World : MonoBehaviour
     // FIX: perlin noise is same for values below zero
     // TODO: clean code and turn repeating codes to functions
 
-    float[,] noiseMap = new float[16, 16];
 
     private void Start()
     {
-        noiseMap = Noise.GenerateNoiseMap(16, 16, 23132, 0.25f, 2, 0.5f, 2);
 
         chunksDictionary = new Dictionary<Vector3Int, Chunk>();
         activeChunksDictionary = new Dictionary<Vector2Int, ChunkCoord>();
@@ -270,11 +268,11 @@ public class World : MonoBehaviour
         /* BIOME SELECTION Pass*/
 
         float sumOfHeights = 0f;
-        int count=0;
-        float strongestWeight=0f;
+        int count = 0;
+        float strongestWeight = 0f;
         int strongestBiomeIndex = 0;
 
-        for(int i = 0; i < biomes.Length; i++)
+        /*for(int i = 0; i < biomes.Length; i++)
         {
             float weight = Noise.Get2DPerlin(new Vector2(pos.x, pos.z), biomes[i].offset, biomes[i].scale);
 
@@ -284,7 +282,8 @@ public class World : MonoBehaviour
                 strongestBiomeIndex = i;
             }
 
-            float height = biomes[i].terrainHeight * Noise.Get2DPerlin(new Vector2(pos.x, pos.z), 0, biomes[i].terrainScale)*weight;
+            //float height = biomes[i].terrainHeight * Noise.Get2DPerlin(new Vector2(pos.x, pos.z), 0, biomes[i].terrainScale)*weight;
+            float height = biomes[i].terrainHeight * Noise.EvaluateNoise(new Vector2(pos.x, pos.z), biomes[i].roughness, biomes[i].strength, 0);// * weight;
 
             if (height > 0)
             {
@@ -292,13 +291,35 @@ public class World : MonoBehaviour
                 count++;
             }
 
+        }*/
+
+        BiomeAttributes biome = biomes[0];
+
+        //sumOfHeights /= count;
+        //float myHeight = noiseMap[Mathf.FloorToInt(pos.x-HexData.ChunkWidth), Mathf.FloorToInt(pos.z - HexData.ChunkWidth)];
+        int firstLayerValue = 0;
+        int terrainHeight =42;
+
+        if (biome.noiseSettings.Length > 0)
+        {
+            firstLayerValue = Mathf.RoundToInt(biome.terrainHeight * Noise.EvaluateNoise(new Vector2(pos.x, pos.z), biome.noiseSettings[0].roughness, biome.noiseSettings[0].strength, 0, biome.noiseSettings[0].baseRoughness, biome.noiseSettings[0].numLayers, biome.noiseSettings[0].persistence, biome.noiseSettings[0].minValue, 123145));
+            if (biome.noiseSettings[0].enabled)
+            {
+                terrainHeight += Mathf.RoundToInt(Noise.Map(0, 86, 0, 1, Noise.EvaluateNoise(new Vector2(pos.x, pos.z), biome.noiseSettings[0].roughness, biome.noiseSettings[0].strength, 0, biome.noiseSettings[0].baseRoughness, biome.noiseSettings[0].numLayers, biome.noiseSettings[0].persistence, biome.noiseSettings[0].minValue, 123145)));
+                //terrainHeight += firstLayerValue;
+            }
         }
 
-        BiomeAttributes biome = biomes[strongestBiomeIndex];
+        for (int i = 1; i < biome.noiseSettings.Length; i++)
+        {
+            if (biome.noiseSettings[i].enabled) {
+                int mask = (biome.noiseSettings[i].useFirstLayerAsMask) ? firstLayerValue : 1;
+                terrainHeight += Mathf.FloorToInt(biome.terrainHeight * Noise.EvaluateNoise(new Vector2(pos.x, pos.z), biome.noiseSettings[i].roughness, biome.noiseSettings[i].strength, 0, biome.noiseSettings[i].baseRoughness, biome.noiseSettings[i].numLayers, biome.noiseSettings[i].persistence, biome.noiseSettings[i].minValue, 123145)) * mask;
+            } 
+        }
 
-        sumOfHeights /= count;
-        //float myHeight = noiseMap[Mathf.FloorToInt(pos.x-HexData.ChunkWidth), Mathf.FloorToInt(pos.z - HexData.ChunkWidth)];
-        int terrainHeight = Mathf.FloorToInt(sumOfHeights + biome.solidGroundHeight);
+        terrainHeight = Mathf.Min(terrainHeight, HexData.ChunkHeight-1);
+
         /* Basic Terrain Pass*/
 
         //int terrainHeight = Mathf.FloorToInt(biome.terrainHeight*Noise.Get2DPerlin(new Vector2(pos.x, pos.z), 0 , biome.terrainScale))+biome.solidGroundHeight;

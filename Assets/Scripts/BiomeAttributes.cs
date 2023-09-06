@@ -17,6 +17,18 @@ public class BiomeAttributes : ScriptableObject
     public byte surfaceBlock;
     public byte subSurfaceBlock;
 
+    [Header("Biome Height Attributes")]
+    public float strength=1;
+    public int numLayers = 1;
+    public float baseRoughness = 1;
+    public float roughness = 1;
+    public float persistence = 0.5f;
+    public float minValue;
+    public float centre = 0; //to be Vector 3 later on
+
+    [Header("Noise Settings")]
+    public NoiseSettings[] noiseSettings;
+
     [Header("Major Flora")]
     public int floraIndex;
     public float floraZoneScale = 1.3f;
