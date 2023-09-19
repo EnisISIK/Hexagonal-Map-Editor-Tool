@@ -19,7 +19,7 @@ public static class Noise
         for(int i = 0; i < numLayers; i++)
         {
             float v = Mathf.PerlinNoise((position.x*0.01f) * frequency + centre+ offset, (position.y * 0.01f) * frequency + centre+ offset);
-            noiseValue +=  (v + 1) * 0.5f*amplitude;
+            noiseValue += (v + 1) * 0.5f*amplitude;
 
             maxValue += amplitude;
 
@@ -34,26 +34,44 @@ public static class Noise
     {
         return Mathf.Lerp(newmin, newmax, Mathf.InverseLerp(noiseMin, noiseMax, noiseValue));
     }
-    public static float Generate2DPerlin(Vector2 position,float offset, float scale, float octaves, float persistance, float lacunarity)
+
+    public static float Map01(float newmin, float newmax, float noiseValue)
     {
-        float perlinValue;
-        float amplitude = 1;
+        return Mathf.Lerp(newmin, newmax, Mathf.InverseLerp(0, 1, noiseValue));
+    }
+
+    public static int Map01Int(float newmin, float newmax, float noiseValue)
+    {
+        return (int) Map01(newmin,newmax,noiseValue);
+    }
+    
+    public static float Redistribution(float noise,NoiseSettings settings)
+    {
+        return Mathf.Pow(noise * settings.redistrubitionModifier, settings.exponent); 
+    }
+    public static float OctavePerlin(Vector2 position,NoiseSettings settings)
+    {
+        float x = position.x;
+        float z = position.y;
+        x *= settings.noiseZoom;
+        z *= settings.noiseZoom;
+        x += settings.noiseZoom;
+        z += settings.noiseZoom;
+        float total = 0;
         float frequency = 1;
-        float noiseValue = 0;
-
-        for(int i = 0; i < octaves; i++)
+        float amplitude = 1;
+        float amplitudeSum = 0;
+        for(int i = 0; i < settings.numLayers; i++)
         {
-            float sampleX = (position.x+0.1f) / HexData.ChunkWidth * scale * frequency + offset;
-            float sampleY = (position.y+0.1f) / HexData.ChunkWidth * scale * frequency + offset;
+            total += Mathf.PerlinNoise((settings.offset.x + x) * frequency, (settings.offset.y + z) * frequency) * amplitude;
 
-            perlinValue = Mathf.PerlinNoise(sampleX, sampleY) * 2 - 1;
-            noiseValue += perlinValue * amplitude;
+            amplitudeSum += amplitude;
 
-            amplitude *= persistance;
-            frequency *= lacunarity;
+            amplitude *= settings.persistence;
+            frequency *= 2;
         }
 
-        return noiseValue;
+        return total / amplitudeSum;
     }
 
     public static bool Get3DPerlin(Vector3 position, float offset,float scale, float threshold)

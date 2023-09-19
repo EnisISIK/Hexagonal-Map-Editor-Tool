@@ -3,9 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 
-
-public static class HexPrism
+public static class PositionHelper
 {
+    public static bool IsHexInChunk(float _x, float _y, float _z)
+    {
+        return !(_x < 0 || _x > HexData.ChunkWidth - 1 || _y < 0 || _y > HexData.ChunkHeight - 1 || _z < 0 || _z > HexData.ChunkWidth - 1);
+
+    }
 
     public static Vector3Int GetChunkFromVector3(Vector3 pos)
     {
@@ -14,6 +18,14 @@ public static class HexPrism
         int z = Mathf.FloorToInt(pos.z / HexData.ChunkWidth);
 
         return new Vector3Int(x, 0, z);//call as vector3 for chunksdictionary
+    }
+
+    public static ChunkCoord GetChunkCoordFromVector3(Vector3 pos)
+    {
+
+        int x = Mathf.FloorToInt(pos.x / HexData.ChunkWidth);
+        int z = Mathf.FloorToInt(pos.z / HexData.ChunkWidth);
+        return new ChunkCoord(x, z);
 
     }
 

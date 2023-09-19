@@ -14,4 +14,10 @@ public class NoiseSettings
     public float persistence = 0.5f;
     public float minValue;
     public float centre = 0;
+    public Vector2 offset=new Vector2(0,0);
+
+    public float noiseZoom=1;
+    public float redistrubitionModifier=0;
+    public float exponent=0;
+
 }

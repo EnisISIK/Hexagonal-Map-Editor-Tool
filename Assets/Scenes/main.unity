@@ -150,7 +150,7 @@ Transform:
   m_Children:
   - {fileID: 830521429}
   m_Father: {fileID: 0}
-  m_RootOrder: 6
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &501965286
 GameObject:
@@ -317,7 +317,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 532024676}
   m_CullTransparentMesh: 0
---- !u!1 &671859480
+--- !u!1 &633088129
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -325,90 +325,41 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 671859481}
-  - component: {fileID: 671859484}
-  - component: {fileID: 671859483}
-  - component: {fileID: 671859482}
+  - component: {fileID: 633088131}
+  - component: {fileID: 633088130}
   m_Layer: 0
-  m_Name: Hex Mesh
+  m_Name: TerrainGenerator
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &671859481
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 671859480}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 1112019598}
-  m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &671859482
+--- !u!114 &633088130
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 671859480}
+  m_GameObject: {fileID: 633088129}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b7d30787cfef8184cadd7f495b581621, type: 3}
+  m_Script: {fileID: 11500000, guid: a8b7c59903eef1541bc899946c4d99ef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!23 &671859483
-MeshRenderer:
+--- !u!4 &633088131
+Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 671859480}
-  m_Enabled: 1
-  m_CastShadows: 1
-  m_ReceiveShadows: 1
-  m_DynamicOccludee: 1
-  m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
-  m_RayTracingMode: 2
-  m_RenderingLayerMask: 1
-  m_RendererPriority: 0
-  m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
-  m_StaticBatchInfo:
-    firstSubMesh: 0
-    subMeshCount: 0
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_ReceiveGI: 1
-  m_PreserveUVs: 0
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 3
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 0
---- !u!33 &671859484
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 671859480}
-  m_Mesh: {fileID: 0}
+  m_GameObject: {fileID: 633088129}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 7
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &827900867
 GameObject:
   m_ObjectHideFlags: 0
@@ -419,6 +370,8 @@ GameObject:
   m_Component:
   - component: {fileID: 827900869}
   - component: {fileID: 827900868}
+  - component: {fileID: 827900870}
+  - component: {fileID: 827900871}
   m_Layer: 0
   m_Name: World
   m_TagString: Untagged
@@ -438,17 +391,45 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c757062e244a41643967c66b07ec9115, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  seed: 0
   biomes:
   - {fileID: 11400000, guid: 70244107e2f8e6942be64cc4fcfa288b, type: 2}
   - {fileID: 11400000, guid: f3b3edc8f63e6a344a5fb13e711e56ee, type: 2}
   - {fileID: 11400000, guid: 1185bc9a992057f408dc55edd4c7561e, type: 2}
+  biomeCenters: []
+  biomeNoiseSettings:
+    enabled: 0
+    useFirstLayerAsMask: 0
+    strength: 1
+    numLayers: 1
+    baseRoughness: 1
+    roughness: 1
+    persistence: 0.5
+    minValue: 0
+    centre: 0
+    offset: {x: 50, y: 50}
+    noiseZoom: 0.05
+    redistrubitionModifier: 1.2
+    exponent: 5
+  domainWarping: {fileID: 827900870}
+  biomeDomainWarping: {fileID: 827900871}
+  biomeAttributesData:
+  - temperatureStartThreshold: 0
+    temperatureEndThreshold: 0.5
+    Biome: {fileID: 0}
+  - temperatureStartThreshold: 0.5
+    temperatureEndThreshold: 1
+    Biome: {fileID: 0}
   player: {fileID: 1295394191}
   spawnPosition: {x: 0, y: 0, z: 0}
   material: {fileID: 2100000, guid: 5c06fc5a7d893244b8cd1c6c268ab79d, type: 2}
+  transparentMaterial: {fileID: 2100000, guid: bc8e15b7747a98040bea722e81313eab, type: 2}
+  waterMaterial: {fileID: 2100000, guid: f59fac318de8c62408e897ebef60dace, type: 2}
   blocktypes:
-  - blockName: Air
+  - blockTypeName: 1
+    blockName: Air
     isSolid: 0
+    isTransparent: 1
+    isWater: 0
     topFaceTexture: 7
     bottomFaceTexture: 7
     rightFaceTexture: 7
@@ -457,8 +438,11 @@ MonoBehaviour:
     frontleftFaceTexture: 7
     backrightFaceTexture: 7
     backleftFaceTexture: 7
-  - blockName: Stone
+  - blockTypeName: 5
+    blockName: Stone
     isSolid: 1
+    isTransparent: 0
+    isWater: 0
     topFaceTexture: 0
     bottomFaceTexture: 0
     rightFaceTexture: 0
@@ -467,8 +451,11 @@ MonoBehaviour:
     frontleftFaceTexture: 0
     backrightFaceTexture: 0
     backleftFaceTexture: 0
-  - blockName: Grass
+  - blockTypeName: 2
+    blockName: Grass
     isSolid: 1
+    isTransparent: 0
+    isWater: 0
     topFaceTexture: 7
     bottomFaceTexture: 1
     rightFaceTexture: 2
@@ -477,8 +464,11 @@ MonoBehaviour:
     frontleftFaceTexture: 2
     backrightFaceTexture: 2
     backleftFaceTexture: 2
-  - blockName: Wood
+  - blockTypeName: 6
+    blockName: Wood
     isSolid: 1
+    isTransparent: 0
+    isWater: 0
     topFaceTexture: 6
     bottomFaceTexture: 6
     rightFaceTexture: 5
@@ -487,8 +477,11 @@ MonoBehaviour:
     frontleftFaceTexture: 5
     backrightFaceTexture: 5
     backleftFaceTexture: 5
-  - blockName: Dirt
+  - blockTypeName: 3
+    blockName: Dirt
     isSolid: 1
+    isTransparent: 0
+    isWater: 0
     topFaceTexture: 1
     bottomFaceTexture: 1
     rightFaceTexture: 1
@@ -497,8 +490,11 @@ MonoBehaviour:
     frontleftFaceTexture: 1
     backrightFaceTexture: 1
     backleftFaceTexture: 1
-  - blockName: Coal
+  - blockTypeName: 4
+    blockName: Coal
     isSolid: 1
+    isTransparent: 0
+    isWater: 0
     topFaceTexture: 9
     bottomFaceTexture: 9
     rightFaceTexture: 9
@@ -507,8 +503,11 @@ MonoBehaviour:
     frontleftFaceTexture: 9
     backrightFaceTexture: 9
     backleftFaceTexture: 9
-  - blockName: Leaves
+  - blockTypeName: 7
+    blockName: Leaves
     isSolid: 1
+    isTransparent: 1
+    isWater: 0
     topFaceTexture: 16
     bottomFaceTexture: 16
     rightFaceTexture: 16
@@ -517,8 +516,11 @@ MonoBehaviour:
     frontleftFaceTexture: 16
     backrightFaceTexture: 16
     backleftFaceTexture: 16
-  - blockName: Sand
+  - blockTypeName: 10
+    blockName: Sand
     isSolid: 1
+    isTransparent: 0
+    isWater: 0
     topFaceTexture: 10
     bottomFaceTexture: 10
     rightFaceTexture: 10
@@ -527,6 +529,32 @@ MonoBehaviour:
     frontleftFaceTexture: 10
     backrightFaceTexture: 10
     backleftFaceTexture: 10
+  - blockTypeName: 9
+    blockName: Water
+    isSolid: 1
+    isTransparent: 1
+    isWater: 1
+    topFaceTexture: 17
+    bottomFaceTexture: 17
+    rightFaceTexture: 17
+    leftFaceTexture: 17
+    frontrightFaceTexture: 17
+    frontleftFaceTexture: 17
+    backrightFaceTexture: 17
+    backleftFaceTexture: 17
+  - blockTypeName: 10
+    blockName: Glass
+    isSolid: 1
+    isTransparent: 1
+    isWater: 0
+    topFaceTexture: 3
+    bottomFaceTexture: 3
+    rightFaceTexture: 3
+    leftFaceTexture: 3
+    frontrightFaceTexture: 3
+    frontleftFaceTexture: 3
+    backrightFaceTexture: 3
+    backleftFaceTexture: 3
   debugScreen: {fileID: 501965286}
   isUpdatingChunks: 0
 --- !u!4 &827900869
@@ -541,8 +569,92 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &827900870
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 827900867}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2355584d9b23c5a4d882095287454db9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  noiseDomainX:
+    enabled: 1
+    useFirstLayerAsMask: 0
+    strength: 1
+    numLayers: 3
+    baseRoughness: 1
+    roughness: 1
+    persistence: 0.5
+    minValue: 0
+    centre: 0
+    offset: {x: 900, y: 1500}
+    noiseZoom: 0.01
+    redistrubitionModifier: 1.2
+    exponent: 5
+  noiseDomainY:
+    enabled: 1
+    useFirstLayerAsMask: 0
+    strength: 1
+    numLayers: 3
+    baseRoughness: 1
+    roughness: 1
+    persistence: 0.5
+    minValue: 0
+    centre: 0
+    offset: {x: 600, y: 350}
+    noiseZoom: 0.01
+    redistrubitionModifier: 1.2
+    exponent: 5
+  amplitudex: 80
+  amplitudey: 80
+--- !u!114 &827900871
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 827900867}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2355584d9b23c5a4d882095287454db9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  noiseDomainX:
+    enabled: 1
+    useFirstLayerAsMask: 0
+    strength: 1
+    numLayers: 3
+    baseRoughness: 1
+    roughness: 1
+    persistence: 0.5
+    minValue: 0
+    centre: 0
+    offset: {x: 900, y: 1500}
+    noiseZoom: 0.01
+    redistrubitionModifier: 1.2
+    exponent: 5
+  noiseDomainY:
+    enabled: 1
+    useFirstLayerAsMask: 0
+    strength: 1
+    numLayers: 3
+    baseRoughness: 1
+    roughness: 1
+    persistence: 0.5
+    minValue: 0
+    centre: 0
+    offset: {x: 600, y: 350}
+    noiseZoom: 0.01
+    redistrubitionModifier: 1.2
+    exponent: 5
+  amplitudex: 20
+  amplitudey: 20
 --- !u!1 &830521428
 GameObject:
   m_ObjectHideFlags: 0
@@ -803,54 +915,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 984912768}
   m_CullTransparentMesh: 0
---- !u!1 &1112019596
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1112019598}
-  - component: {fileID: 1112019597}
-  m_Layer: 0
-  m_Name: HexGrid
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!114 &1112019597
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1112019596}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d7a3d055149a332418d5b14b91f3bd25, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  width: 6
-  height: 6
-  cellPrefab: {fileID: 1987226021592546894, guid: a1a25b29a215c2145a396f8bcbc3be19,
-    type: 3}
---- !u!4 &1112019598
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1112019596}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.045713164, y: 4.8118057, z: 0.7271069}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children:
-  - {fileID: 671859481}
-  m_Father: {fileID: 0}
-  m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1157337049
 GameObject:
   m_ObjectHideFlags: 0
@@ -915,7 +979,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 4
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1295394189
 GameObject:
@@ -973,7 +1037,7 @@ Transform:
   m_Children:
   - {fileID: 1616302746}
   m_Father: {fileID: 0}
-  m_RootOrder: 7
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1463929241
 GameObject:
@@ -1004,7 +1068,7 @@ Transform:
   m_Children:
   - {fileID: 955396058}
   m_Father: {fileID: 0}
-  m_RootOrder: 5
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1616302742
 GameObject:
@@ -1050,8 +1114,8 @@ Camera:
   m_GameObject: {fileID: 1616302742}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_ClearFlags: 2
+  m_BackGroundColor: {r: 0.48420256, g: 0.6370965, b: 0.8773585, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -1329,7 +1393,7 @@ RectTransform:
   - {fileID: 501965287}
   - {fileID: 1763642425}
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}

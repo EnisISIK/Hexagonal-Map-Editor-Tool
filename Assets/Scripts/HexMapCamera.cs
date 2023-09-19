@@ -38,13 +38,13 @@ public class HexMapCamera : MonoBehaviour
 			// Destroy block.
 			if (Input.GetMouseButtonDown(1)){
 
-				Vector3 destroyPos = HexPrism.PixelToHex(highlightBlock.position);
+				Vector3 destroyPos = PositionHelper.PixelToHex(highlightBlock.position);
 				world.GetChunkFromChunkVector3(destroyPos).EditHex(destroyPos, 0);  //şimdidide raycastta bir problem var onu çöz tamamdır
-				Debug.Log(HexPrism.PixelToHex(highlightBlock.position));
+				Debug.Log(PositionHelper.PixelToHex(highlightBlock.position));
 			}
 			// Place block.
 			if (Input.GetMouseButtonDown(0)){
-				Vector3 placePos = HexPrism.PixelToHex(placeBlock.position);
+				Vector3 placePos = PositionHelper.PixelToHex(placeBlock.position);
 				world.GetChunkFromChunkVector3(placePos).EditHex(placePos, 1);
 			}
 		}
@@ -117,7 +117,7 @@ public class HexMapCamera : MonoBehaviour
 		while (step < reach)
 		{
 			Vector3 pos = cam.position + (cam.forward * step);
-			Vector3 checkPos = HexPrism.PixelToHex(pos);
+			Vector3 checkPos = PositionHelper.PixelToHex(pos);
 
 			if (world.CheckForHex(checkPos))
 			{

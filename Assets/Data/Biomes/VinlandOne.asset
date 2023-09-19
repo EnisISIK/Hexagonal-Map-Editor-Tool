@@ -31,12 +31,16 @@ MonoBehaviour:
   - enabled: 1
     useFirstLayerAsMask: 0
     strength: 1
-    numLayers: 4
-    baseRoughness: 1.21
-    roughness: 2
+    numLayers: 5
+    baseRoughness: 1
+    roughness: 1
     persistence: 0.5
     minValue: 0
     centre: 1
+    offset: {x: -100, y: 3400}
+    noiseZoom: 0.01
+    redistrubitionModifier: 1.2
+    exponent: 5
   - enabled: 0
     useFirstLayerAsMask: 0
     strength: 2
@@ -46,6 +50,10 @@ MonoBehaviour:
     persistence: 0.54
     minValue: 1.58
     centre: 0
+    offset: {x: 0, y: 0}
+    noiseZoom: 0
+    redistrubitionModifier: 0
+    exponent: 0
   floraIndex: 0
   floraZoneScale: 1.3
   floraZoneThreshold: 0.6

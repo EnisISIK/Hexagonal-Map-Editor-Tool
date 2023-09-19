@@ -144,16 +144,16 @@ public class Player : MonoBehaviour
             // Destroy block.
             if (Input.GetMouseButtonDown(0)&&!world.isUpdatingChunks){
 
-                Vector3 destroyPos = HexPrism.PixelToHex(highlightBlock.position);
+                Vector3 destroyPos = PositionHelper.PixelToHex(highlightBlock.position);
                 world.GetChunkFromChunkVector3(destroyPos).EditHex(destroyPos, 0);
-                Debug.Log(HexPrism.PixelToHex(highlightBlock.position));
+                Debug.Log(PositionHelper.PixelToHex(highlightBlock.position));
             }
             //destroy block positionu biraz kayık bir yandakini falan yokediyor bazen
 
             // Place block.
             if (Input.GetMouseButtonDown(1)&&!world.isUpdatingChunks) {
 
-                Vector3 placePos = HexPrism.PixelToHex(placeBlock.position);
+                Vector3 placePos = PositionHelper.PixelToHex(placeBlock.position);
                 world.GetChunkFromChunkVector3(placePos).EditHex(placePos, selectedBlockIndex);
             }
         }
@@ -170,7 +170,7 @@ public class Player : MonoBehaviour
         {
 
             Vector3 pos = cam.position + (cam.forward * step);
-            Vector3 checkPos = HexPrism.PixelToHex(pos);
+            Vector3 checkPos = PositionHelper.PixelToHex(pos);
 
             if (world.CheckForHex(checkPos))
             {
@@ -200,10 +200,10 @@ public class Player : MonoBehaviour
     {
 
         if (
-            world.CheckForHex(HexPrism.PixelToHex(new Vector3(transform.position.x - playerWidth, transform.position.y + downSpeed, transform.position.z - playerWidth))) ||
-            world.CheckForHex(HexPrism.PixelToHex(new Vector3(transform.position.x + playerWidth, transform.position.y + downSpeed, transform.position.z - playerWidth))) ||
-            world.CheckForHex(HexPrism.PixelToHex(new Vector3(transform.position.x + playerWidth, transform.position.y + downSpeed, transform.position.z + playerWidth)))||
-            world.CheckForHex(HexPrism.PixelToHex(new Vector3(transform.position.x - playerWidth, transform.position.y + downSpeed, transform.position.z + playerWidth)))
+            world.CheckForHex(PositionHelper.PixelToHex(new Vector3(transform.position.x - playerWidth, transform.position.y + downSpeed, transform.position.z - playerWidth))) ||
+            world.CheckForHex(PositionHelper.PixelToHex(new Vector3(transform.position.x + playerWidth, transform.position.y + downSpeed, transform.position.z - playerWidth))) ||
+            world.CheckForHex(PositionHelper.PixelToHex(new Vector3(transform.position.x + playerWidth, transform.position.y + downSpeed, transform.position.z + playerWidth)))||
+            world.CheckForHex(PositionHelper.PixelToHex(new Vector3(transform.position.x - playerWidth, transform.position.y + downSpeed, transform.position.z + playerWidth)))
            )
         {
 
@@ -225,10 +225,10 @@ public class Player : MonoBehaviour
     {
 
         if (
-            world.CheckForHex(HexPrism.PixelToHex(new Vector3(transform.position.x - playerWidth, transform.position.y + 2f + upSpeed, transform.position.z - playerWidth))) ||
-            world.CheckForHex(HexPrism.PixelToHex(new Vector3(transform.position.x + playerWidth, transform.position.y + 2f + upSpeed, transform.position.z - playerWidth))) ||
-            world.CheckForHex(HexPrism.PixelToHex(new Vector3(transform.position.x + playerWidth, transform.position.y + 2f + upSpeed, transform.position.z + playerWidth))) ||
-            world.CheckForHex(HexPrism.PixelToHex(new Vector3(transform.position.x - playerWidth, transform.position.y + 2f + upSpeed, transform.position.z + playerWidth)))
+            world.CheckForHex(PositionHelper.PixelToHex(new Vector3(transform.position.x - playerWidth, transform.position.y + 2f + upSpeed, transform.position.z - playerWidth))) ||
+            world.CheckForHex(PositionHelper.PixelToHex(new Vector3(transform.position.x + playerWidth, transform.position.y + 2f + upSpeed, transform.position.z - playerWidth))) ||
+            world.CheckForHex(PositionHelper.PixelToHex(new Vector3(transform.position.x + playerWidth, transform.position.y + 2f + upSpeed, transform.position.z + playerWidth))) ||
+            world.CheckForHex(PositionHelper.PixelToHex(new Vector3(transform.position.x - playerWidth, transform.position.y + 2f + upSpeed, transform.position.z + playerWidth)))
            )
         {
 
@@ -250,8 +250,8 @@ public class Player : MonoBehaviour
         get
         {
             if (
-                world.CheckForHex(HexPrism.PixelToHex(new Vector3(transform.position.x, transform.position.y, transform.position.z + playerWidth))) ||
-                world.CheckForHex(HexPrism.PixelToHex(new Vector3(transform.position.x, transform.position.y + 1f, transform.position.z + playerWidth)))
+                world.CheckForHex(PositionHelper.PixelToHex(new Vector3(transform.position.x, transform.position.y, transform.position.z + playerWidth))) ||
+                world.CheckForHex(PositionHelper.PixelToHex(new Vector3(transform.position.x, transform.position.y + 1f, transform.position.z + playerWidth)))
                 )
                 return true;
             else
@@ -265,8 +265,8 @@ public class Player : MonoBehaviour
         get
         {
             if (
-                world.CheckForHex(HexPrism.PixelToHex(new Vector3(transform.position.x, transform.position.y, transform.position.z - playerWidth))) ||
-                world.CheckForHex(HexPrism.PixelToHex(new Vector3(transform.position.x, transform.position.y + 1f, transform.position.z - playerWidth)))
+                world.CheckForHex(PositionHelper.PixelToHex(new Vector3(transform.position.x, transform.position.y, transform.position.z - playerWidth))) ||
+                world.CheckForHex(PositionHelper.PixelToHex(new Vector3(transform.position.x, transform.position.y + 1f, transform.position.z - playerWidth)))
                 )
                 return true;
             else
@@ -280,8 +280,8 @@ public class Player : MonoBehaviour
         get
         {
             if (
-                world.CheckForHex(HexPrism.PixelToHex(new Vector3(transform.position.x - playerWidth, transform.position.y, transform.position.z))) ||
-                world.CheckForHex(HexPrism.PixelToHex(new Vector3(transform.position.x - playerWidth, transform.position.y + 1f, transform.position.z)))
+                world.CheckForHex(PositionHelper.PixelToHex(new Vector3(transform.position.x - playerWidth, transform.position.y, transform.position.z))) ||
+                world.CheckForHex(PositionHelper.PixelToHex(new Vector3(transform.position.x - playerWidth, transform.position.y + 1f, transform.position.z)))
                 )
                 return true;
             else
@@ -295,8 +295,8 @@ public class Player : MonoBehaviour
         get
         {
             if (
-                world.CheckForHex(HexPrism.PixelToHex(new Vector3(transform.position.x + playerWidth, transform.position.y, transform.position.z))) ||
-                world.CheckForHex(HexPrism.PixelToHex(new Vector3(transform.position.x + playerWidth, transform.position.y + 1f, transform.position.z)))
+                world.CheckForHex(PositionHelper.PixelToHex(new Vector3(transform.position.x + playerWidth, transform.position.y, transform.position.z))) ||
+                world.CheckForHex(PositionHelper.PixelToHex(new Vector3(transform.position.x + playerWidth, transform.position.y + 1f, transform.position.z)))
                 )
                 return true;
             else
