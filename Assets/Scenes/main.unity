@@ -317,49 +317,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 532024676}
   m_CullTransparentMesh: 0
---- !u!1 &633088129
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 633088131}
-  - component: {fileID: 633088130}
-  m_Layer: 0
-  m_Name: TerrainGenerator
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &633088130
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 633088129}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a8b7c59903eef1541bc899946c4d99ef, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!4 &633088131
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 633088129}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 7
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &827900867
 GameObject:
   m_ObjectHideFlags: 0
@@ -406,7 +363,7 @@ MonoBehaviour:
     persistence: 0.5
     minValue: 0
     centre: 0
-    offset: {x: 50, y: 50}
+    offset: {x: 750, y: 2000}
     noiseZoom: 0.05
     redistrubitionModifier: 1.2
     exponent: 5
@@ -415,10 +372,10 @@ MonoBehaviour:
   biomeAttributesData:
   - temperatureStartThreshold: 0
     temperatureEndThreshold: 0.5
-    Biome: {fileID: 0}
+    Biome: {fileID: 11400000, guid: 70244107e2f8e6942be64cc4fcfa288b, type: 2}
   - temperatureStartThreshold: 0.5
     temperatureEndThreshold: 1
-    Biome: {fileID: 0}
+    Biome: {fileID: 11400000, guid: f3b3edc8f63e6a344a5fb13e711e56ee, type: 2}
   player: {fileID: 1295394191}
   spawnPosition: {x: 0, y: 0, z: 0}
   material: {fileID: 2100000, guid: 5c06fc5a7d893244b8cd1c6c268ab79d, type: 2}
@@ -531,7 +488,7 @@ MonoBehaviour:
     backleftFaceTexture: 10
   - blockTypeName: 9
     blockName: Water
-    isSolid: 1
+    isSolid: 0
     isTransparent: 1
     isWater: 1
     topFaceTexture: 17
@@ -653,8 +610,8 @@ MonoBehaviour:
     noiseZoom: 0.01
     redistrubitionModifier: 1.2
     exponent: 5
-  amplitudex: 20
-  amplitudey: 20
+  amplitudex: 90
+  amplitudey: 50
 --- !u!1 &830521428
 GameObject:
   m_ObjectHideFlags: 0

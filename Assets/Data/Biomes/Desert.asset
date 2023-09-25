@@ -21,8 +21,26 @@ MonoBehaviour:
   surfaceBlock: 7
   subSurfaceBlock: 7
   strength: 6
+  numLayers: 1
+  baseRoughness: 1
   roughness: 1
+  persistence: 0.5
+  minValue: 0
   centre: 1
+  noiseSettings:
+  - enabled: 1
+    useFirstLayerAsMask: 0
+    strength: 1
+    numLayers: 4
+    baseRoughness: 1
+    roughness: 1
+    persistence: 0.5
+    minValue: 0
+    centre: 1
+    offset: {x: 100, y: 2200}
+    noiseZoom: 0.01
+    redistrubitionModifier: 1.2
+    exponent: 5
   floraIndex: 1
   floraZoneScale: 1.06
   floraZoneThreshold: 0.75

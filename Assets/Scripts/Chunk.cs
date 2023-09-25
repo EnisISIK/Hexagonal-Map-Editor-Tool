@@ -22,7 +22,7 @@ public class Chunk
 	public Queue<HexMod> modifications = new Queue<HexMod>();
 
 	private ChunkCoord chunkCoordinates;
-	private Vector3Int position;
+	public Vector3Int position;
 
 	private bool _isActive;
 	public bool isHexMapPopulated = false;
@@ -47,7 +47,7 @@ public class Chunk
 
 	}
 
-	public void Init()
+	public void Init(byte[,,] data)
     {
 		chunkObject = new GameObject();
 		meshFilter = chunkObject.AddComponent<MeshFilter>();
@@ -64,19 +64,13 @@ public class Chunk
 		position = Vector3Int.FloorToInt(chunkObject.transform.position);
 
 		_chunkMeshRenderer = new ChunkMeshRenderer(_world, position);
-		_chunkDataGenerator = new ChunkDataGenerator(_world);
+		//_chunkDataGenerator = new ChunkDataGenerator(_world);
+		hexMap = data;
 		_world.StartCoroutine(PopulateHexMap());
 	}
 
-	private IEnumerator PopulateHexMap()
+	public IEnumerator PopulateHexMap()
     {
-
-        if (hexMap == null)
-        {
-			_world.StartCoroutine(_chunkDataGenerator.GenerateData(position, x => hexMap = x));
-			yield return new WaitUntil(() => hexMap != null);
-
-        }
 
 		isHexMapPopulated = true;
 
@@ -196,6 +190,8 @@ public class Chunk
 					for (int x = 0; x < HexData.ChunkWidth; x++)
 					{
 						if (_world.blocktypes[hexMap[x, (int)y, z]].isSolid)
+							AddHexCell(x, y, z);
+						else if(!_world.blocktypes[hexMap[x, (int)y, z]].isSolid&& _world.blocktypes[hexMap[x, (int)y, z]].isWater)
 							AddHexCell(x, y, z);
 					}
 				}

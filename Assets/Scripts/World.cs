@@ -8,6 +8,7 @@ using System;
 
 public class World : MonoBehaviour
 {
+    private ChunkDataGenerator _chunkDataGenerator;
     public BiomeAttributes[] biomes;
 
     [SerializeField]
@@ -42,7 +43,7 @@ public class World : MonoBehaviour
 
     public ChunkCoord playerCurrentChunkCoord;
     ChunkCoord playerLastChunkCoord;
-    List<ChunkCoord> chunksToCreate= new List<ChunkCoord>();
+    HashSet<ChunkCoord> chunksToCreate= new HashSet<ChunkCoord>();
 
     public ConcurrentQueue<Chunk> chunksToUpdate = new ConcurrentQueue<Chunk>();
 
@@ -59,7 +60,7 @@ public class World : MonoBehaviour
 
     private void Start()
     {
-
+        _chunkDataGenerator = new ChunkDataGenerator(this,biomeAttributesData,domainWarping,biomeDomainWarping);
         chunksDictionary = new Dictionary<Vector3Int, Chunk>();
         chunksDataDictionary = new Dictionary<Vector3Int, byte[,,]>();
         activeChunksDictionary = new Dictionary<Vector2Int, ChunkCoord>();
@@ -108,11 +109,17 @@ public class World : MonoBehaviour
         while (chunksToUpdate.Count > 0)
         {
             if (chunksToUpdate.TryPeek(out Chunk var))
-                if (var.isHexMapPopulated)
-                    if (chunksToUpdate.TryDequeue(out Chunk var1)) { 
+                if (chunksDataDictionary.ContainsKey(var.position/HexData.ChunkWidth))
+                {
+                    Vector3Int chunkPos = PositionHelper.GetChunkFromVector3(var.position);
+                    if (!chunksDataDictionary.ContainsKey(chunkPos))
+                        chunksDataDictionary.Add(chunkPos, chunksDictionary[chunkPos].hexMap);
+                    if (chunksToUpdate.TryDequeue(out Chunk var1))
+                    {
                         StartCoroutine(var1.UpdateChunk());
                         yield return null;
                     }
+                }
         }
         isUpdatingChunks = false;
     }
@@ -132,9 +139,9 @@ public class World : MonoBehaviour
 
                 ChunkCoord c = PositionHelper.GetChunkCoordFromVector3(v.position);
 
-                if (chunksDictionary.ContainsKey(new Vector3Int(c.x,0,c.z)))
+                if (chunksDictionary.TryGetValue(new Vector3Int(c.x, 0, c.z), out Chunk var))
                 {
-                    chunksDictionary[new Vector3Int(c.x, 0, c.z)].modifications.Enqueue(v);
+                    var.modifications.Enqueue(v);
                 }
 
 
@@ -150,12 +157,37 @@ public class World : MonoBehaviour
 
         while (chunksToCreate.Count > 0)
         {
-            chunksDictionary[new Vector3Int(chunksToCreate[0].x, 0, chunksToCreate[0].z)].Init();
-            chunksToCreate.RemoveAt(0);
+            HashSet<ChunkCoord> chunksToCreateCopy = new HashSet<ChunkCoord>(chunksToCreate);
+            foreach (ChunkCoord chunkPos in chunksToCreateCopy) {
+                if (chunksDataDictionary.ContainsKey(new Vector3Int(chunkPos.x, 0, chunkPos.z))) { 
+
+                    chunksDictionary[new Vector3Int(chunkPos.x, 0, chunkPos.z)].Init(chunksDataDictionary[new Vector3Int(chunkPos.x, 0, chunkPos.z)]);
+                    chunksToCreate.Remove(chunkPos);
+                }
+            }
             yield return null;
         }
         isCreatingChunks = false;
     }
+
+    private void Populate(Vector3Int chunkPos)
+    {
+        StartCoroutine(PopulateCoroutine(chunkPos));
+    }
+
+    private IEnumerator PopulateCoroutine(Vector3Int chunkPos)
+    {
+        byte[,,] tmpData=null;
+        if (tmpData == null)
+        {
+            StartCoroutine(_chunkDataGenerator.GenerateData(chunkPos*HexData.ChunkWidth, biomeCenters, biomeNoise, x => tmpData = x));
+            yield return new WaitUntil(() => tmpData != null);
+
+        }
+        if (!chunksDataDictionary.ContainsKey(chunkPos))
+            chunksDataDictionary.Add(chunkPos, tmpData);
+    }
+
     public byte[,,] RequestChunk(Vector3 chunkPos)
     {
         Vector3Int coord = PositionHelper.GetChunkFromVector3(chunkPos);
@@ -180,17 +212,30 @@ public class World : MonoBehaviour
         List<ChunkCoord> previouslyActiveChunks = new List<ChunkCoord>(activeChunks);
 
         activeChunks.Clear();
+        for (int x = coord.x - HexData.ViewDistanceinChunks-1; x < coord.x + HexData.ViewDistanceinChunks+1; x++)
+        {
+            for (int z = coord.z - HexData.ViewDistanceinChunks-1; z < coord.z + HexData.ViewDistanceinChunks+1; z++)
+            {
+                Vector3Int chunkPos = new Vector3Int(x, 0, z);
+                if (chunksDataDictionary.ContainsKey(chunkPos)) continue;
+                
+                Populate(chunkPos);
+            }
+        }
 
         for (int x = coord.x - HexData.ViewDistanceinChunks; x < coord.x + HexData.ViewDistanceinChunks; x++)
         {
             for (int z = coord.z - HexData.ViewDistanceinChunks; z < coord.z + HexData.ViewDistanceinChunks; z++)
             {
-                if (!chunksDictionary.ContainsKey(new Vector3Int(x, 0, z))){
-                    chunksDictionary.Add(new Vector3Int(x, 0, z), new Chunk(new ChunkCoord(x, z), this));
+                Vector3Int chunkPos = new Vector3Int(x, 0, z);
+                if (!chunksDictionary.TryGetValue(chunkPos, out Chunk var))
+                {
+                    chunksDictionary.Add(chunkPos, new Chunk(new ChunkCoord(x, z), this));
                     chunksToCreate.Add(new ChunkCoord(x, z));
                 }
-                else if (!chunksDictionary[new Vector3Int(x, 0, z)].isActive){
-                    chunksDictionary[new Vector3Int(x, 0, z)].isActive = true;
+                else if (!var.isActive)
+                {
+                    var.isActive = true;
                 }
                 activeChunks.Add(new ChunkCoord(x, z));
 
@@ -206,17 +251,29 @@ public class World : MonoBehaviour
             activeChunks.Remove(new ChunkCoord(_chunk.x, _chunk.z));
         }
     }
+    private Vector3Int GetInChunkPosition(Vector3 pos, Vector3 chunkPos)
+    {
+        int xCheck = Mathf.FloorToInt(pos.x);
+        int yCheck = Mathf.FloorToInt(pos.y);
+        int zCheck = Mathf.FloorToInt(pos.z);
+
+        xCheck -= Mathf.FloorToInt(chunkPos.x*HexData.ChunkWidth);
+        zCheck -= Mathf.FloorToInt(chunkPos.z*HexData.ChunkWidth);
+
+        return new Vector3Int(xCheck, yCheck, zCheck);
+    }
 
     public bool CheckForHex(Vector3 pos)
     {
         ChunkCoord thisChunk = PositionHelper.GetChunkCoordFromVector3(pos);
 
         if (!IsHexInWorld(pos)) return false;
-       
+
         Vector3Int chunkPos = new Vector3Int(thisChunk.x, 0, thisChunk.z);
-        if (chunksDictionary.ContainsKey(chunkPos) && chunksDictionary[chunkPos].isHexMapPopulated) 
+        if (chunksDictionary.ContainsKey(chunkPos) && chunksDataDictionary.TryGetValue(chunkPos,out byte[,,] var))
         {
-            return blocktypes[chunksDictionary[chunkPos].GetHexFromGlobalVector3(pos)].isSolid; 
+            Vector3Int inChunkPos = GetInChunkPosition(pos,chunkPos);
+            return blocktypes[var[inChunkPos.x, inChunkPos.y, inChunkPos.z]].isSolid;
         }
         return blocktypes[GetHex(pos)].isSolid;
     }
@@ -227,10 +284,18 @@ public class World : MonoBehaviour
         if (!IsHexInWorld(pos)) return false;
 
         Vector3Int chunkPos = new Vector3Int(thisChunk.x, 0, thisChunk.z);
-        if (chunksDictionary.ContainsKey(chunkPos) && chunksDictionary[chunkPos].isHexMapPopulated)
+        if (chunksDataDictionary.TryGetValue(chunkPos, out byte[,,] var))
         {
-            return blocktypes[chunksDictionary[chunkPos].GetHexFromGlobalVector3(pos)].isTransparent;
+            Vector3Int inChunkPos = GetInChunkPosition(pos, chunkPos);
+            return blocktypes[var[inChunkPos.x, inChunkPos.y, inChunkPos.z]].isTransparent;
         }
+        if (!chunksDictionary.ContainsKey(chunkPos) && chunksDataDictionary.TryGetValue(chunkPos, out byte[,,] var1))
+        {
+            Vector3Int inChunkPos = GetInChunkPosition(pos, chunkPos);
+            //if (blocktypes[var1[inChunkPos.x, inChunkPos.y, inChunkPos.z]].isTransparent && blocktypes[GetHex(pos)].isTransparent)
+            if (blocktypes[var1[inChunkPos.x, inChunkPos.y, inChunkPos.z]].isTransparent) print("yesbe");
+            else if (blocktypes[GetHex(pos)].isTransparent) print("nobe");
+        } //bak bakalım chunkdatanin viewdistancetan 1 fazla olmasını kullanabiliyor musun gethex yerine
         return blocktypes[GetHex(pos)].isTransparent;
     }
     public bool CheckForWaterHex(Vector3 pos)
@@ -240,9 +305,10 @@ public class World : MonoBehaviour
         if (!IsHexInWorld(pos)) return false;
 
         Vector3Int chunkPos = new Vector3Int(thisChunk.x, 0, thisChunk.z);
-        if (chunksDictionary.ContainsKey(chunkPos) && chunksDictionary[chunkPos].isHexMapPopulated)
+        if (chunksDataDictionary.TryGetValue(chunkPos, out byte[,,] var))
         {
-            return blocktypes[chunksDictionary[chunkPos].GetHexFromGlobalVector3(pos)].isWater;
+            Vector3Int inChunkPos = GetInChunkPosition(pos, chunkPos);
+            return blocktypes[var[inChunkPos.x, inChunkPos.y, inChunkPos.z]].isWater;
         }
         return blocktypes[GetHex(pos)].isWater;
     }
@@ -254,7 +320,7 @@ public class World : MonoBehaviour
 
         for(int i = 0; i<biomeCenters.Count; i++)
         {
-            Vector2Int domainWarpingOffset = biomeDomainWarping.GenerateDomainOffsetInt(biomeCenters[i].x, biomeCenters[i].y);
+            Vector2Int domainWarpingOffset = biomeDomainWarping.GenerateDomainOffsetInt(biomeCenters[i].x, biomeCenters[i].z);
             biomeCenters[i] += new Vector3Int(domainWarpingOffset.x, 0, domainWarpingOffset.y);
         }
 
@@ -265,33 +331,30 @@ public class World : MonoBehaviour
     {
         return biomeCenters.Select(center => Noise.OctavePerlin(new Vector2(center.x, center.z), biomeNoiseSettings)).ToList();
     }
-    public byte GetHex(Vector3 pos)
+    public byte GetHex(Vector3 pos,BiomeSelector biomeSelection=null)
     {
         int yPos = Mathf.FloorToInt(pos.y);
         if (!IsHexInWorld(pos)) return 0;
 
-        /* BIOME SELECTION Pass*/
-
-        //BiomeSelector biomeSelection = SelectBiomeAttributes(pos);
-
-        //BiomeAttributes biome = biomeSelection.biomeAttributes;
-
-
-        //int terrainHeight;
-        //if (biomeSelection.terrainSurfaceNoise.HasValue == false)
-        //{
-        //    terrainHeight = GetSurfaceHeightNoise(pos.x, pos.z, biome);
-        //}
-        //else
-        //{
-        //    terrainHeight = biomeSelection.terrainSurfaceNoise.Value;
-        //}
-        //terrainHeight = GetSurfaceHeightNoise(pos.x, pos.z, biome);
         /* Basic Terrain Pass*/
-
-        BiomeAttributes biome = biomes[0];
-
-        int terrainHeight = GetSurfaceHeightNoise(pos.x, pos.z, biome);
+        int terrainHeight;
+        BiomeAttributes biome;
+        if (biomeSelection != null)
+        {
+            biome = biomeSelection.biomeAttributes;
+            if (biomeSelection.terrainSurfaceNoise.HasValue == false)
+            {
+                terrainHeight = GetSurfaceHeightNoise(pos.x, pos.z, biome);
+            }
+            else
+            {
+                terrainHeight = biomeSelection.terrainSurfaceNoise.Value;
+            }
+        }
+        else { biome = biomes[0];
+            terrainHeight = GetSurfaceHeightNoise(pos.x, pos.z, biome);
+        }
+        //terrainHeight = GetSurfaceHeightNoise(pos.x, pos.z, biome);
 
         byte voxelValue;
 
@@ -305,19 +368,19 @@ public class World : MonoBehaviour
         }
         else if (yPos > terrainHeight)
         {
-            if (yPos <= 7)
-                return 8;
-            else
+            //if (yPos <= 4)
+            //    return 8;
+            //else
                 return 0;
         }
         else
         {
             voxelValue = 1;
         }
-        if (terrainHeight < 7)
-        {
-            voxelValue = 7;
-        }
+        //if (terrainHeight < 4)
+        //{
+        //    voxelValue = 7;
+        //}
         /*Second Pass*/
 
         if(voxelValue == 1)
