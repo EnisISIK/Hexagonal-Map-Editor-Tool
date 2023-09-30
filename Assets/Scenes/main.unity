@@ -357,13 +357,13 @@ MonoBehaviour:
     enabled: 0
     useFirstLayerAsMask: 0
     strength: 1
-    numLayers: 1
+    numLayers: 3
     baseRoughness: 1
     roughness: 1
     persistence: 0.5
     minValue: 0
     centre: 0
-    offset: {x: 750, y: 2000}
+    offset: {x: 0, y: 0}
     noiseZoom: 0.05
     redistrubitionModifier: 1.2
     exponent: 5
@@ -371,11 +371,30 @@ MonoBehaviour:
   biomeDomainWarping: {fileID: 827900871}
   biomeAttributesData:
   - temperatureStartThreshold: 0
-    temperatureEndThreshold: 0.5
+    temperatureEndThreshold: 0.3
+    humidityStartThreshold: 0.6
+    humidityEndThreshold: 1
     Biome: {fileID: 11400000, guid: 70244107e2f8e6942be64cc4fcfa288b, type: 2}
-  - temperatureStartThreshold: 0.5
+  - temperatureStartThreshold: 0.6
     temperatureEndThreshold: 1
+    humidityStartThreshold: 0
+    humidityEndThreshold: 0.6
     Biome: {fileID: 11400000, guid: f3b3edc8f63e6a344a5fb13e711e56ee, type: 2}
+  - temperatureStartThreshold: 0
+    temperatureEndThreshold: 0.3
+    humidityStartThreshold: 0
+    humidityEndThreshold: 0.6
+    Biome: {fileID: 11400000, guid: c9956884b285f354f9c53792b9c3c08d, type: 2}
+  - temperatureStartThreshold: 0.3
+    temperatureEndThreshold: 0.6
+    humidityStartThreshold: 0
+    humidityEndThreshold: 1
+    Biome: {fileID: 11400000, guid: 5c05da517e91b0d42a7a5b28099b76d7, type: 2}
+  - temperatureStartThreshold: 0.6
+    temperatureEndThreshold: 1
+    humidityStartThreshold: 0.6
+    humidityEndThreshold: 1
+    Biome: {fileID: 11400000, guid: b23664bc7fbad0e40b922a774d9099ca, type: 2}
   player: {fileID: 1295394191}
   spawnPosition: {x: 0, y: 0, z: 0}
   material: {fileID: 2100000, guid: 5c06fc5a7d893244b8cd1c6c268ab79d, type: 2}
@@ -480,12 +499,12 @@ MonoBehaviour:
     isWater: 0
     topFaceTexture: 10
     bottomFaceTexture: 10
-    rightFaceTexture: 10
-    leftFaceTexture: 10
-    frontrightFaceTexture: 10
-    frontleftFaceTexture: 10
-    backrightFaceTexture: 10
-    backleftFaceTexture: 10
+    rightFaceTexture: 18
+    leftFaceTexture: 18
+    frontrightFaceTexture: 18
+    frontleftFaceTexture: 18
+    backrightFaceTexture: 18
+    backleftFaceTexture: 18
   - blockTypeName: 9
     blockName: Water
     isSolid: 0
@@ -512,8 +531,48 @@ MonoBehaviour:
     frontleftFaceTexture: 3
     backrightFaceTexture: 3
     backleftFaceTexture: 3
+  - blockTypeName: 10
+    blockName: Ice
+    isSolid: 1
+    isTransparent: 0
+    isWater: 0
+    topFaceTexture: 19
+    bottomFaceTexture: 19
+    rightFaceTexture: 20
+    leftFaceTexture: 20
+    frontrightFaceTexture: 20
+    frontleftFaceTexture: 20
+    backrightFaceTexture: 20
+    backleftFaceTexture: 20
+  - blockTypeName: 10
+    blockName: Savannah
+    isSolid: 1
+    isTransparent: 0
+    isWater: 0
+    topFaceTexture: 23
+    bottomFaceTexture: 21
+    rightFaceTexture: 22
+    leftFaceTexture: 22
+    frontrightFaceTexture: 22
+    frontleftFaceTexture: 22
+    backrightFaceTexture: 22
+    backleftFaceTexture: 22
+  - blockTypeName: 10
+    blockName: DesertOrange
+    isSolid: 1
+    isTransparent: 0
+    isWater: 0
+    topFaceTexture: 25
+    bottomFaceTexture: 25
+    rightFaceTexture: 24
+    leftFaceTexture: 24
+    frontrightFaceTexture: 24
+    frontleftFaceTexture: 24
+    backrightFaceTexture: 24
+    backleftFaceTexture: 24
   debugScreen: {fileID: 501965286}
   isUpdatingChunks: 0
+  HumidityOffset: 100
 --- !u!4 &827900869
 Transform:
   m_ObjectHideFlags: 0

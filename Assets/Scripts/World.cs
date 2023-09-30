@@ -13,7 +13,17 @@ public class World : MonoBehaviour
 
     [SerializeField]
     List<Vector3Int> biomeCenters = new List<Vector3Int>();
+
+    List<Vector3> biomeCentersyedek = new List<Vector3>();
     List<float> biomeNoise = new List<float>();
+
+    List<float> tempbiomeNoiseyedek = new List<float>();
+    List<float> moisturebiomeNoiseyedek = new List<float>();
+    List<float> landNoiseyedek = new List<float>();
+    List<BiomeAttributes> biomeAttributesyedek = new List<BiomeAttributes>();
+    List<BiomeAttributes> yedekbiomeAttributesyedek = new List<BiomeAttributes>();
+
+    public static Dictionary<Vector3Int, BiomeAttributes> yedekAttributesDictionary;
 
     [SerializeField]
     private NoiseSettings biomeNoiseSettings;
@@ -51,6 +61,8 @@ public class World : MonoBehaviour
 
     private bool isCreatingChunks;
     public bool isUpdatingChunks;
+
+    public float HumidityOffset = 100f;
 
     // TODO: make blocktypes enum or a scriptable object
     // TODO: add creation stack
@@ -180,7 +192,8 @@ public class World : MonoBehaviour
         byte[,,] tmpData=null;
         if (tmpData == null)
         {
-            StartCoroutine(_chunkDataGenerator.GenerateData(chunkPos*HexData.ChunkWidth, biomeCenters, biomeNoise, x => tmpData = x));
+            StartCoroutine(_chunkDataGenerator.GenerateData(chunkPos*HexData.ChunkWidth, biomeCentersyedek, tempbiomeNoiseyedek,moisturebiomeNoiseyedek,landNoiseyedek, yedekbiomeAttributesyedek, x => tmpData = x));
+            //StartCoroutine(_chunkDataGenerator.GenerateData(chunkPos * HexData.ChunkWidth, biomeCenters, biomeNoise, x => tmpData = x));
             yield return new WaitUntil(() => tmpData != null);
 
         }
@@ -207,8 +220,8 @@ public class World : MonoBehaviour
     void CheckViewDistance()
     {
         GenerateBiomePoints(PositionHelper.PixelToHex(player.position), HexData.ViewDistanceinChunks, HexData.ChunkWidth);
-        ChunkCoord coord = PositionHelper.GetChunkCoordFromVector3(PositionHelper.PixelToHex(player.position)); 
-
+        ChunkCoord coord = PositionHelper.GetChunkCoordFromVector3(PositionHelper.PixelToHex(player.position));
+        GenerateBiomePointsBetter(coord, HexData.ViewDistanceinChunks, HexData.ChunkWidth);
         List<ChunkCoord> previouslyActiveChunks = new List<ChunkCoord>(activeChunks);
 
         activeChunks.Clear();
@@ -326,11 +339,72 @@ public class World : MonoBehaviour
 
         biomeNoise = CalculateBiomeNoise(biomeCenters);
     }
+    public void GenerateBiomePointsBetter(ChunkCoord coord, int drawRange, int mapSize)
+    {
+        biomeCentersyedek = new List<Vector3>();
+        biomeCentersyedek = BiomeCenterFinder.CalculateBiomeCentersBetter(mapSize, drawRange, coord);
+
+        tempbiomeNoiseyedek = CalculateBiomeTempNoise(biomeCentersyedek);
+        moisturebiomeNoiseyedek = CalculateBiomeHumNoise(biomeCentersyedek);
+        landNoiseyedek = CalculateLandNoise(biomeCentersyedek);
+
+        for(int i= 0;i < biomeCentersyedek.Count;i++)
+        {
+            float temp = tempbiomeNoiseyedek[i];
+            float humidity = moisturebiomeNoiseyedek[i];
+            BiomeAttributes biomeToAdd = SelectBiomes(i, temp, humidity);
+            biomeAttributesyedek.Add(biomeToAdd);
+        }
+
+        List<BiomeAttributes> yedek = new List<BiomeAttributes>();
+        for (int i = coord.x-HexData.ViewDistanceinChunks-1; i < coord.x + HexData.ViewDistanceinChunks+1; i++)
+        {
+            for (int j = coord.z - HexData.ViewDistanceinChunks-1; j < coord.z + HexData.ViewDistanceinChunks+1; j++)
+            {
+                float temp = Mathf.PerlinNoise((i+50f) * 0.2f, (j + 50f) * 0.2f);
+                float humidity = Mathf.PerlinNoise((i + 100f) *0.2f, (j  + 100f) * 0.2f);
+                //bir tane de land ocean map ekle daha sonra onu kullanarak tempdataya su ekle doğrudan eğer okyanus ise
+                yedek.Add(SelectBiomes(i,temp,humidity)); //heh bu oldu gibi ama işte bunu nasıl kullanacan sadece 18 chunkta çalışyıor
+            }
+        }
+        yedekbiomeAttributesyedek = yedek;
+        print("ist est over");
+    }
+    private BiomeAttributes SelectBiomes(int index, float tempbiomeNoiseyedek, float moisturebiomeNoiseyedek)
+    {
+        float temp = tempbiomeNoiseyedek;
+        float humidity = moisturebiomeNoiseyedek;
+
+        foreach (var data in biomeAttributesData)
+        {
+            //if (!land) return Color.blue;
+
+            if (temp > data.temperatureStartThreshold && temp < data.temperatureEndThreshold
+                && humidity > data.humidityStartThreshold && humidity < data.humidityEndThreshold)
+            {
+                return data.Biome;
+            }
+        }
+        return biomeAttributesData[0].Biome;
+    }
 
     private List<float> CalculateBiomeNoise(List<Vector3Int> biomeCenters)
     {
         return biomeCenters.Select(center => Noise.OctavePerlin(new Vector2(center.x, center.z), biomeNoiseSettings)).ToList();
     }
+    private List<float> CalculateBiomeTempNoise(List<Vector3> biomeCenters)
+    {
+        return biomeCenters.Select(center => Mathf.PerlinNoise((center.x + 500f) * 0.2f, (center.z+500f)*0.2f)).ToList();
+    }
+    private List<float> CalculateBiomeHumNoise(List<Vector3> biomeCenters)
+    {
+        return biomeCenters.Select(center => Mathf.PerlinNoise((center.x+1000f) * 0.2f, (center.z + 1000f) * 0.2f)).ToList();
+    }
+    private List<float> CalculateLandNoise(List<Vector3> biomeCenters)
+    {
+        return biomeCenters.Select(center => Mathf.PerlinNoise((center.x + 50f) * 0.1f, (center.z + 50f) * 0.1f)).ToList();
+    }
+
     public byte GetHex(Vector3 pos,BiomeSelector biomeSelection=null)
     {
         int yPos = Mathf.FloorToInt(pos.y);
@@ -342,14 +416,14 @@ public class World : MonoBehaviour
         if (biomeSelection != null)
         {
             biome = biomeSelection.biomeAttributes;
-            if (biomeSelection.terrainSurfaceNoise.HasValue == false)
-            {
+            //if (biomeSelection.terrainSurfaceNoise.HasValue == false)
+            //{
                 terrainHeight = GetSurfaceHeightNoise(pos.x, pos.z, biome);
-            }
-            else
-            {
-                terrainHeight = biomeSelection.terrainSurfaceNoise.Value;
-            }
+            //}
+            //else
+            //{
+            //    terrainHeight = biomeSelection.terrainSurfaceNoise.Value;
+            //}
         }
         else { biome = biomes[0];
             terrainHeight = GetSurfaceHeightNoise(pos.x, pos.z, biome);
@@ -503,6 +577,11 @@ public class World : MonoBehaviour
         {
             Gizmos.DrawLine(biomeCenterPoint, biomeCenterPoint + Vector3.up * 255);
         }
+        //Gizmos.color = Color.red;
+        //foreach (var biomeCenterPointyedek in biomeCentersyedek)
+        //{
+        //    Gizmos.DrawLine(biomeCenterPointyedek, biomeCenterPointyedek + Vector3.up * 255);
+        //}
     }
 }
 
@@ -576,6 +655,8 @@ public struct BiomeData
 {
     [Range(0f, 1f)]
     public float temperatureStartThreshold, temperatureEndThreshold;
+    [Range(0f, 1f)]
+    public float humidityStartThreshold, humidityEndThreshold;
     public BiomeAttributes Biome;
 }
 

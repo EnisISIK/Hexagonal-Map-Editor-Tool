@@ -40,4 +40,19 @@ public static class BiomeCenterFinder
 
         return new List<Vector3Int>(biomeCentersTemp);
     }
+
+    public static List<Vector3> CalculateBiomeCentersBetter(int pixelsPerCell,int chunkRange,ChunkCoord coord)
+    {
+        HashSet<Vector3> biomeCentersTemp = new HashSet<Vector3>();
+
+        for(int x = coord.x - chunkRange-1;x< coord.x + chunkRange+1;x++)
+        {
+            for (int z = coord.z - chunkRange-1; z < coord.z + chunkRange+1; z++)
+            {
+                biomeCentersTemp.Add(new Vector3(x * pixelsPerCell + UnityEngine.Random.Range(0, pixelsPerCell), 0, z * pixelsPerCell  + UnityEngine.Random.Range(0, pixelsPerCell)));
+            }
+        }
+        //İşe Yaradı Gibi??
+        return new List<Vector3>(biomeCentersTemp);
+    }
 }
