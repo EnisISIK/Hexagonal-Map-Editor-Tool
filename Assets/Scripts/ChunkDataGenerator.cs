@@ -8,123 +8,32 @@ public class ChunkDataGenerator
 {
 	public World _world;
 
-	[SerializeField]
-	List<Vector3Int> biomeCenters = new List<Vector3Int>();
-	List<float> biomeNoise = new List<float>();
-
-
-    //List<Vector3> biomeCentersyedek = new List<Vector3>();
-    //List<float> tempbiomeNoiseyedek = new List<float>();
-    //List<float> moisturebiomeNoiseyedek = new List<float>();
-    List<float> landNoiseyedek = new List<float>();
-
     public DomainWarping domainWarping;
-	public DomainWarping biomeDomainWarping;
-
-    [SerializeField]
-    private List<BiomeData> biomeAttributesData = new List<BiomeData>();
 
     public ChunkDataGenerator(World world)
     {
 		_world = world;
     }
-    public ChunkDataGenerator(World world, List<BiomeData> biomeAttributesData, DomainWarping domainWarping, DomainWarping biomeDomainWarping)
+    public ChunkDataGenerator(World world, DomainWarping domainWarping)
     {
         _world = world;
-        this.biomeAttributesData = biomeAttributesData;
         this.domainWarping = domainWarping;
-        this.biomeDomainWarping = biomeDomainWarping;
     }
 
-    public IEnumerator GenerateData(Vector3 chunkPos, System.Action<byte[,,]> callback)
-	{
-		byte[,,] tempData = new byte[HexData.ChunkWidth, HexData.ChunkHeight, HexData.ChunkWidth];
-
-		Task t = Task.Factory.StartNew(delegate
-		{
-            //BiomeSelector biomeSelection = SelectBiomeAttributes(chunkPos);
-
-            for (int y = 0; y < HexData.ChunkHeight; y++)
-			{
-				for (int z = 0; z < HexData.ChunkWidth; z++)
-				{
-					for (int x = 0; x < HexData.ChunkWidth; x++)
-					{
-                        //tempData[x, y, z] = _world.GetHex(new Vector3(x, y, z) + chunkPos, biomeSelection);
-                        tempData[x, y, z] = _world.GetHex(new Vector3(x, y, z) + chunkPos);
-					}
-				}
-			}
-		});
-
-		yield return new WaitUntil(() =>
-		{
-			return t.IsCompleted;
-		});
-
-		if (t.Exception != null)
-		{
-			Debug.LogError(t.Exception);
-		}
-
-		callback(tempData);
-	}
-
-    public IEnumerator GenerateData(Vector3 chunkPos, List<Vector3Int> biomeCenters , List<float> biomeNoise, System.Action<byte[,,]> callback)
+    public IEnumerator GenerateData(Vector3 chunkPos, Dictionary<Vector3Int,Vector3> biomeCenters, Dictionary<Vector3Int, BiomeAttributes> biomeAttributes, System.Action<byte[,,]> callback)
     {
         byte[,,] tempData = new byte[HexData.ChunkWidth, HexData.ChunkHeight, HexData.ChunkWidth];
 
         Task t = Task.Factory.StartNew(delegate
         {
-            this.biomeCenters = biomeCenters;
-            this.biomeNoise = biomeNoise;
-
-
-            for (int x = 0; x < HexData.ChunkWidth; x++) 
-            {
-                for (int z = 0; z < HexData.ChunkWidth; z++)
-                {
-                    BiomeSelector biomeSelection = SelectBiomeAttributes(new Vector3(chunkPos.x + x,0, chunkPos.z + z));
-                    for (int y = 0; y < HexData.ChunkHeight; y++)
-                    {
-                        tempData[x, y, z] = _world.GetHex(new Vector3(x, y, z) + chunkPos, biomeSelection);
-                        //tempData[x, y, z] = _world.GetHex(new Vector3(x, y, z) + chunkPos);
-                    }
-                }
-            }
-        });
-
-        yield return new WaitUntil(() =>
-        {
-            return t.IsCompleted;
-        });
-
-        if (t.Exception != null)
-        {
-            Debug.LogError(t.Exception);
-        }
-
-        callback(tempData);
-    }
-
-    public IEnumerator GenerateData(Vector3 chunkPos, List<Vector3> biomeCenters, List<float> biomeTempNoise, List<float> biomeHumNoise, List<float> landNoise, List<BiomeAttributes> biomeAttributes, System.Action<byte[,,]> callback)
-    {
-        byte[,,] tempData = new byte[HexData.ChunkWidth, HexData.ChunkHeight, HexData.ChunkWidth];
-
-        Task t = Task.Factory.StartNew(delegate
-        {
-            List<Vector3> biomeCentersyedek = biomeCenters;
-            List<float> tempbiomeNoiseyedek = biomeTempNoise;
-            List<float> moisturebiomeNoiseyedek = biomeHumNoise;
-
-            List<BiomeAttributes> biomeAttributesyedek = biomeAttributes;
-            this.landNoiseyedek = landNoise;
+            Dictionary<Vector3Int,Vector3> biomeCentersyedek = biomeCenters;
+            Dictionary<Vector3Int, BiomeAttributes> biomeAttributesyedek = biomeAttributes;
 
             for (int x = 0; x < HexData.ChunkWidth; x++)
             {
                 for (int z = 0; z < HexData.ChunkWidth; z++)
                 {
-                    BiomeSelector biomeSelection = SelectBiomeAttributes(new Vector3(chunkPos.x + x, 0, chunkPos.z + z), biomeCentersyedek, tempbiomeNoiseyedek, moisturebiomeNoiseyedek, biomeAttributesyedek);
+                    BiomeSelector biomeSelection = SelectBiomeAttributesFromDict(new Vector3(chunkPos.x + x, 0, chunkPos.z + z), biomeCentersyedek, biomeAttributesyedek);
                     for (int y = 0; y < HexData.ChunkHeight; y++)
                     {
                         tempData[x, y, z] = _world.GetHex(new Vector3(x, y, z) + chunkPos, biomeSelection);
@@ -147,44 +56,41 @@ public class ChunkDataGenerator
         callback(tempData);
     }
 
-    private BiomeSelector SelectBiomeAttributes(Vector3 position, bool useDomainWarping = true)
+    private BiomeSelector SelectBiomeAttributesFromDict(Vector3 position,Dictionary<Vector3Int, Vector3> biomeCenters, Dictionary<Vector3Int, BiomeAttributes> biomeAttributes)
     {
-        if (useDomainWarping)
+        int gridX = Mathf.FloorToInt(position.x / 64);
+        int gridZ = Mathf.FloorToInt(position.z / 64); // sanırım işe yaradı en nihayetinde. Bu 16 iken 32 oldu. Center finderda ise cellsize'i 2 katına çıkarmak durumunda kaldım
+
+        float nearestDistance = Mathf.Infinity;
+        Vector3Int nearestPoint = new Vector3Int();
+
+        float distortedX = position.x + Noise.Map01Int(0,15, Mathf.PerlinNoise(position.x * 0.1f, position.z * 0.1f));
+        float distortedZ = position.z + Noise.Map01Int(0, 15, Mathf.PerlinNoise(position.x * 0.1f, position.z * 0.1f));
+
+        for (int a = -2; a < 3; a++)
         {
+            for (int b = -2; b < 3; b++)
+            {
 
-            Vector2Int domainOffset = Vector2Int.RoundToInt(biomeDomainWarping.GenerateDomainOffset((int)position.x, (int)position.z));
-            position += new Vector3Int(domainOffset.x, 0, domainOffset.y);
+                int i = gridX + a;
+                int j = gridZ + b;
+                if(biomeCenters.TryGetValue(new Vector3Int(i,0,j), out Vector3 var)) { 
+                    float distance = Vector3.Distance(new Vector3(distortedX, 0 , distortedZ), var);
+                    if (distance < nearestDistance)
+                    {
+                        nearestDistance = distance;
+                        nearestPoint = new Vector3Int(i, 0, j);
+                    }
+                }
+
+            }
         }
+        BiomeAttributes attributes1 =null;
+        if(biomeAttributes.TryGetValue(new Vector3Int(nearestPoint.x, 0, nearestPoint.z), out BiomeAttributes var1))
+            attributes1 = var1;//liste yerine dictionary de yapılabilir. Eğer çalışmıyorsa tabii ki de
 
-        List<BiomeSelectionHelper> biomeSelectionHelpers = GetBiomeSelectionHelpers(position);
-        BiomeAttributes attributes_1 = SelectBiome(biomeSelectionHelpers[0].Index);
-        BiomeAttributes attributes_2 = SelectBiome(biomeSelectionHelpers[1].Index);
-
-        float distance = Vector3.Distance(biomeCenters[biomeSelectionHelpers[0].Index], biomeCenters[biomeSelectionHelpers[1].Index]);
-        float weight_0 = biomeSelectionHelpers[0].Distance / distance;
-        float weight_1 = 1 - weight_0;
-        int terrainHeightNoise_0 = GetSurfaceHeightNoise(position.x, position.z, attributes_1);
-        int terrainHeightNoise_1 = GetSurfaceHeightNoise(position.x, position.z, attributes_2);
-        return new BiomeSelector(attributes_1, Mathf.RoundToInt(terrainHeightNoise_0 * weight_0 + terrainHeightNoise_1 * weight_1));
-
+        return new BiomeSelector(attributes1);
     }
-
-    private BiomeSelector SelectBiomeAttributes(Vector3 position, List<Vector3> biomeCentersyedek, List<float> tempbiomeNoiseyedek, List<float> moisturebiomeNoiseyedek, List<BiomeAttributes> biomeAttributesyedek)
-    {
-
-        List<BiomeSelectionHelper> biomeSelectionHelpers = GetBiomeSelectionHelper(position, biomeCentersyedek);
-        BiomeAttributes attributes_1 = biomeAttributesyedek[biomeSelectionHelpers[0].Index];
-        BiomeAttributes attributes_2 = biomeAttributesyedek[biomeSelectionHelpers[1].Index];
-
-        float distance = Vector3.Distance(biomeCentersyedek[biomeSelectionHelpers[0].Index], biomeCentersyedek[biomeSelectionHelpers[1].Index]);
-        float weight_0 = biomeSelectionHelpers[0].Distance / distance;
-        float weight_1 = 1 - weight_0;
-        int terrainHeightNoise_0 = GetSurfaceHeightNoise(position.x, position.z, attributes_1);
-        int terrainHeightNoise_1 = GetSurfaceHeightNoise(position.x, position.z, attributes_2);
-        return new BiomeSelector(attributes_1, Mathf.RoundToInt(terrainHeightNoise_0 * weight_0 + terrainHeightNoise_1 * weight_1));
-
-    }
-
     private int GetSurfaceHeightNoise(float x, float z, BiomeAttributes attributes_1)
     {
         float height = domainWarping.GenerateDomainNoise(new Vector2(x, z), attributes_1.noiseSettings[0]);
@@ -192,79 +98,6 @@ public class ChunkDataGenerator
         int terrainHeight = Noise.Map01Int(0, HexData.ChunkHeight, height);
 
         return terrainHeight;
-    }
-
-    private BiomeAttributes SelectBiome(int index)
-    {
-        float temp = biomeNoise[index];
-        foreach (var data in biomeAttributesData)
-        {
-            if (temp > data.temperatureStartThreshold && temp < data.temperatureEndThreshold)
-            {
-                return data.Biome;
-            }
-        }
-        return biomeAttributesData[0].Biome;
-    }
-    private BiomeAttributes SelectBiomes(int index, List<float> tempbiomeNoiseyedek, List<float> moisturebiomeNoiseyedek)
-    {
-        float temp = tempbiomeNoiseyedek[index];
-        float humidity = moisturebiomeNoiseyedek[index];
-
-        foreach (var data in biomeAttributesData)
-        {
-            //if (!land) return Color.blue;
-
-            if (temp > data.temperatureStartThreshold && temp < data.temperatureEndThreshold
-                && humidity > data.humidityStartThreshold && humidity < data.humidityEndThreshold)
-            {
-                return data.Biome;
-            }
-        }
-        return biomeAttributesData[0].Biome;
-    }
-
-    private List<BiomeSelectionHelper> GetBiomeSelectionHelpers(Vector3 position)
-    {
-        int x = Mathf.FloorToInt(position.x);
-        int y = 0;
-        int z = Mathf.FloorToInt(position.z);
-
-        return GetClosestBiomeIndex(new Vector3Int(x, y, z));
-    }
-
-    private List<BiomeSelectionHelper> GetBiomeSelectionHelper(Vector3 position, List<Vector3> biomeCentersyedek)
-    {
-        float x = position.x;
-        int y = 0;
-        float z = position.z;
-
-        return GetClosestBiomeIndexes(new Vector3(x, y, z), biomeCentersyedek);
-    }
-    private List<BiomeSelectionHelper> GetClosestBiomeIndexes(Vector3 position, List<Vector3> biomeCentersyedek)
-    {
-        return biomeCentersyedek.Select((center, index) =>
-        new BiomeSelectionHelper
-        {
-            Index = index,
-            Distance = Vector3.Distance(center, position)
-        }).OrderBy(helper => helper.Distance).Take(4).ToList();
-    }
-
-    private List<BiomeSelectionHelper> GetClosestBiomeIndex(Vector3Int position)
-    {
-        return biomeCenters.Select((center, index) =>
-        new BiomeSelectionHelper
-        {
-            Index = index,
-            Distance = Vector3.Distance(center, position)
-        }).OrderBy(helper => helper.Distance).Take(4).ToList();
-    }
-
-    private struct BiomeSelectionHelper
-    {
-        public int Index;
-        public float Distance;
     }
 
 }

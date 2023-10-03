@@ -353,6 +353,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: f3b3edc8f63e6a344a5fb13e711e56ee, type: 2}
   - {fileID: 11400000, guid: 1185bc9a992057f408dc55edd4c7561e, type: 2}
   biomeCenters: []
+  OceanBiome: {fileID: 11400000, guid: cc54776d271c6c545bb5bf690b32711c, type: 2}
   biomeNoiseSettings:
     enabled: 0
     useFirstLayerAsMask: 0
@@ -364,14 +365,14 @@ MonoBehaviour:
     minValue: 0
     centre: 0
     offset: {x: 0, y: 0}
-    noiseZoom: 0.05
+    noiseZoom: 0.2
     redistrubitionModifier: 1.2
     exponent: 5
   domainWarping: {fileID: 827900870}
   biomeDomainWarping: {fileID: 827900871}
   biomeAttributesData:
   - temperatureStartThreshold: 0
-    temperatureEndThreshold: 0.3
+    temperatureEndThreshold: 0.4
     humidityStartThreshold: 0.6
     humidityEndThreshold: 1
     Biome: {fileID: 11400000, guid: 70244107e2f8e6942be64cc4fcfa288b, type: 2}
@@ -381,15 +382,30 @@ MonoBehaviour:
     humidityEndThreshold: 0.6
     Biome: {fileID: 11400000, guid: f3b3edc8f63e6a344a5fb13e711e56ee, type: 2}
   - temperatureStartThreshold: 0
-    temperatureEndThreshold: 0.3
+    temperatureEndThreshold: 0.4
     humidityStartThreshold: 0
     humidityEndThreshold: 0.6
     Biome: {fileID: 11400000, guid: c9956884b285f354f9c53792b9c3c08d, type: 2}
-  - temperatureStartThreshold: 0.3
+  - temperatureStartThreshold: 0.4
     temperatureEndThreshold: 0.6
     humidityStartThreshold: 0
-    humidityEndThreshold: 1
+    humidityEndThreshold: 0.35
     Biome: {fileID: 11400000, guid: 5c05da517e91b0d42a7a5b28099b76d7, type: 2}
+  - temperatureStartThreshold: 0.4
+    temperatureEndThreshold: 0.6
+    humidityStartThreshold: 0.35
+    humidityEndThreshold: 0.5
+    Biome: {fileID: 11400000, guid: 6edb4beeea9e3654baa82c339a865acd, type: 2}
+  - temperatureStartThreshold: 0.4
+    temperatureEndThreshold: 0.6
+    humidityStartThreshold: 0.5
+    humidityEndThreshold: 0.7
+    Biome: {fileID: 11400000, guid: b7057a400562782499556b3e924d60d3, type: 2}
+  - temperatureStartThreshold: 0.4
+    temperatureEndThreshold: 0.6
+    humidityStartThreshold: 0.7
+    humidityEndThreshold: 1
+    Biome: {fileID: 11400000, guid: 1ece59afb5a2c194191ba724090f0d9a, type: 2}
   - temperatureStartThreshold: 0.6
     temperatureEndThreshold: 1
     humidityStartThreshold: 0.6

@@ -11,19 +11,10 @@ public class World : MonoBehaviour
     private ChunkDataGenerator _chunkDataGenerator;
     public BiomeAttributes[] biomes;
 
-    [SerializeField]
-    List<Vector3Int> biomeCenters = new List<Vector3Int>();
+    public BiomeAttributes OceanBiome;
 
-    List<Vector3> biomeCentersyedek = new List<Vector3>();
-    List<float> biomeNoise = new List<float>();
-
-    List<float> tempbiomeNoiseyedek = new List<float>();
-    List<float> moisturebiomeNoiseyedek = new List<float>();
-    List<float> landNoiseyedek = new List<float>();
-    List<BiomeAttributes> biomeAttributesyedek = new List<BiomeAttributes>();
-    List<BiomeAttributes> yedekbiomeAttributesyedek = new List<BiomeAttributes>();
-
-    public static Dictionary<Vector3Int, BiomeAttributes> yedekAttributesDictionary;
+    Dictionary<Vector3Int, BiomeAttributes> voronoiBiomeAttributesDict = new Dictionary<Vector3Int, BiomeAttributes>();
+    public static Dictionary<Vector3Int, Vector3> voronoiCentersDictionary;
 
     [SerializeField]
     private NoiseSettings biomeNoiseSettings;
@@ -72,10 +63,12 @@ public class World : MonoBehaviour
 
     private void Start()
     {
-        _chunkDataGenerator = new ChunkDataGenerator(this,biomeAttributesData,domainWarping,biomeDomainWarping);
+        _chunkDataGenerator = new ChunkDataGenerator(this,domainWarping);
         chunksDictionary = new Dictionary<Vector3Int, Chunk>();
         chunksDataDictionary = new Dictionary<Vector3Int, byte[,,]>();
         activeChunksDictionary = new Dictionary<Vector2Int, ChunkCoord>();
+        voronoiCentersDictionary = new Dictionary<Vector3Int, Vector3>();
+        voronoiBiomeAttributesDict = new Dictionary<Vector3Int, BiomeAttributes>();
         CalculateSpawnPosition();
 
         player.position = spawnPosition;
@@ -192,8 +185,7 @@ public class World : MonoBehaviour
         byte[,,] tmpData=null;
         if (tmpData == null)
         {
-            StartCoroutine(_chunkDataGenerator.GenerateData(chunkPos*HexData.ChunkWidth, biomeCentersyedek, tempbiomeNoiseyedek,moisturebiomeNoiseyedek,landNoiseyedek, yedekbiomeAttributesyedek, x => tmpData = x));
-            //StartCoroutine(_chunkDataGenerator.GenerateData(chunkPos * HexData.ChunkWidth, biomeCenters, biomeNoise, x => tmpData = x));
+            StartCoroutine(_chunkDataGenerator.GenerateData(chunkPos * HexData.ChunkWidth, voronoiCentersDictionary,voronoiBiomeAttributesDict, x => tmpData = x));
             yield return new WaitUntil(() => tmpData != null);
 
         }
@@ -219,9 +211,8 @@ public class World : MonoBehaviour
 
     void CheckViewDistance()
     {
-        GenerateBiomePoints(PositionHelper.PixelToHex(player.position), HexData.ViewDistanceinChunks, HexData.ChunkWidth);
         ChunkCoord coord = PositionHelper.GetChunkCoordFromVector3(PositionHelper.PixelToHex(player.position));
-        GenerateBiomePointsBetter(coord, HexData.ViewDistanceinChunks, HexData.ChunkWidth);
+        GenerateVoronoiSeeds(coord, HexData.ViewDistanceinChunks, HexData.ChunkWidth);
         List<ChunkCoord> previouslyActiveChunks = new List<ChunkCoord>(activeChunks);
 
         activeChunks.Clear();
@@ -326,59 +317,50 @@ public class World : MonoBehaviour
         return blocktypes[GetHex(pos)].isWater;
     }
 
-    public void GenerateBiomePoints(Vector3 playerPosition,int drawRange,int mapSize)
+    public void GenerateVoronoiSeeds(ChunkCoord coord, int drawRange, int mapSize)
     {
-        biomeCenters = new List<Vector3Int>();
-        biomeCenters = BiomeCenterFinder.CalculateBiomeCenters(playerPosition,drawRange,mapSize);
+        Dictionary<Vector3Int, Vector3> tempDict = BiomeCenterFinder.CalculateBiomeCentersDictionary(mapSize, drawRange, coord);
 
-        for(int i = 0; i<biomeCenters.Count; i++)
+        foreach(var centerSeed in tempDict)
         {
-            Vector2Int domainWarpingOffset = biomeDomainWarping.GenerateDomainOffsetInt(biomeCenters[i].x, biomeCenters[i].z);
-            biomeCenters[i] += new Vector3Int(domainWarpingOffset.x, 0, domainWarpingOffset.y);
-        }
-
-        biomeNoise = CalculateBiomeNoise(biomeCenters);
-    }
-    public void GenerateBiomePointsBetter(ChunkCoord coord, int drawRange, int mapSize)
-    {
-        biomeCentersyedek = new List<Vector3>();
-        biomeCentersyedek = BiomeCenterFinder.CalculateBiomeCentersBetter(mapSize, drawRange, coord);
-
-        tempbiomeNoiseyedek = CalculateBiomeTempNoise(biomeCentersyedek);
-        moisturebiomeNoiseyedek = CalculateBiomeHumNoise(biomeCentersyedek);
-        landNoiseyedek = CalculateLandNoise(biomeCentersyedek);
-
-        for(int i= 0;i < biomeCentersyedek.Count;i++)
-        {
-            float temp = tempbiomeNoiseyedek[i];
-            float humidity = moisturebiomeNoiseyedek[i];
-            BiomeAttributes biomeToAdd = SelectBiomes(i, temp, humidity);
-            biomeAttributesyedek.Add(biomeToAdd);
-        }
-
-        List<BiomeAttributes> yedek = new List<BiomeAttributes>();
-        for (int i = coord.x-HexData.ViewDistanceinChunks-1; i < coord.x + HexData.ViewDistanceinChunks+1; i++)
-        {
-            for (int j = coord.z - HexData.ViewDistanceinChunks-1; j < coord.z + HexData.ViewDistanceinChunks+1; j++)
+            if (!voronoiCentersDictionary.ContainsKey(centerSeed.Key))
             {
-                float temp = Mathf.PerlinNoise((i+50f) * 0.2f, (j + 50f) * 0.2f);
-                float humidity = Mathf.PerlinNoise((i + 100f) *0.2f, (j  + 100f) * 0.2f);
-                //bir tane de land ocean map ekle daha sonra onu kullanarak tempdataya su ekle doğrudan eğer okyanus ise
-                yedek.Add(SelectBiomes(i,temp,humidity)); //heh bu oldu gibi ama işte bunu nasıl kullanacan sadece 18 chunkta çalışyıor
+                voronoiCentersDictionary.Add(centerSeed.Key, centerSeed.Value);
             }
         }
-        yedekbiomeAttributesyedek = yedek;
-        print("ist est over");
+
+        List<float> tempTest = new List<float>();
+        List<float> humTest = new List<float>();
+
+        for (int x = coord.x - HexData.ViewDistanceinChunks - 4; x < coord.x + HexData.ViewDistanceinChunks + 4; x++)
+        {
+            for (int z = coord.z - HexData.ViewDistanceinChunks - 4; z < coord.z + HexData.ViewDistanceinChunks + 4; z++)
+            {
+                Vector3Int seedCoord = new Vector3Int(x, 0, z);
+                if (!voronoiBiomeAttributesDict.ContainsKey(seedCoord))
+                {
+                    float land = Mathf.PerlinNoise((x + 100f) * 0.1f, (z + 100f) * 0.1f);
+                    if (land < 0.50f) voronoiBiomeAttributesDict.Add(seedCoord, OceanBiome);
+                    else{
+                        float temperature = Mathf.PerlinNoise(x * 0.2f, z * 0.2f);
+                        float humidity = Mathf.PerlinNoise((x + 160f) * 0.2f, (z + 160f) * 0.2f);
+                        tempTest.Add(temperature);
+                        humTest.Add(humidity);
+                        voronoiBiomeAttributesDict.Add(seedCoord, SelectBiomes(temperature, humidity));
+                    }
+                }
+            }
+        }
+
     }
-    private BiomeAttributes SelectBiomes(int index, float tempbiomeNoiseyedek, float moisturebiomeNoiseyedek)
+
+    private BiomeAttributes SelectBiomes(float tempbiomeNoiseyedek, float moisturebiomeNoiseyedek)
     {
         float temp = tempbiomeNoiseyedek;
         float humidity = moisturebiomeNoiseyedek;
 
         foreach (var data in biomeAttributesData)
         {
-            //if (!land) return Color.blue;
-
             if (temp > data.temperatureStartThreshold && temp < data.temperatureEndThreshold
                 && humidity > data.humidityStartThreshold && humidity < data.humidityEndThreshold)
             {
@@ -388,9 +370,9 @@ public class World : MonoBehaviour
         return biomeAttributesData[0].Biome;
     }
 
-    private List<float> CalculateBiomeNoise(List<Vector3Int> biomeCenters)
+    private List<float> CalculateBiomeNoise(List<Vector3Int> biomeCenters,Vector3Int offset)
     {
-        return biomeCenters.Select(center => Noise.OctavePerlin(new Vector2(center.x, center.z), biomeNoiseSettings)).ToList();
+        return biomeCenters.Select(center =>Mathf.PerlinNoise((center.x+offset.x)*0.1f,(center.z+offset.z) * 0.1f) /*Noise.OctavePerlin(new Vector2(center.x+offset.x, center.z+offset.z), biomeNoiseSettings*/).ToList();
     }
     private List<float> CalculateBiomeTempNoise(List<Vector3> biomeCenters)
     {
@@ -429,6 +411,10 @@ public class World : MonoBehaviour
             terrainHeight = GetSurfaceHeightNoise(pos.x, pos.z, biome);
         }
         //terrainHeight = GetSurfaceHeightNoise(pos.x, pos.z, biome);
+        if (biome == OceanBiome)
+        {
+            terrainHeight = 4;
+        }
 
         byte voxelValue;
 
@@ -442,22 +428,22 @@ public class World : MonoBehaviour
         }
         else if (yPos > terrainHeight)
         {
-            //if (yPos <= 4)
-            //    return 8;
-            //else
+            if (yPos <= 5)
+                return 8;
+            else
                 return 0;
         }
         else
         {
             voxelValue = 1;
         }
-        //if (terrainHeight < 4)
-        //{
-        //    voxelValue = 7;
-        //}
+        if (terrainHeight < 5)
+        {
+            voxelValue = 7;
+        }
         /*Second Pass*/
 
-        if(voxelValue == 1)
+        if (voxelValue == 1)
         {
             foreach(Lode lode in biome.lodes)
             {
@@ -490,26 +476,6 @@ public class World : MonoBehaviour
         return voxelValue;
     }
 
-    private BiomeSelector SelectBiomeAttributes(Vector3 position,bool useDomainWarping = true)
-    {
-        if (useDomainWarping) {
-
-            Vector2Int domainOffset = Vector2Int.RoundToInt(biomeDomainWarping.GenerateDomainOffset((int)position.x, (int)position.z));
-            position += new Vector3Int(domainOffset.x, 0, domainOffset.y);
-        }
-
-        List<BiomeSelectionHelper> biomeSelectionHelpers = GetBiomeSelectionHelpers(position);
-        BiomeAttributes attributes_1 = SelectBiome(biomeSelectionHelpers[0].Index);
-        BiomeAttributes attributes_2 = SelectBiome(biomeSelectionHelpers[1].Index);
-
-        float distance = Vector3.Distance(biomeCenters[biomeSelectionHelpers[0].Index], biomeCenters[biomeSelectionHelpers[1].Index]);
-        float weight_0 = biomeSelectionHelpers[0].Distance / distance;
-        float weight_1 = 1 - weight_0;
-        int terrainHeightNoise_0 = GetSurfaceHeightNoise(position.x, position.z, attributes_1);
-        int terrainHeightNoise_1 = GetSurfaceHeightNoise(position.x, position.z, attributes_2);
-        return new BiomeSelector(attributes_1, Mathf.RoundToInt(terrainHeightNoise_0 * weight_0 + terrainHeightNoise_1 * weight_1));
-
-    }
 
     private int GetSurfaceHeightNoise(float x, float z, BiomeAttributes attributes_1)
     {
@@ -518,37 +484,6 @@ public class World : MonoBehaviour
         int terrainHeight = Noise.Map01Int(0, HexData.ChunkHeight, height);
 
         return terrainHeight;
-    }
-
-    private BiomeAttributes SelectBiome(int index)
-    {
-        float temp = biomeNoise[index];
-        foreach(var data in biomeAttributesData)
-        {
-            if(temp > data.temperatureStartThreshold && temp< data.temperatureEndThreshold)
-            {
-                return data.Biome;
-            }
-        }
-        return biomeAttributesData[0].Biome;
-    }
-
-    private List<BiomeSelectionHelper> GetBiomeSelectionHelpers(Vector3 position)
-    {
-        int x = Mathf.FloorToInt(position.x);
-        int y = 0;
-        int z = Mathf.FloorToInt(position.z);
-
-        return GetClosestBiomeIndex(new Vector3Int(x, y, z));
-    }
-
-    private List<BiomeSelectionHelper> GetClosestBiomeIndex(Vector3Int position)
-    {
-        return biomeCenters.Select((center, index) =>
-        new BiomeSelectionHelper {
-            Index = index,
-            Distance = Vector3.Distance(center,position)
-        }).OrderBy(helper=> helper.Distance).Take(4).ToList();
     }
 
     private struct BiomeSelectionHelper
@@ -571,12 +506,14 @@ public class World : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        Gizmos.color = Color.blue;
+        //Gizmos.color = Color.blue;
 
-        foreach(var biomeCenterPoint in biomeCenters)
-        {
-            Gizmos.DrawLine(biomeCenterPoint, biomeCenterPoint + Vector3.up * 255);
-        }
+        //foreach(var biomeCenterPoint in voronoiCentersDictionary)
+        //{
+        //    Vector3 pixelPoint = PositionHelper.HexToPixel(biomeCenterPoint.Value);
+        //    Gizmos.DrawLine(pixelPoint, pixelPoint+ Vector3.up * 255);
+        //}
+
         //Gizmos.color = Color.red;
         //foreach (var biomeCenterPointyedek in biomeCentersyedek)
         //{

@@ -55,4 +55,21 @@ public static class BiomeCenterFinder
         //İşe Yaradı Gibi??
         return new List<Vector3>(biomeCentersTemp);
     }
+
+    public static Dictionary<Vector3Int, Vector3> CalculateBiomeCentersDictionary(int pixelsPerCell, int chunkRange, ChunkCoord coord)
+    {
+        Dictionary<Vector3Int, Vector3> biomeCentersDict = new Dictionary<Vector3Int, Vector3>();
+        int cellSize = pixelsPerCell * 4;
+
+        for (int x = coord.x - chunkRange - 4; x < coord.x + chunkRange + 4; x++)
+        {
+            for (int z = coord.z - chunkRange - 4; z < coord.z + chunkRange + 4; z++)
+            {
+                if (!biomeCentersDict.ContainsKey(new Vector3Int(x, 0, z)))
+                    biomeCentersDict.Add(new Vector3Int(x, 0, z), new Vector3(x * cellSize + UnityEngine.Random.Range(0, cellSize), 0, z * cellSize + UnityEngine.Random.Range(0, cellSize)));
+            }
+        }
+        //İşe Yaradı Gibi??
+        return biomeCentersDict;
+    }
 }
