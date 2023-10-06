@@ -10,6 +10,7 @@ public class ChunkMeshRenderer
 	public readonly List<int> triangles = new List<int>();
 	public readonly List<int> transparentTriangles = new List<int>();
 	public readonly List<int> waterTriangles = new List<int>();
+	public readonly List<Color> colors = new List<Color>();
 
 	public readonly List<Vector3> normals = new List<Vector3>();
 	public readonly List<Vector2> uvs = new List<Vector2>();
@@ -21,11 +22,14 @@ public class ChunkMeshRenderer
 		this.chunkPosition = chunkPosition;
     }
 
-	internal void AddHex(Vector3 pos, Vector3[] hexVert, int[] hexTri, Vector3[] hexNormals, bool isWater,bool isTransparent)
+	internal void AddHex(Vector3 pos, Vector3[] hexVert, int[] hexTri, Vector3[] hexNormals, bool isWater,bool isTransparent, float lightLevel)
 	{
 		Vector3 _position = PositionHelper.HexToPixel(pos);
-		_position.x += (chunkPosition.x * 2 * HexData.innerRadius - chunkPosition.x);
+		_position.x += (chunkPosition.x * 2f * HexData.innerRadius - chunkPosition.x);
 		_position.z += (chunkPosition.z * 1.5f * HexData.outerRadius - chunkPosition.z);
+
+		//_position.x += chunkPosition.x;
+		//_position.z += chunkPosition.z;
 
 		int triangleOffsetValue = vertices.Count;
 
@@ -34,11 +38,13 @@ public class ChunkMeshRenderer
 		if (!isWater&&!isTransparent) {
 			vertices.AddRange(hexVert.Select(v => v + _position));
 			triangles.AddRange(hexTri.Select(t => t + triangleOffsetValue));
+			colors.AddRange(hexVert.Select(v => new Color(0, 0, 0, lightLevel)));
 		}
 		else if (!isWater && isTransparent)
 		{
 			vertices.AddRange(hexVert.Select(v => v + _position));
 			transparentTriangles.AddRange(hexTri.Select(t => t + triangleOffsetValue));
+			colors.AddRange(hexVert.Select(v => new Color(0, 0, 0, lightLevel)));
 		}
 		else if (isWater)
 		{
@@ -48,6 +54,7 @@ public class ChunkMeshRenderer
             }
 			vertices.AddRange(hexVert.Select(v => v + _position));
 			waterTriangles.AddRange(hexTri.Select(t => t + triangleOffsetValue));
+			colors.AddRange(hexVert.Select(v => new Color(0, 0, 0, lightLevel)));
 		}
 
 		if (hexTri.Length == 12) triangleOffsetValue += 6;
@@ -68,8 +75,8 @@ public class ChunkMeshRenderer
 			y = 1f - y - HexData.NormalizedBlockTextureSize;
 
 			Vector2 textureUV = hexUV[i];
-			textureUV.x = textureUV.x * HexData.NormalizedBlockTextureSize + x;
-			textureUV.y = textureUV.y * HexData.NormalizedBlockTextureSize + y;
+			textureUV.x = (textureUV.x * HexData.NormalizedBlockTextureSize + x);
+			textureUV.y = (textureUV.y * HexData.NormalizedBlockTextureSize + y);
 			if(!isWater)
 				uvs.Add(textureUV);
 			if (isWater)

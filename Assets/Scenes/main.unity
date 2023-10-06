@@ -352,7 +352,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 70244107e2f8e6942be64cc4fcfa288b, type: 2}
   - {fileID: 11400000, guid: f3b3edc8f63e6a344a5fb13e711e56ee, type: 2}
   - {fileID: 11400000, guid: 1185bc9a992057f408dc55edd4c7561e, type: 2}
-  biomeCenters: []
   OceanBiome: {fileID: 11400000, guid: cc54776d271c6c545bb5bf690b32711c, type: 2}
   biomeNoiseSettings:
     enabled: 0
@@ -589,6 +588,7 @@ MonoBehaviour:
   debugScreen: {fileID: 501965286}
   isUpdatingChunks: 0
   HumidityOffset: 100
+  globalLightLevel: 0
 --- !u!4 &827900869
 Transform:
   m_ObjectHideFlags: 0

@@ -27,6 +27,7 @@ public class Chunk
 	private bool _isActive;
 	public bool isHexMapPopulated = false;
 
+
 	public bool isActive
 	{
 		get { return _isActive; }
@@ -60,6 +61,7 @@ public class Chunk
 
 		chunkObject.name = "Chunk " + chunkCoordinates.x + ", " + chunkCoordinates.z;
 		chunkObject.transform.position = new Vector3(chunkCoordinates.x * HexData.ChunkWidth, 0f, chunkCoordinates.z * HexData.ChunkWidth);
+		//Debug.Log(PositionHelper.HexToPixel(new Vector3(chunkCoordinates.x * HexData.ChunkWidth, 0f, chunkCoordinates.z * HexData.ChunkWidth)));
 		chunkObject.transform.SetParent(_world.transform);
 		position = Vector3Int.FloorToInt(chunkObject.transform.position);
 
@@ -189,10 +191,12 @@ public class Chunk
 				{
 					for (int x = 0; x < HexData.ChunkWidth; x++)
 					{
-						if (_world.blocktypes[hexMap[x, (int)y, z]].isSolid)
-							AddHexCell(x, y, z);
-						else if(!_world.blocktypes[hexMap[x, (int)y, z]].isSolid&& _world.blocktypes[hexMap[x, (int)y, z]].isWater)
-							AddHexCell(x, y, z);
+						if (_world.blocktypes[hexMap[x, (int)y, z]].isSolid) { 
+						AddHexCell(x, y, z);
+						}
+						else if (!_world.blocktypes[hexMap[x, (int)y, z]].isSolid && _world.blocktypes[hexMap[x, (int)y, z]].isWater) { 
+						AddHexCell(x, y, z); 
+						}
 					}
 				}
 			}
@@ -224,7 +228,24 @@ public class Chunk
 				continue;
 			}
 
-			_chunkMeshRenderer.AddHex(new Vector3Int(x, y, z), HexData.hexVertices[i], HexData.hexTriangles[i],HexData.normals[i], isWater, isTransparent);
+			float lightLevel;
+			int yPos = y + 2;
+			bool inShade = false;
+			while (yPos < HexData.ChunkHeight)
+			{
+				if(hexMap[x,yPos,z]!=0)
+				{ 
+					inShade = true;
+					break;
+				}
+
+				yPos++;
+			}
+
+			if (inShade) lightLevel = 0.4f;
+			else lightLevel = 0f;
+
+			_chunkMeshRenderer.AddHex(new Vector3Int(x, y, z), HexData.hexVertices[i], HexData.hexTriangles[i],HexData.normals[i], isWater, isTransparent, lightLevel);
 			_chunkMeshRenderer.AddUvs(blockID, HexData.hexUvs[i], i, isWater);
 		}
 	}
@@ -236,6 +257,7 @@ public class Chunk
 		mesh.vertices = _chunkMeshRenderer.vertices.ToArray();
 		mesh.uv = _chunkMeshRenderer.uvs.ToArray();
 		mesh.normals = _chunkMeshRenderer.normals.ToArray();
+		mesh.colors = _chunkMeshRenderer.colors.ToArray();
 		mesh.subMeshCount = 3;
 
 		mesh.SetTriangles(_chunkMeshRenderer.triangles.ToArray(), 0);
@@ -255,6 +277,7 @@ public class Chunk
 		_chunkMeshRenderer.triangles.Clear();
 		_chunkMeshRenderer.transparentTriangles.Clear();
 		_chunkMeshRenderer.waterTriangles.Clear();
+		_chunkMeshRenderer.colors.Clear();
 	}
 }
 

@@ -64,14 +64,16 @@ public static class PositionHelper
     }
     public static Vector3 HexToPixel(Vector3 pos)
     {
-        int _x = (int)pos.x;
-        int _y = (int)pos.y;
-        int _z = (int)pos.z;
+        int _x = Mathf.FloorToInt(pos.x);
+        int _y = Mathf.FloorToInt(pos.y);
+        int _z = Mathf.FloorToInt(pos.z);
 
-        Vector3 pixelPos = new Vector3();
-        pixelPos.x = (((_x) + (_z) * 0.5f - (_z) / 2) * (HexData.innerRadius * 2f));
-        pixelPos.y = 1f * _y;
-        pixelPos.z = ((_z) * (HexData.outerRadius * 1.5f));
+        Vector3 pixelPos = new Vector3
+        {
+            x = (((_x) + (_z) * 0.5f - (_z) / 2) * ((Mathf.Sqrt(3.00f) / 2.00f) * 2f)),
+            y = 1f * _y,
+            z = ((_z) * (HexData.outerRadius * 1.5f))
+        };
 
         return pixelPos;
     }

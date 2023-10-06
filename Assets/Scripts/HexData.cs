@@ -7,7 +7,9 @@ public static class HexData {
 	//A Single Hexagon's metric values
 	public const float outerRadius = 1f;
 
-	public const float innerRadius = outerRadius * 0.866025404f;
+	public const float radiusVal = 0.2886f;
+
+	public const float innerRadius = outerRadius * 0.8660254f;
 
 	#region World size metrics
 	public static readonly int ChunkWidth = 16;
@@ -211,17 +213,20 @@ public static class HexData {
 	#endregion
 
 	#region UVs clockwise top to bottom
-	public static readonly Vector2 _00 = new Vector2(0.50f, 1.00f);
-	public static readonly Vector2 _01 = new Vector2(1.00f, 0.50f + (1.00f / (2.00f * Mathf.Sqrt(3.00f))));
-	public static readonly Vector2 _02 = new Vector2(1.00f, (1.00f / (2.00f * Mathf.Sqrt(3.00f))));
-	public static readonly Vector2 _03 = new Vector2(0.50f, 0.00f);
-	public static readonly Vector2 _04 = new Vector2(0.00f, (1.00f / (2.00f * Mathf.Sqrt(3.00f))));
-	public static readonly Vector2 _05 = new Vector2(0.00f, 0.50f + (1.00f / (2.00f * Mathf.Sqrt(3.00f))));
 
-	public static readonly Vector2 _06 = new Vector2(0f, 0f);
-	public static readonly Vector2 _07 = new Vector2(1f, 0f);
-	public static readonly Vector2 _08 = new Vector2(0f, 1f);
-	public static readonly Vector2 _09 = new Vector2(1f, 1f);
+	public static float epsilon = 0.0001f;
+
+	public static readonly Vector2 _00 = new Vector2(0.50f, 1.00f);
+	public static readonly Vector2 _01 = new Vector2(1.00f, 0.50f + radiusVal);
+	public static readonly Vector2 _02 = new Vector2(1.00f, radiusVal);
+	public static readonly Vector2 _03 = new Vector2(0.50f, 0.00f);
+	public static readonly Vector2 _04 = new Vector2(0.00f, radiusVal);
+	public static readonly Vector2 _05 = new Vector2(0.00f, 0.50f + radiusVal);
+
+	public static readonly Vector2 _06 = new Vector2(0.00f, 0.00f);
+	public static readonly Vector2 _07 = new Vector2(1.00f, 0.00f);
+	public static readonly Vector2 _08 = new Vector2(0.00f, 1.00f);
+	public static readonly Vector2 _09 = new Vector2(1.00f, 1.00f);
 
 	public static readonly Vector2[] topUvs = new Vector2[]
 	{

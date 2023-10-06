@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Collections.Concurrent;
-using System.Threading.Tasks;
 using System.Linq;
 using System;
 
@@ -55,6 +54,9 @@ public class World : MonoBehaviour
 
     public float HumidityOffset = 100f;
 
+    [Range(0.95f, 0f)]
+    public float globalLightLevel;
+
     // TODO: make blocktypes enum or a scriptable object
     // TODO: add creation stack
     // TODO: work on random generated seeds
@@ -78,6 +80,9 @@ public class World : MonoBehaviour
     private void Update()
     {
         playerCurrentChunkCoord = PositionHelper.GetChunkCoordFromVector3(PositionHelper.PixelToHex(player.position));
+
+        Shader.SetGlobalFloat("GlobalLightLevel",globalLightLevel);
+
         if (!playerCurrentChunkCoord.Equals(playerLastChunkCoord))
         { 
             CheckViewDistance();
@@ -297,8 +302,6 @@ public class World : MonoBehaviour
         {
             Vector3Int inChunkPos = GetInChunkPosition(pos, chunkPos);
             //if (blocktypes[var1[inChunkPos.x, inChunkPos.y, inChunkPos.z]].isTransparent && blocktypes[GetHex(pos)].isTransparent)
-            if (blocktypes[var1[inChunkPos.x, inChunkPos.y, inChunkPos.z]].isTransparent) print("yesbe");
-            else if (blocktypes[GetHex(pos)].isTransparent) print("nobe");
         } //bak bakalım chunkdatanin viewdistancetan 1 fazla olmasını kullanabiliyor musun gethex yerine
         return blocktypes[GetHex(pos)].isTransparent;
     }
