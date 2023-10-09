@@ -382,9 +382,14 @@ MonoBehaviour:
     Biome: {fileID: 11400000, guid: f3b3edc8f63e6a344a5fb13e711e56ee, type: 2}
   - temperatureStartThreshold: 0
     temperatureEndThreshold: 0.4
-    humidityStartThreshold: 0
+    humidityStartThreshold: 0.2
     humidityEndThreshold: 0.6
     Biome: {fileID: 11400000, guid: c9956884b285f354f9c53792b9c3c08d, type: 2}
+  - temperatureStartThreshold: 0
+    temperatureEndThreshold: 0.4
+    humidityStartThreshold: 0
+    humidityEndThreshold: 0.2
+    Biome: {fileID: 11400000, guid: f44b01d049231014aaee7236b74d6f7f, type: 2}
   - temperatureStartThreshold: 0.4
     temperatureEndThreshold: 0.6
     humidityStartThreshold: 0
@@ -585,6 +590,71 @@ MonoBehaviour:
     frontleftFaceTexture: 24
     backrightFaceTexture: 24
     backleftFaceTexture: 24
+  - blockTypeName: 10
+    blockName: SpruceWood
+    isSolid: 1
+    isTransparent: 0
+    isWater: 0
+    topFaceTexture: 27
+    bottomFaceTexture: 27
+    rightFaceTexture: 26
+    leftFaceTexture: 26
+    frontrightFaceTexture: 26
+    frontleftFaceTexture: 26
+    backrightFaceTexture: 26
+    backleftFaceTexture: 26
+  - blockTypeName: 10
+    blockName: SpruceLeaves
+    isSolid: 1
+    isTransparent: 0
+    isWater: 0
+    topFaceTexture: 30
+    bottomFaceTexture: 30
+    rightFaceTexture: 30
+    leftFaceTexture: 30
+    frontrightFaceTexture: 30
+    frontleftFaceTexture: 30
+    backrightFaceTexture: 30
+    backleftFaceTexture: 30
+  - blockTypeName: 10
+    blockName: Snow
+    isSolid: 1
+    isTransparent: 0
+    isWater: 0
+    topFaceTexture: 29
+    bottomFaceTexture: 29
+    rightFaceTexture: 28
+    leftFaceTexture: 28
+    frontrightFaceTexture: 28
+    frontleftFaceTexture: 28
+    backrightFaceTexture: 28
+    backleftFaceTexture: 28
+  - blockTypeName: 10
+    blockName: TaigaGrass
+    isSolid: 1
+    isTransparent: 0
+    isWater: 0
+    topFaceTexture: 31
+    bottomFaceTexture: 32
+    rightFaceTexture: 33
+    leftFaceTexture: 33
+    frontrightFaceTexture: 33
+    frontleftFaceTexture: 33
+    backrightFaceTexture: 33
+    backleftFaceTexture: 33
+  - blockTypeName: 10
+    blockName: TaigaDirt
+    isSolid: 1
+    isTransparent: 0
+    isWater: 0
+    topFaceTexture: 32
+    bottomFaceTexture: 32
+    rightFaceTexture: 32
+    leftFaceTexture: 32
+    frontrightFaceTexture: 32
+    frontleftFaceTexture: 32
+    backrightFaceTexture: 32
+    backleftFaceTexture: 32
   debugScreen: {fileID: 501965286}
   isUpdatingChunks: 0
   HumidityOffset: 100

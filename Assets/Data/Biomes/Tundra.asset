@@ -18,15 +18,8 @@ MonoBehaviour:
   solidGroundHeight: 42
   terrainHeight: 20
   terrainScale: 0.15
-  surfaceBlock: 10
-  subSurfaceBlock: 10
-  strength: 0.11
-  numLayers: 4
-  baseRoughness: 0.69
-  roughness: 1
-  persistence: 0.93
-  minValue: 1.13
-  centre: 1
+  surfaceBlock: 15
+  subSurfaceBlock: 15
   noiseSettings:
   - enabled: 1
     useFirstLayerAsMask: 0
@@ -54,14 +47,14 @@ MonoBehaviour:
     noiseZoom: 0
     redistrubitionModifier: 0
     exponent: 0
-  floraIndex: 0
+  floraIndex: 3
   floraZoneScale: 1.3
   floraZoneThreshold: 0.6
   floraPlacementScale: 15
   floraPlacementThreshold: 0.8
-  placeFlora: 0
-  maxFloraHeight: 12
-  minFloraHeight: 5
+  placeFlora: 1
+  maxFloraHeight: 16
+  minFloraHeight: 8
   lodes:
   - nodeName: Dirt
     blockID: 4

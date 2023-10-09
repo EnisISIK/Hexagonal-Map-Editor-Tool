@@ -343,7 +343,7 @@ public class World : MonoBehaviour
                 if (!voronoiBiomeAttributesDict.ContainsKey(seedCoord))
                 {
                     float land = Mathf.PerlinNoise((x + 100f) * 0.1f, (z + 100f) * 0.1f);
-                    if (land < 0.50f) voronoiBiomeAttributesDict.Add(seedCoord, OceanBiome);
+                    if (land < 0.40f) voronoiBiomeAttributesDict.Add(seedCoord, OceanBiome);  //0.40f 0.30f falan ayarla işte
                     else{
                         float temperature = Mathf.PerlinNoise(x * 0.2f, z * 0.2f);
                         float humidity = Mathf.PerlinNoise((x + 160f) * 0.2f, (z + 160f) * 0.2f);
@@ -431,7 +431,7 @@ public class World : MonoBehaviour
         }
         else if (yPos > terrainHeight)
         {
-            if (yPos <= 5)
+            if (yPos <= 5&&biome==OceanBiome)
                 return 8;
             else
                 return 0;
@@ -440,7 +440,7 @@ public class World : MonoBehaviour
         {
             voxelValue = 1;
         }
-        if (terrainHeight < 5)
+        if (terrainHeight < 5 && biome == OceanBiome)
         {
             voxelValue = 7;
         }
@@ -462,7 +462,7 @@ public class World : MonoBehaviour
 
         /* TREE PASS */
 
-        if (yPos == terrainHeight && biome.placeFlora&&terrainHeight>=10)
+        if (yPos == terrainHeight && biome.placeFlora&& biome != OceanBiome)
         {
 
             if (Noise.Get2DPerlin(new Vector2(pos.x, pos.z), 0, biome.floraZoneScale) > biome.floraZoneThreshold)

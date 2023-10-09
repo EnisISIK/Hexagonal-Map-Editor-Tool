@@ -14,6 +14,10 @@ public static class Structure
                 return MakeTree(position, minTrunkHeight, maxTrunkHeight);
             case 1:
                 return MakeCactus(position, minTrunkHeight, maxTrunkHeight);
+            case 2:
+                return MakeSpruceTree(position, minTrunkHeight, maxTrunkHeight);
+            case 3:
+                return MakeIceSpike(position, minTrunkHeight, maxTrunkHeight);
         }
 
         return new ConcurrentQueue<HexMod>();
@@ -58,6 +62,66 @@ public static class Structure
         for (int i = 1; i <= height; i++)
         {
             queue.Enqueue(new HexMod(new Vector3(position.x, position.y + i, position.z), 6));
+        }
+
+        return queue;
+    }
+
+    public static ConcurrentQueue<HexMod> MakeSpruceTree(Vector3 position, int minTrunkHeight, int maxTrunkHeight)
+    {
+        ConcurrentQueue<HexMod> queue = new ConcurrentQueue<HexMod>();
+
+        int height = (int)(maxTrunkHeight * Noise.Get2DPerlin(new Vector2(position.x, position.z), 4005f, 2f));
+
+        if (height < minTrunkHeight)
+            height = minTrunkHeight;
+
+        for(int a = 3; a < height; a+=3) 
+        { 
+            for (int i = 0; i < 8; i++)
+            {
+                float faceX = position.x + HexData.faces[i].x;
+                if (i >= 4 && i % 2 == 0 && Mathf.FloorToInt(position.z) % 2 == 0) faceX = position.x;
+                if (i >= 4 && i % 2 == 1 && Mathf.FloorToInt(position.z) % 2 == 1) faceX = position.x;
+
+                queue.Enqueue(new HexMod(new Vector3(faceX, position.y + a, position.z + HexData.faces[i].z), 14));
+            }
+        }
+
+        for (int i = 1; i < height; i++)
+        {
+            queue.Enqueue(new HexMod(new Vector3(position.x, position.y + i, position.z), 13));
+        }
+
+        queue.Enqueue(new HexMod(new Vector3(position.x, position.y + height, position.z), 14));
+
+        return queue;
+    }
+
+    public static ConcurrentQueue<HexMod> MakeIceSpike(Vector3 position, int minTrunkHeight, int maxTrunkHeight)
+    {
+        ConcurrentQueue<HexMod> queue = new ConcurrentQueue<HexMod>();
+
+        int height = (int)(maxTrunkHeight * Noise.Get2DPerlin(new Vector2(position.x, position.z), 4005f, 2f));
+
+        if (height < minTrunkHeight)
+            height = minTrunkHeight;
+
+        for (int a = 1; a < height/2; a++)
+        {
+            for (int i = 0; i < 8; i++)
+            {
+                float faceX = position.x + HexData.faces[i].x;
+                if (i >= 4 && i % 2 == 0 && Mathf.FloorToInt(position.z) % 2 == 0) faceX = position.x;
+                if (i >= 4 && i % 2 == 1 && Mathf.FloorToInt(position.z) % 2 == 1) faceX = position.x;
+
+                queue.Enqueue(new HexMod(new Vector3(faceX, position.y + a, position.z + HexData.faces[i].z), 10));
+            }
+        }
+
+        for (int i = height/2; i < height; i++)
+        {
+            queue.Enqueue(new HexMod(new Vector3(position.x, position.y + i, position.z), 10));
         }
 
         return queue;
