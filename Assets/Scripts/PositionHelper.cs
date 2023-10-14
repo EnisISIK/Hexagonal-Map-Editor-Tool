@@ -25,6 +25,7 @@ public static class PositionHelper
 
         int x = Mathf.FloorToInt(pos.x / HexData.ChunkWidth);
         int z = Mathf.FloorToInt(pos.z / HexData.ChunkWidth);
+        //Debug.Log("lower: " + x + " higher: "+ Mathf.CeilToInt(pos.x / HexData.ChunkWidth));
         return new ChunkCoord(x, z);
 
     }

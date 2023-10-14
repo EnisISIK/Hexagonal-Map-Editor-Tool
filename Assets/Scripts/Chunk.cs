@@ -76,7 +76,7 @@ public class Chunk
 
 		isHexMapPopulated = true;
 
-		yield return _world.ApplyModifications();
+		yield return _world.ApplyModificationsData();
 
 		_world.chunksToUpdate.Enqueue(this);
 	}
@@ -173,29 +173,30 @@ public class Chunk
 
 	}
 
-	public IEnumerator UpdateChunk()
+	public IEnumerator UpdateChunk(byte[,,] sexMap)
 	{
-		while (modifications.Count > 0)
-		{
-			HexMod structureHex = modifications.Dequeue();
-			Vector3 structureHexPos = structureHex.position -= position;
-			hexMap[(int)structureHexPos.x, (int)structureHexPos.y, (int)structureHexPos.z] = structureHex.id;
 
-		}
 		ClearMesh();
 		Task t = Task.Factory.StartNew(delegate
 		{
+			while (modifications.Count > 0)
+			{
+				HexMod structureHex = modifications.Dequeue();
+				Vector3 structureHexPos = structureHex.position -= position;
+				sexMap[(int)structureHexPos.x, (int)structureHexPos.y, (int)structureHexPos.z] = structureHex.id;
+
+			}
 			for (int y = 0; y < HexData.ChunkHeight; y++)
 			{
 				for (int z = 0; z < HexData.ChunkWidth; z++)
 				{
 					for (int x = 0; x < HexData.ChunkWidth; x++)
 					{
-						if (_world.blocktypes[hexMap[x, (int)y, z]].isSolid) { 
-						AddHexCell(x, y, z);
+						if (_world.blocktypes[sexMap[x, (int)y, z]].isSolid) { 
+						AddHexCell(x, y, z, sexMap);
 						}
-						else if (!_world.blocktypes[hexMap[x, (int)y, z]].isSolid && _world.blocktypes[hexMap[x, (int)y, z]].isWater) { 
-						AddHexCell(x, y, z); 
+						else if (!_world.blocktypes[sexMap[x, (int)y, z]].isSolid && _world.blocktypes[sexMap[x, (int)y, z]].isWater) { 
+						AddHexCell(x, y, z, sexMap); 
 						}
 					}
 				}
@@ -212,11 +213,11 @@ public class Chunk
 		//world.chunksToDraw.Enqueue(this);
 	}
 
-	private void AddHexCell(int x, int y, int z)
+	private void AddHexCell(int x, int y, int z,byte[,,] sexMap)
     {
-		byte blockID = hexMap[x, y, z];
-		bool isTransparent = _world.blocktypes[hexMap[x, y, z]].isTransparent;
-		bool isWater = _world.blocktypes[hexMap[x, y, z]].isWater;
+		byte blockID = sexMap[x, y, z];
+		bool isTransparent = _world.blocktypes[sexMap[x, y, z]].isTransparent;
+		bool isWater = _world.blocktypes[sexMap[x, y, z]].isWater;
 		for (int i = 0; i < 8; i++)
         {
 			float faceX = x + HexData.faces[i].x;

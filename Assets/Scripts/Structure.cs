@@ -18,6 +18,8 @@ public static class Structure
                 return MakeSpruceTree(position, minTrunkHeight, maxTrunkHeight);
             case 3:
                 return MakeIceSpike(position, minTrunkHeight, maxTrunkHeight);
+            case 4:
+                return MakeSpruceFoliage(position);
         }
 
         return new ConcurrentQueue<HexMod>();
@@ -71,13 +73,15 @@ public static class Structure
     {
         ConcurrentQueue<HexMod> queue = new ConcurrentQueue<HexMod>();
 
+        //queue = MakeSpruceFoliage(position);
+
         int height = (int)(maxTrunkHeight * Noise.Get2DPerlin(new Vector2(position.x, position.z), 4005f, 2f));
 
         if (height < minTrunkHeight)
             height = minTrunkHeight;
 
-        for(int a = 3; a < height; a+=3) 
-        { 
+        for (int a = 3; a < height; a += 3)
+        {
             for (int i = 0; i < 8; i++)
             {
                 float faceX = position.x + HexData.faces[i].x;
@@ -94,6 +98,38 @@ public static class Structure
         }
 
         queue.Enqueue(new HexMod(new Vector3(position.x, position.y + height, position.z), 14));
+
+        return queue;
+        //ConcurrentQueue<HexMod> queue = new ConcurrentQueue<HexMod>();
+
+        //int height = (int)(maxTrunkHeight * Noise.Get2DPerlin(new Vector2(position.x, position.z), 4005f, 2f));
+
+        //if (height < minTrunkHeight)
+        //    height = minTrunkHeight;
+
+        //for (int i = 1; i < height; i++)
+        //{
+        //    queue.Enqueue(new HexMod(new Vector3(position.x, position.y + i, position.z), 13));
+        //}
+
+        //for (int x = -2; x < 3; x++)
+        //{
+        //    for (int y = 0; y < 3; y++)
+        //    {
+        //        for (int z = -2; z < 3; z++)
+        //        {
+        //            queue.Enqueue(new HexMod(new Vector3(position.x + x, position.y + height + y, position.z + z), 14));
+        //        }
+        //    }
+        //}
+
+        //return queue;
+    }
+    public static ConcurrentQueue<HexMod> MakeSpruceFoliage(Vector3 position)
+    {
+        ConcurrentQueue<HexMod> queue = new ConcurrentQueue<HexMod>();
+
+        queue.Enqueue(new HexMod(new Vector3(position.x, position.y + 1, position.z), 18));
 
         return queue;
     }

@@ -49,6 +49,7 @@ public class World : MonoBehaviour
 
     public GameObject debugScreen;
 
+    private bool isApplyingModifications;
     private bool isCreatingChunks;
     public bool isUpdatingChunks;
 
@@ -92,6 +93,10 @@ public class World : MonoBehaviour
         {
             StartCoroutine(CreateChunks());
         }
+        if (modifications.Count > 0 && !isApplyingModifications)
+        {
+            //StartCoroutine(ApplyModifications());
+        }
         if (Input.GetKeyDown(KeyCode.F3))
         {
             debugScreen.SetActive(!debugScreen.activeSelf);
@@ -119,14 +124,14 @@ public class World : MonoBehaviour
         while (chunksToUpdate.Count > 0)
         {
             if (chunksToUpdate.TryPeek(out Chunk var))
-                if (chunksDataDictionary.ContainsKey(var.position/HexData.ChunkWidth))
+                if (chunksDataDictionary.TryGetValue(var.position/HexData.ChunkWidth,out byte[,,] byteMap))
                 {
                     Vector3Int chunkPos = PositionHelper.GetChunkFromVector3(var.position);
                     if (!chunksDataDictionary.ContainsKey(chunkPos))
-                        chunksDataDictionary.Add(chunkPos, chunksDictionary[chunkPos].hexMap);
+                        chunksDataDictionary.Add(chunkPos, chunksDictionary[chunkPos].hexMap);  //bu satır ne abicim amk bu yaşanıyor mu ki
                     if (chunksToUpdate.TryDequeue(out Chunk var1))
                     {
-                        StartCoroutine(var1.UpdateChunk());
+                        StartCoroutine(var1.UpdateChunk(byteMap));
                         yield return null;
                     }
                 }
@@ -135,6 +140,7 @@ public class World : MonoBehaviour
     }
     public IEnumerator ApplyModifications()
     {
+        isApplyingModifications = true;
         while (modifications.Count > 0)
         {
 
@@ -147,7 +153,7 @@ public class World : MonoBehaviour
                 HexMod v;
                 queue.TryDequeue(out v);
 
-                ChunkCoord c = PositionHelper.GetChunkCoordFromVector3(v.position);
+                ChunkCoord c = PositionHelper.GetChunkCoordFromVector3(v.position);//burda sıkıntı var
 
                 if (chunksDictionary.TryGetValue(new Vector3Int(c.x, 0, c.z), out Chunk var))
                 {
@@ -159,6 +165,38 @@ public class World : MonoBehaviour
             }
             yield return null;
         }
+        isApplyingModifications = false;
+    }
+
+    public IEnumerator ApplyModificationsData()  //yarın kodu buna değiştir bakalım
+    {
+        isApplyingModifications = true;
+        while (modifications.Count > 0)
+        {
+
+            ConcurrentQueue<HexMod> queue;
+            modifications.TryDequeue(out queue);
+
+            while (queue.Count > 0)
+            {
+
+                HexMod v;
+                queue.TryDequeue(out v);
+
+                ChunkCoord c = PositionHelper.GetChunkCoordFromVector3(v.position);//burda sıkıntı var
+
+                if (chunksDataDictionary.TryGetValue(new Vector3Int(c.x, 0, c.z), out byte[,,] var))
+                {
+                    Vector3Int newPos = new Vector3Int(Mathf.FloorToInt(v.position.x-(c.x*HexData.ChunkWidth)), Mathf.FloorToInt(v.position.y), Mathf.FloorToInt(v.position.z - (c.z * HexData.ChunkWidth)));
+                    var[newPos.x, newPos.y, newPos.z] = v.id;
+                }
+
+
+
+            }
+            yield return null;
+        }
+        isApplyingModifications = false;
     }
 
     IEnumerator CreateChunks()
@@ -169,8 +207,7 @@ public class World : MonoBehaviour
         {
             HashSet<ChunkCoord> chunksToCreateCopy = new HashSet<ChunkCoord>(chunksToCreate);
             foreach (ChunkCoord chunkPos in chunksToCreateCopy) {
-                if (chunksDataDictionary.ContainsKey(new Vector3Int(chunkPos.x, 0, chunkPos.z))) { 
-
+                if (chunksDataDictionary.ContainsKey(new Vector3Int(chunkPos.x, 0, chunkPos.z))) {
                     chunksDictionary[new Vector3Int(chunkPos.x, 0, chunkPos.z)].Init(chunksDataDictionary[new Vector3Int(chunkPos.x, 0, chunkPos.z)]);
                     chunksToCreate.Remove(chunkPos);
                 }
@@ -404,6 +441,7 @@ public class World : MonoBehaviour
             //if (biomeSelection.terrainSurfaceNoise.HasValue == false)
             //{
                 terrainHeight = GetSurfaceHeightNoise(pos.x, pos.z, biome);
+                terrainHeight += 5;
             //}
             //else
             //{
@@ -412,6 +450,7 @@ public class World : MonoBehaviour
         }
         else { biome = biomes[0];
             terrainHeight = GetSurfaceHeightNoise(pos.x, pos.z, biome);
+            terrainHeight += 5;
         }
         //terrainHeight = GetSurfaceHeightNoise(pos.x, pos.z, biome);
         if (biome == OceanBiome)
@@ -471,6 +510,14 @@ public class World : MonoBehaviour
                 if (Noise.Get2DPerlin(new Vector2(pos.x, pos.z), 0, biome.floraPlacementScale) > biome.floraPlacementThreshold)
                 {
                     ConcurrentQueue<HexMod> structure = Structure.GenerateMajorFlora(biome.floraIndex,pos, biome.minFloraHeight, biome.maxFloraHeight);
+                    modifications.Enqueue(structure);
+                }
+            }
+            else
+            {
+                if (Noise.Get2DPerlin(new Vector2(pos.x, pos.z), 0, biome.floraPlacementScale) > biome.floraPlacementThreshold)
+                {
+                    ConcurrentQueue<HexMod> structure = Structure.GenerateMajorFlora(4, pos, biome.minFloraHeight, biome.maxFloraHeight);
                     modifications.Enqueue(structure);
                 }
             }
