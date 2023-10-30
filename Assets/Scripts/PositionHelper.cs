@@ -5,6 +5,15 @@ using System.Linq;
 
 public static class PositionHelper
 {
+    public static int GetSurfaceHeightNoise(float x, float z, BiomeAttributes attributes_1,DomainWarping domainWarping)
+    {
+        float height = domainWarping.GenerateDomainNoise(new Vector2(x, z), attributes_1.noiseSettings[0]);
+        height = Noise.Redistribution(height, attributes_1.noiseSettings[0]);
+        int terrainHeight = Noise.Map01Int(4, HexData.ChunkHeight, height);
+
+        return terrainHeight;
+    }
+
     public static bool IsHexInChunk(float _x, float _y, float _z)
     {
         return !(_x < 0 || _x > HexData.ChunkWidth - 1 || _y < 0 || _y > HexData.ChunkHeight - 1 || _z < 0 || _z > HexData.ChunkWidth - 1);
@@ -28,6 +37,18 @@ public static class PositionHelper
         //Debug.Log("lower: " + x + " higher: "+ Mathf.CeilToInt(pos.x / HexData.ChunkWidth));
         return new ChunkCoord(x, z);
 
+    }
+
+    public static Vector3Int GetInChunkPosition(Vector3 pos, Vector3 chunkPos)
+    {
+        int xCheck = Mathf.FloorToInt(pos.x);
+        int yCheck = Mathf.FloorToInt(pos.y);
+        int zCheck = Mathf.FloorToInt(pos.z);
+
+        xCheck -= Mathf.FloorToInt(chunkPos.x * HexData.ChunkWidth);
+        zCheck -= Mathf.FloorToInt(chunkPos.z * HexData.ChunkWidth);
+
+        return new Vector3Int(xCheck, yCheck, zCheck);
     }
 
     public static Vector3 AxialToOddr(Vector2 hex)

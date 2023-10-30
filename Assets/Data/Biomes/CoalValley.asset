@@ -20,13 +20,6 @@ MonoBehaviour:
   terrainScale: 0.15
   surfaceBlock: 5
   subSurfaceBlock: 5
-  strength: 0.11
-  numLayers: 4
-  baseRoughness: 0.69
-  roughness: 1
-  persistence: 0.93
-  minValue: 1.13
-  centre: 1
   noiseSettings:
   - enabled: 1
     useFirstLayerAsMask: 0
@@ -34,7 +27,7 @@ MonoBehaviour:
     numLayers: 5
     baseRoughness: 1
     roughness: 1
-    persistence: 0.5
+    persistence: 2
     minValue: 0
     centre: 1
     offset: {x: -100, y: 3400}

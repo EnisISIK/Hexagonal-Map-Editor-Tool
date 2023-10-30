@@ -145,7 +145,7 @@ public class Player : MonoBehaviour
             if (Input.GetMouseButtonDown(0)&&!world.isUpdatingChunks){
 
                 Vector3 destroyPos = PositionHelper.PixelToHex(highlightBlock.position);
-                world.GetChunkFromChunkVector3(destroyPos).EditHex(destroyPos, 0);
+                world.EditHex(destroyPos, 0);
                 Debug.Log(PositionHelper.PixelToHex(highlightBlock.position));
             }
             //destroy block positionu biraz kayık bir yandakini falan yokediyor bazen
@@ -154,7 +154,7 @@ public class Player : MonoBehaviour
             if (Input.GetMouseButtonDown(1)&&!world.isUpdatingChunks) {
 
                 Vector3 placePos = PositionHelper.PixelToHex(placeBlock.position);
-                world.GetChunkFromChunkVector3(placePos).EditHex(placePos, selectedBlockIndex);
+                world.EditHex(placePos, selectedBlockIndex);
             }
         }
 

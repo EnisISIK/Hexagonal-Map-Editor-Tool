@@ -33,7 +33,7 @@ MonoBehaviour:
     offset: {x: -100, y: 3400}
     noiseZoom: 0.01
     redistrubitionModifier: 1.2
-    exponent: 5
+    exponent: 8
   - enabled: 0
     useFirstLayerAsMask: 0
     strength: 2

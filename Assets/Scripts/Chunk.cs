@@ -9,7 +9,6 @@ public class Chunk
 {
 	private readonly World _world;
 	private ChunkMeshRenderer _chunkMeshRenderer;
-	private ChunkDataGenerator _chunkDataGenerator;
 
 	private GameObject chunkObject;
 
@@ -17,16 +16,10 @@ public class Chunk
 	private MeshRenderer meshRenderer;
 	private MeshFilter meshFilter;
 
-	public byte[,,] hexMap = null;
-
-	public Queue<HexMod> modifications = new Queue<HexMod>();
-
 	private ChunkCoord chunkCoordinates;
 	public Vector3Int position;
 
 	private bool _isActive;
-	public bool isHexMapPopulated = false;
-
 
 	public bool isActive
 	{
@@ -48,7 +41,7 @@ public class Chunk
 
 	}
 
-	public void Init(byte[,,] data)
+	public void Init()
     {
 		chunkObject = new GameObject();
 		meshFilter = chunkObject.AddComponent<MeshFilter>();
@@ -66,22 +59,22 @@ public class Chunk
 		position = Vector3Int.FloorToInt(chunkObject.transform.position);
 
 		_chunkMeshRenderer = new ChunkMeshRenderer(_world, position);
-		//_chunkDataGenerator = new ChunkDataGenerator(_world);
-		hexMap = data;
-		_world.StartCoroutine(PopulateHexMap());
+
+
+		_world.chunksToUpdate.Enqueue(this);
+		//_world.StartCoroutine(PopulateHexMap());
+
 	}
 
 	public IEnumerator PopulateHexMap()
     {
-
-		isHexMapPopulated = true;
 
 		yield return _world.ApplyModificationsData();
 
 		_world.chunksToUpdate.Enqueue(this);
 	}
 
-	private bool CheckHex(float _y, float _x, float _z)
+	private bool CheckHex(float _y, float _x, float _z, HexState[,,] hexMap)
     {
 		int x = Mathf.FloorToInt(_x);
 		int y = Mathf.FloorToInt(_y);
@@ -89,12 +82,12 @@ public class Chunk
 
 		if (!PositionHelper.IsHexInChunk(x, y, z))
         {
-			return _world.CheckForTransparentHex(new Vector3(x, y, z)+position);
+			return _world.CheckForHex(new Vector3(x, y, z)+position);
         }
 
-		return _world.blocktypes[hexMap[x, y, z]].isTransparent;
+		return _world.blocktypes[hexMap[x, y, z].id].isSolid;
 	}
-	private bool CheckWaterHex(float _y, float _x, float _z)
+	private bool CheckWaterHex(float _y, float _x, float _z, HexState[,,] hexMap)
 	{
 		int x = Mathf.FloorToInt(_x);
 		int y = Mathf.FloorToInt(_y);
@@ -105,38 +98,10 @@ public class Chunk
 			return _world.CheckForWaterHex(new Vector3(x, y, z) + position);
 		}
 
-		return _world.blocktypes[hexMap[x, y, z]].isWater;
+		return _world.blocktypes[hexMap[x, y, z].id].isWater;
 	}
 
-	private Vector3Int GetInChunkPosition(Vector3 pos)
-    {
-		int xCheck = Mathf.FloorToInt(pos.x);
-		int yCheck = Mathf.FloorToInt(pos.y);
-		int zCheck = Mathf.FloorToInt(pos.z);
-
-		xCheck -= Mathf.FloorToInt(position.x);
-		zCheck -= Mathf.FloorToInt(position.z);
-
-		return new Vector3Int(xCheck, yCheck, zCheck);
-	}
-
-	public byte GetHexFromGlobalVector3(Vector3 pos)
-	{
-		Vector3Int inChunkPosition = GetInChunkPosition(pos);
-
-		return hexMap[inChunkPosition.x, inChunkPosition.y, inChunkPosition.z];
-	}
-
-	public void EditHex(Vector3 pos, byte newID)
-	{
-		Vector3Int inChunkPosition = GetInChunkPosition(pos);
-
-		hexMap[inChunkPosition.x, inChunkPosition.y, inChunkPosition.z] = newID;
-
-		_world.StartCoroutine(UpdateSurroundingHex(inChunkPosition.x, inChunkPosition.y, inChunkPosition.z, newID));
-	}
-
-	private IEnumerator UpdateSurroundingHex(int x, int y, int z,int blockID)
+	public IEnumerator UpdateSurroundingHex(int x, int y, int z,int blockID)
 	{
 		Vector3Int thisHex = new Vector3Int(x, y, z);
 
@@ -173,30 +138,23 @@ public class Chunk
 
 	}
 
-	public IEnumerator UpdateChunk(byte[,,] sexMap)
+	public IEnumerator UpdateChunk(HexState[,,] hexMap)
 	{
 
 		ClearMesh();
 		Task t = Task.Factory.StartNew(delegate
 		{
-			while (modifications.Count > 0)
-			{
-				HexMod structureHex = modifications.Dequeue();
-				Vector3 structureHexPos = structureHex.position -= position;
-				sexMap[(int)structureHexPos.x, (int)structureHexPos.y, (int)structureHexPos.z] = structureHex.id;
-
-			}
 			for (int y = 0; y < HexData.ChunkHeight; y++)
 			{
 				for (int z = 0; z < HexData.ChunkWidth; z++)
 				{
 					for (int x = 0; x < HexData.ChunkWidth; x++)
 					{
-						if (_world.blocktypes[sexMap[x, (int)y, z]].isSolid) { 
-						AddHexCell(x, y, z, sexMap);
+						if (_world.blocktypes[hexMap[x, y, z].id].isSolid) { 
+						AddHexCell(x, y, z, hexMap);
 						}
-						else if (!_world.blocktypes[sexMap[x, (int)y, z]].isSolid && _world.blocktypes[sexMap[x, (int)y, z]].isWater) { 
-						AddHexCell(x, y, z, sexMap); 
+						else if (!_world.blocktypes[hexMap[x, y, z].id].isSolid && _world.blocktypes[hexMap[x, y, z].id].isWater) { 
+						AddHexCell(x, y, z, hexMap); 
 						}
 					}
 				}
@@ -210,21 +168,19 @@ public class Chunk
 			Debug.LogError(t.Exception);
         }
 		CreateMesh();
-		//world.chunksToDraw.Enqueue(this);
 	}
 
-	private void AddHexCell(int x, int y, int z,byte[,,] sexMap)
+	private void AddHexCell(int x, int y, int z,HexState[,,] hexMap)
     {
-		byte blockID = sexMap[x, y, z];
-		bool isTransparent = _world.blocktypes[sexMap[x, y, z]].isTransparent;
-		bool isWater = _world.blocktypes[sexMap[x, y, z]].isWater;
+		byte blockID = hexMap[x, y, z].id;
+		bool isTransparent = _world.blocktypes[hexMap[x, y, z].id].isTransparent;
+		bool isWater = _world.blocktypes[hexMap[x, y, z].id].isWater;
 		for (int i = 0; i < 8; i++)
         {
 			float faceX = x + HexData.faces[i].x;
-			if (i >= 4 && i % 2 == 0 && z % 2 == 0) faceX = x;
-			if (i >= 4 && i % 2 == 1 && z % 2 == 1) faceX = x;
-			if (isWater && CheckWaterHex(y + HexData.faces[i].y, faceX, z + HexData.faces[i].z)) continue;
-			if (!CheckHex(y + HexData.faces[i].y, faceX, z + HexData.faces[i].z))
+			if (i >= 4 && i % 2 == z % 2) faceX = x;
+			if (isWater && CheckWaterHex(y + HexData.faces[i].y, faceX, z + HexData.faces[i].z, hexMap)) continue; //if the neighbour IS water, dont render the face
+			if (CheckHex(y + HexData.faces[i].y, faceX, z + HexData.faces[i].z, hexMap))  //if the neighbour IS a block(and not transparent but its not implemented yet), dont render the face 
 			{
 				continue;
 			}
@@ -234,7 +190,7 @@ public class Chunk
 			bool inShade = false;
 			while (yPos < HexData.ChunkHeight)
 			{
-				if(hexMap[x,yPos,z]!=0)
+				if(hexMap[x,yPos,z].id!=0)
 				{ 
 					inShade = true;
 					break;
@@ -314,15 +270,16 @@ public class ChunkCoord{
 }
 
 [System.Serializable]
-public class VoxelState
+public class HexState
 {
 	public byte id;
 
-	public VoxelState()
+	public HexState()
     {
 		id = 0;
+
     }
-	public VoxelState(byte _id)
+	public HexState(byte _id)
 	{
 		id = _id;
 	}

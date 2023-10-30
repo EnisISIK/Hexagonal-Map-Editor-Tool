@@ -39,13 +39,13 @@ public class HexMapCamera : MonoBehaviour
 			if (Input.GetMouseButtonDown(1)){
 
 				Vector3 destroyPos = PositionHelper.PixelToHex(highlightBlock.position);
-				world.GetChunkFromChunkVector3(destroyPos).EditHex(destroyPos, 0);  //şimdidide raycastta bir problem var onu çöz tamamdır
+				world.EditHex(destroyPos, 0);  //şimdidide raycastta bir problem var onu çöz tamamdır
 				Debug.Log(PositionHelper.PixelToHex(highlightBlock.position));
 			}
 			// Place block.
 			if (Input.GetMouseButtonDown(0)){
 				Vector3 placePos = PositionHelper.PixelToHex(placeBlock.position);
-				world.GetChunkFromChunkVector3(placePos).EditHex(placePos, 1);
+				world.EditHex(placePos, 1);
 			}
 		}
 

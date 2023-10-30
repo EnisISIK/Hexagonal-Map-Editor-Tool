@@ -363,7 +363,7 @@ MonoBehaviour:
     persistence: 0.5
     minValue: 0
     centre: 0
-    offset: {x: 0, y: 0}
+    offset: {x: 1000, y: 2000}
     noiseZoom: 0.2
     redistrubitionModifier: 1.2
     exponent: 5
@@ -420,6 +420,7 @@ MonoBehaviour:
     blockName: Air
     isSolid: 0
     isTransparent: 1
+    renderNeighbourFaces: 0
     isWater: 0
     topFaceTexture: 7
     bottomFaceTexture: 7
@@ -433,6 +434,7 @@ MonoBehaviour:
     blockName: Stone
     isSolid: 1
     isTransparent: 0
+    renderNeighbourFaces: 1
     isWater: 0
     topFaceTexture: 0
     bottomFaceTexture: 0
@@ -446,6 +448,7 @@ MonoBehaviour:
     blockName: Grass
     isSolid: 1
     isTransparent: 0
+    renderNeighbourFaces: 0
     isWater: 0
     topFaceTexture: 7
     bottomFaceTexture: 1
@@ -459,6 +462,7 @@ MonoBehaviour:
     blockName: Wood
     isSolid: 1
     isTransparent: 0
+    renderNeighbourFaces: 0
     isWater: 0
     topFaceTexture: 6
     bottomFaceTexture: 6
@@ -472,6 +476,7 @@ MonoBehaviour:
     blockName: Dirt
     isSolid: 1
     isTransparent: 0
+    renderNeighbourFaces: 0
     isWater: 0
     topFaceTexture: 1
     bottomFaceTexture: 1
@@ -485,6 +490,7 @@ MonoBehaviour:
     blockName: Coal
     isSolid: 1
     isTransparent: 0
+    renderNeighbourFaces: 0
     isWater: 0
     topFaceTexture: 9
     bottomFaceTexture: 9
@@ -498,6 +504,7 @@ MonoBehaviour:
     blockName: Leaves
     isSolid: 1
     isTransparent: 1
+    renderNeighbourFaces: 0
     isWater: 0
     topFaceTexture: 16
     bottomFaceTexture: 16
@@ -511,6 +518,7 @@ MonoBehaviour:
     blockName: Sand
     isSolid: 1
     isTransparent: 0
+    renderNeighbourFaces: 0
     isWater: 0
     topFaceTexture: 10
     bottomFaceTexture: 10
@@ -524,6 +532,7 @@ MonoBehaviour:
     blockName: Water
     isSolid: 0
     isTransparent: 1
+    renderNeighbourFaces: 0
     isWater: 1
     topFaceTexture: 17
     bottomFaceTexture: 17
@@ -537,6 +546,7 @@ MonoBehaviour:
     blockName: Glass
     isSolid: 1
     isTransparent: 1
+    renderNeighbourFaces: 0
     isWater: 0
     topFaceTexture: 3
     bottomFaceTexture: 3
@@ -550,6 +560,7 @@ MonoBehaviour:
     blockName: Ice
     isSolid: 1
     isTransparent: 0
+    renderNeighbourFaces: 0
     isWater: 0
     topFaceTexture: 19
     bottomFaceTexture: 19
@@ -563,6 +574,7 @@ MonoBehaviour:
     blockName: Savannah
     isSolid: 1
     isTransparent: 0
+    renderNeighbourFaces: 0
     isWater: 0
     topFaceTexture: 23
     bottomFaceTexture: 21
@@ -576,6 +588,7 @@ MonoBehaviour:
     blockName: DesertOrange
     isSolid: 1
     isTransparent: 0
+    renderNeighbourFaces: 0
     isWater: 0
     topFaceTexture: 25
     bottomFaceTexture: 25
@@ -589,6 +602,7 @@ MonoBehaviour:
     blockName: SpruceWood
     isSolid: 1
     isTransparent: 0
+    renderNeighbourFaces: 0
     isWater: 0
     topFaceTexture: 27
     bottomFaceTexture: 27
@@ -602,6 +616,7 @@ MonoBehaviour:
     blockName: SpruceLeaves
     isSolid: 1
     isTransparent: 0
+    renderNeighbourFaces: 0
     isWater: 0
     topFaceTexture: 30
     bottomFaceTexture: 30
@@ -615,6 +630,7 @@ MonoBehaviour:
     blockName: Snow
     isSolid: 1
     isTransparent: 0
+    renderNeighbourFaces: 0
     isWater: 0
     topFaceTexture: 29
     bottomFaceTexture: 29
@@ -628,6 +644,7 @@ MonoBehaviour:
     blockName: TaigaGrass
     isSolid: 1
     isTransparent: 0
+    renderNeighbourFaces: 0
     isWater: 0
     topFaceTexture: 31
     bottomFaceTexture: 32
@@ -641,6 +658,7 @@ MonoBehaviour:
     blockName: TaigaDirt
     isSolid: 1
     isTransparent: 0
+    renderNeighbourFaces: 0
     isWater: 0
     topFaceTexture: 32
     bottomFaceTexture: 32
@@ -654,6 +672,7 @@ MonoBehaviour:
     blockName: Grass
     isSolid: 1
     isTransparent: 0
+    renderNeighbourFaces: 0
     isWater: 0
     topFaceTexture: 34
     bottomFaceTexture: 34
