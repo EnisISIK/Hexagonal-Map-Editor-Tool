@@ -15,7 +15,7 @@ public static class HexData {
 	public static readonly int ChunkWidth = 16;
 	public static readonly int ChunkHeight = 128;
 
-	public static readonly int ViewDistanceinChunks = 8;
+	public static readonly int ViewDistanceinChunks = 4;
 
 	public static readonly int WorldSizeInChunks = 10;
 	public static int WorldSizeInBlocks

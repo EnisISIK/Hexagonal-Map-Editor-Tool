@@ -66,14 +66,6 @@ public class Chunk
 
 	}
 
-	public IEnumerator PopulateHexMap()
-    {
-
-		yield return _world.ApplyModificationsData();
-
-		_world.chunksToUpdate.Enqueue(this);
-	}
-
 	private bool CheckHex(float _y, float _x, float _z, HexState[,,] hexMap)
     {
 		int x = Mathf.FloorToInt(_x);

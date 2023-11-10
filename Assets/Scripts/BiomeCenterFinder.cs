@@ -7,6 +7,7 @@ public static class BiomeCenterFinder
 {
     public static List<Vector2Int> neighbours8Directions = new List<Vector2Int>
     {
+        new Vector2Int(0,0),
         new Vector2Int(0,1),
         new Vector2Int(1,1),
         new Vector2Int(1,0),
@@ -85,7 +86,7 @@ public static class BiomeCenterFinder
     public static Dictionary<Vector3Int, VoronoiSeed> CalculateBiomeCentersVoronoi(int pixelsPerCell, int chunkRange, ChunkCoord coord,World world)
     {
         Dictionary<Vector3Int, VoronoiSeed> biomeCentersDict = new Dictionary<Vector3Int, VoronoiSeed>();
-        int cellSize = pixelsPerCell;
+        int cellSize = pixelsPerCell*4;  //burayı incele 9.11 ve oluşturabiliyorsan 8 yönlü olana çevir
         int seed = 45;
 
         System.Random randomGenerator = new System.Random(seed);
@@ -102,6 +103,69 @@ public static class BiomeCenterFinder
 
                 float land = Mathf.PerlinNoise((x + 100f) * 0.1f, (z + 100f) * 0.1f);
                 if (land < 0.40f) biomeCentersDict.Add(new Vector3Int(x, 0, z),new VoronoiSeed(world.OceanBiome, new Vector3(x * cellSize + randomNumberX, 0, z * cellSize + randomNumberZ)));  //0.40f 0.30f falan ayarla işte
+                else
+                {
+                    float temperature = Mathf.PerlinNoise(x * 0.2f, z * 0.2f);//Noise.OctavePerlin(new Vector2(x, z), biomeNoiseSettings);// simplexNoise.coherentNoise(x, 0, z);//+ z *0.05f);
+                    float humidity = Mathf.PerlinNoise((x + 160f) * 0.2f, (z + 160f) * 0.2f);//Noise.OctavePerlin(new Vector2(x+160f, z + 160f), biomeNoiseSettings);//+ (z + 160f) *0.05f);// simplexNoise.coherentNoise(x+160f, 0, z+160f);//çöl yanında kar gibi ufak bir sıkıntı yaşandı
+                    biomeCentersDict.Add(new Vector3Int(x, 0, z), new VoronoiSeed(world.SelectBiomes(temperature, humidity), new Vector3(x * cellSize + randomNumberX, 0, z * cellSize + randomNumberZ)));
+                    //voronoiBiomeAttributesDict.Add(seedCoord, biomeAttributesData[randomGenerator.Next(0,biomeAttributesData.Count)].Biome);
+                }
+
+            }
+        }
+
+        return biomeCentersDict;
+    }
+
+    public static Dictionary<Vector3Int, VoronoiSeed> CalculateBiomeCenter(int pixelsPerCell, int chunkRange, ChunkCoord coord, World world)
+    {
+        Dictionary<Vector3Int, VoronoiSeed> biomeCentersDict = new Dictionary<Vector3Int, VoronoiSeed>();
+        int cellSize = pixelsPerCell*4;
+        int seed = 45;
+
+        System.Random randomGenerator = new System.Random(seed);
+
+        foreach (Vector2Int offsetXY in neighbours8Directions)
+        {
+            int randomNumberX = randomGenerator.Next(0, cellSize);
+            int randomNumberZ = randomGenerator.Next(0, cellSize);
+
+            if (biomeCentersDict.ContainsKey(new Vector3Int(coord.x + offsetXY.x, 0, coord.z + offsetXY.y))) continue;
+
+            float land = Mathf.PerlinNoise((coord.x+offsetXY.x + 100f) * 0.1f, (coord.z + offsetXY.y + 100f) * 0.1f);
+            if (land < 0.40f) biomeCentersDict.Add(new Vector3Int(coord.x + offsetXY.x, 0, coord.z + offsetXY.y), new VoronoiSeed(world.OceanBiome, new Vector3(offsetXY.x * cellSize + randomNumberX, 0, offsetXY.y * cellSize + randomNumberZ)));  //0.40f 0.30f falan ayarla işte
+            else
+            {
+                float temperature = Mathf.PerlinNoise(coord.x + offsetXY.x * 0.2f, coord.z + offsetXY.y * 0.2f);//Noise.OctavePerlin(new Vector2(x, z), biomeNoiseSettings);// simplexNoise.coherentNoise(x, 0, z);//+ z *0.05f);
+                float humidity = Mathf.PerlinNoise((coord.x + offsetXY.x + 160f) * 0.2f, (coord.z + offsetXY.y + 160f) * 0.2f);//Noise.OctavePerlin(new Vector2(x+160f, z + 160f), biomeNoiseSettings);//+ (z + 160f) *0.05f);// simplexNoise.coherentNoise(x+160f, 0, z+160f);//çöl yanında kar gibi ufak bir sıkıntı yaşandı
+                biomeCentersDict.Add(new Vector3Int(coord.x + offsetXY.x, 0, coord.z + offsetXY.y), new VoronoiSeed(world.SelectBiomes(temperature, humidity), new Vector3((coord.x + offsetXY.x)* cellSize + randomNumberX, 0, (coord.z + offsetXY.y) * cellSize + randomNumberZ)));
+                //voronoiBiomeAttributesDict.Add(seedCoord, biomeAttributesData[randomGenerator.Next(0,biomeAttributesData.Count)].Biome);
+            }
+        }
+
+
+        return biomeCentersDict;
+    }
+    public static Dictionary<Vector3Int, VoronoiSeed> CalculateBiomeCentersCopy(int pixelsPerCell, int chunkRange, ChunkCoord coord, World world)
+    {
+        Dictionary<Vector3Int, VoronoiSeed> biomeCentersDict = new Dictionary<Vector3Int, VoronoiSeed>();
+        int cellSize = pixelsPerCell * 4;  //burayı incele 9.11 ve oluşturabiliyorsan 8 yönlü olana çevir
+        int seed = 45;
+
+        System.Random randomGenerator = new System.Random(seed);
+
+        for (int x = (coord.x/4)-2; x < (coord.x/4) + 3; x++)
+        {
+            for (int z = (coord.z / 4) -2; z < (coord.z/4) + 3; z++)
+            {
+
+                int randomNumberX = randomGenerator.Next(0, cellSize);
+                int randomNumberZ = randomGenerator.Next(0, cellSize);
+
+                if (biomeCentersDict.ContainsKey(new Vector3Int(x, 0, z))) continue;
+
+                float land = Mathf.PerlinNoise((x + 100f) * 0.1f, (z + 100f) * 0.1f);
+                if (land < 0.40f) biomeCentersDict.Add(new Vector3Int(x, 0, z), new VoronoiSeed(world.OceanBiome, new Vector3(x * cellSize + randomNumberX, 0, z * cellSize + randomNumberZ)));  //0.40f 0.30f falan ayarla işte
                 else
                 {
                     float temperature = Mathf.PerlinNoise(x * 0.2f, z * 0.2f);//Noise.OctavePerlin(new Vector2(x, z), biomeNoiseSettings);// simplexNoise.coherentNoise(x, 0, z);//+ z *0.05f);
