@@ -9,7 +9,7 @@ public static class PositionHelper
     {
         float height = domainWarping.GenerateDomainNoise(new Vector2(x, z), attributes_1.noiseSettings[0]);
         height = Noise.Redistribution(height, attributes_1.noiseSettings[0]);
-        int terrainHeight = Noise.Map01Int(4, HexData.ChunkHeight, height);
+        int terrainHeight = Noise.Map01Int(0, HexData.ChunkHeight, height);
 
         return terrainHeight;
     }

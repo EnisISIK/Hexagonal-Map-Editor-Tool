@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class DebugScreen : MonoBehaviour
 {
-    World world;
+    World _world;
     Text text;
 
     float frameRate;
@@ -16,7 +16,7 @@ public class DebugScreen : MonoBehaviour
 
     void Start()
     {
-        world = GameObject.Find("World").GetComponent<World>();
+        _world = GameObject.Find("World").GetComponent<World>();
         text = GetComponent<Text>();
 
         halfWorldSizeInHex = HexData.WorldSizeInBlocks / 2;
@@ -30,9 +30,9 @@ public class DebugScreen : MonoBehaviour
         debugText += "\n";
         debugText += frameRate + " fps";
         debugText += "\n";
-        debugText += "XYZ: " + (Mathf.FloorToInt(world.player.position.x)-halfWorldSizeInHex) +" / "+ (Mathf.FloorToInt(world.player.position.y) - halfWorldSizeInHex) + " / " + (Mathf.FloorToInt(world.player.position.z) - halfWorldSizeInHex);
+        debugText += "XYZ: " + (Mathf.FloorToInt(_world.player.position.x)-halfWorldSizeInHex) +" / "+ (Mathf.FloorToInt(_world.player.position.y) - halfWorldSizeInHex) + " / " + (Mathf.FloorToInt(_world.player.position.z) - halfWorldSizeInHex);
         debugText += "\n";
-        debugText += "Chunk: " + (world.playerCurrentChunkCoord.x - halfWorldSizeInChunks) + " / " + (world.playerCurrentChunkCoord.z - halfWorldSizeInChunks);
+        debugText += "Chunk: " + (_world.playerCurrentChunkCoord.x - halfWorldSizeInChunks) + " / " + (_world.playerCurrentChunkCoord.z - halfWorldSizeInChunks);
 
         text.text = debugText;
 

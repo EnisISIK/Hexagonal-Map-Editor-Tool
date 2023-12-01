@@ -12,7 +12,6 @@ public class BiomeAttributes : ScriptableObject
 
     public int solidGroundHeight;
     public int terrainHeight;
-    public float terrainScale;
 
     public byte surfaceBlock;
     public byte subSurfaceBlock;
@@ -29,7 +28,6 @@ public class BiomeAttributes : ScriptableObject
     [Range(0.1f, 1f)]
     public float floraPlacementThreshold = 0.8f;
     public bool placeFlora = true;
-
 
     public int maxFloraHeight = 12;
     public int minFloraHeight = 5;

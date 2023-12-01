@@ -348,10 +348,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c757062e244a41643967c66b07ec9115, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  biomes:
-  - {fileID: 11400000, guid: 70244107e2f8e6942be64cc4fcfa288b, type: 2}
-  - {fileID: 11400000, guid: f3b3edc8f63e6a344a5fb13e711e56ee, type: 2}
-  - {fileID: 11400000, guid: 1185bc9a992057f408dc55edd4c7561e, type: 2}
+  standartBiome: {fileID: 11400000, guid: 5c05da517e91b0d42a7a5b28099b76d7, type: 2}
   OceanBiome: {fileID: 11400000, guid: cc54776d271c6c545bb5bf690b32711c, type: 2}
   biomeNoiseSettings:
     enabled: 0
@@ -368,18 +365,12 @@ MonoBehaviour:
     redistrubitionModifier: 1.2
     exponent: 5
   domainWarping: {fileID: 827900870}
-  biomeDomainWarping: {fileID: 827900871}
-  biomeAttributesData:
+  biomeTable:
   - temperatureStartThreshold: 0
     temperatureEndThreshold: 0.4
-    humidityStartThreshold: 0.6
-    humidityEndThreshold: 1
-    Biome: {fileID: 11400000, guid: 70244107e2f8e6942be64cc4fcfa288b, type: 2}
-  - temperatureStartThreshold: 0.6
-    temperatureEndThreshold: 1
     humidityStartThreshold: 0
-    humidityEndThreshold: 0.6
-    Biome: {fileID: 11400000, guid: f3b3edc8f63e6a344a5fb13e711e56ee, type: 2}
+    humidityEndThreshold: 0.2
+    Biome: {fileID: 11400000, guid: f44b01d049231014aaee7236b74d6f7f, type: 2}
   - temperatureStartThreshold: 0
     temperatureEndThreshold: 0.4
     humidityStartThreshold: 0.2
@@ -387,9 +378,9 @@ MonoBehaviour:
     Biome: {fileID: 11400000, guid: c9956884b285f354f9c53792b9c3c08d, type: 2}
   - temperatureStartThreshold: 0
     temperatureEndThreshold: 0.4
-    humidityStartThreshold: 0
-    humidityEndThreshold: 0.2
-    Biome: {fileID: 11400000, guid: f44b01d049231014aaee7236b74d6f7f, type: 2}
+    humidityStartThreshold: 0.6
+    humidityEndThreshold: 1
+    Biome: {fileID: 11400000, guid: 70244107e2f8e6942be64cc4fcfa288b, type: 2}
   - temperatureStartThreshold: 0.4
     temperatureEndThreshold: 0.6
     humidityStartThreshold: 0
@@ -397,7 +388,7 @@ MonoBehaviour:
     Biome: {fileID: 11400000, guid: 5c05da517e91b0d42a7a5b28099b76d7, type: 2}
   - temperatureStartThreshold: 0.4
     temperatureEndThreshold: 0.6
-    humidityStartThreshold: 0.35
+    humidityStartThreshold: 0.353
     humidityEndThreshold: 0.5
     Biome: {fileID: 11400000, guid: 6edb4beeea9e3654baa82c339a865acd, type: 2}
   - temperatureStartThreshold: 0.4
@@ -407,11 +398,15 @@ MonoBehaviour:
     Biome: {fileID: 11400000, guid: 798eec3b195fe984288f56a5b7346a0f, type: 2}
   - temperatureStartThreshold: 0.6
     temperatureEndThreshold: 1
+    humidityStartThreshold: 0
+    humidityEndThreshold: 0.6
+    Biome: {fileID: 11400000, guid: f3b3edc8f63e6a344a5fb13e711e56ee, type: 2}
+  - temperatureStartThreshold: 0.6
+    temperatureEndThreshold: 1
     humidityStartThreshold: 0.6
     humidityEndThreshold: 1
     Biome: {fileID: 11400000, guid: b23664bc7fbad0e40b922a774d9099ca, type: 2}
   player: {fileID: 1295394191}
-  spawnPosition: {x: 0, y: 0, z: 0}
   material: {fileID: 2100000, guid: 5c06fc5a7d893244b8cd1c6c268ab79d, type: 2}
   transparentMaterial: {fileID: 2100000, guid: bc8e15b7747a98040bea722e81313eab, type: 2}
   waterMaterial: {fileID: 2100000, guid: f59fac318de8c62408e897ebef60dace, type: 2}
@@ -683,8 +678,6 @@ MonoBehaviour:
     backrightFaceTexture: 34
     backleftFaceTexture: 34
   debugScreen: {fileID: 501965286}
-  isUpdatingChunks: 0
-  HumidityOffset: 100
   globalLightLevel: 0
 --- !u!4 &827900869
 Transform:

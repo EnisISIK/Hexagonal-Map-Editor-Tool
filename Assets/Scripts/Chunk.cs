@@ -265,6 +265,7 @@ public class ChunkCoord{
 public class HexState
 {
 	public byte id;
+	public BiomeAttributes biome;
 
 	public HexState()
     {
@@ -274,5 +275,11 @@ public class HexState
 	public HexState(byte _id)
 	{
 		id = _id;
+	}
+
+	public HexState(byte _id, BiomeAttributes _biome)
+	{
+		id = _id;
+		biome = _biome;
 	}
 }

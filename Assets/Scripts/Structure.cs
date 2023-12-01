@@ -28,7 +28,8 @@ public static class Structure
     public static ConcurrentQueue<HexMod> MakeTree(Vector3 position, int minTrunkHeight, int maxTrunkHeight)
     {
         ConcurrentQueue<HexMod> queue = new ConcurrentQueue<HexMod>();
-
+        //System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
+        //stopwatch.Start();
         int height = (int)(maxTrunkHeight * Noise.Get2DPerlin(new Vector2(position.x, position.z), 4005f, 2f));
 
         if (height < minTrunkHeight)
@@ -49,7 +50,10 @@ public static class Structure
                     }
                 }
             }
+        //stopwatch.Stop();
+        //long elapsedTime = stopwatch.ElapsedMilliseconds;
 
+        //Debug.Log($"Latency: {elapsedTime} milliseconds");
         return queue;
     }
     public static ConcurrentQueue<HexMod> MakeCactus(Vector3 position, int minTrunkHeight, int maxTrunkHeight)

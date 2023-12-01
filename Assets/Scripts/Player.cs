@@ -142,7 +142,7 @@ public class Player : MonoBehaviour
         {
 
             // Destroy block.
-            if (Input.GetMouseButtonDown(0)&&!world.isUpdatingChunks){
+            if (Input.GetMouseButtonDown(0)){//is this necessary check out &&!world.isUpdatingChunks){
 
                 Vector3 destroyPos = PositionHelper.PixelToHex(highlightBlock.position);
                 world.EditHex(destroyPos, 0);
@@ -151,7 +151,7 @@ public class Player : MonoBehaviour
             //destroy block positionu biraz kayık bir yandakini falan yokediyor bazen
 
             // Place block.
-            if (Input.GetMouseButtonDown(1)&&!world.isUpdatingChunks) {
+            if (Input.GetMouseButtonDown(1)){//is this necessary check out &&!world.isUpdatingChunks){
 
                 Vector3 placePos = PositionHelper.PixelToHex(placeBlock.position);
                 world.EditHex(placePos, selectedBlockIndex);
