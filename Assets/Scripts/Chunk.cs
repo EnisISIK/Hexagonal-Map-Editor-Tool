@@ -20,6 +20,7 @@ public class Chunk
 	public Vector3Int position;
 
 	private bool _isActive;
+	bool chunkUpdatingFlag=false;
 
 	public bool isActive
 	{
@@ -62,7 +63,6 @@ public class Chunk
 
 
 		_world.chunksToUpdate.Enqueue(this);
-		//_world.StartCoroutine(PopulateHexMap());
 
 	}
 
@@ -132,47 +132,52 @@ public class Chunk
 
 	public IEnumerator UpdateChunk(HexState[,,] hexMap)
 	{
-
-		ClearMesh();
-		Task t = Task.Factory.StartNew(delegate
-		{
-			for (int y = 0; y < HexData.ChunkHeight; y++)
+        if (!chunkUpdatingFlag) {
+			chunkUpdatingFlag = true;
+			ClearMesh();
+			Task t = Task.Factory.StartNew(delegate
 			{
-				for (int z = 0; z < HexData.ChunkWidth; z++)
+				for (int y = 0; y < HexData.ChunkHeight; y++)
 				{
-					for (int x = 0; x < HexData.ChunkWidth; x++)
+					for (int z = 0; z < HexData.ChunkWidth; z++)
 					{
-						if (_world.blocktypes[hexMap[x, y, z].id].isSolid) { 
-						AddHexCell(x, y, z, hexMap);
-						}
-						else if (!_world.blocktypes[hexMap[x, y, z].id].isSolid && _world.blocktypes[hexMap[x, y, z].id].isWater) { 
-						AddHexCell(x, y, z, hexMap); 
+						for (int x = 0; x < HexData.ChunkWidth; x++)
+						{
+							if (_world.blocktypes[hexMap[x, y, z].id].isSolid || _world.blocktypes[hexMap[x, y, z].id].isTransparent) { 
+							AddHexCell(x, y, z, hexMap);
+							}
+							else if (!_world.blocktypes[hexMap[x, y, z].id].isSolid && _world.blocktypes[hexMap[x, y, z].id].isWater) { 
+							AddHexCell(x, y, z, hexMap); 
+							}
 						}
 					}
 				}
+			});
+			yield return new WaitUntil(() => {
+				return t.IsCompleted;
+			});
+			if (t.Exception != null)
+			{
+				Debug.LogError(t.Exception);
 			}
-		});
-		yield return new WaitUntil(() => {
-			return t.IsCompleted;
-		});
-        if (t.Exception != null)
-        {
-			Debug.LogError(t.Exception);
-        }
-		CreateMesh();
+			CreateMesh();
+			chunkUpdatingFlag = false;
+		}
 	}
 
 	private void AddHexCell(int x, int y, int z,HexState[,,] hexMap)
     {
-		byte blockID = hexMap[x, y, z].id;
+		byte blockID = hexMap[x, y, z].id; 
+		BlockData block = GetBlock(_world.blocktypes[blockID].blockDataType);
+
 		bool isTransparent = _world.blocktypes[hexMap[x, y, z].id].isTransparent;
 		bool isWater = _world.blocktypes[hexMap[x, y, z].id].isWater;
-		for (int i = 0; i < 8; i++)
+		for (int i = 0; i < block.facesCount; i++)
         {
 			float faceX = x + HexData.faces[i].x;
 			if (i >= 4 && i % 2 == z % 2) faceX = x;
 			if (isWater && CheckWaterHex(y + HexData.faces[i].y, faceX, z + HexData.faces[i].z, hexMap)) continue; //if the neighbour IS water, dont render the face
-			if (CheckHex(y + HexData.faces[i].y, faceX, z + HexData.faces[i].z, hexMap))  //if the neighbour IS a block(and not transparent but its not implemented yet), dont render the face 
+			if (CheckHex(y + HexData.faces[i].y, faceX, z + HexData.faces[i].z, hexMap)&&!isTransparent)  //if the neighbour IS a block(and not transparent but its not implemented yet), dont render the face 
 			{
 				continue;
 			}
@@ -193,11 +198,33 @@ public class Chunk
 
 			if (inShade) lightLevel = 0.4f;
 			else lightLevel = 0f;
-
-			_chunkMeshRenderer.AddHex(new Vector3Int(x, y, z), HexData.hexVertices[i], HexData.hexTriangles[i],HexData.normals[i], isWater, isTransparent, lightLevel);
-			_chunkMeshRenderer.AddUvs(blockID, HexData.hexUvs[i], i, isWater);
+			
+			_chunkMeshRenderer.AddHex(new Vector3Int(x, y, z), block.hexVertices[i], block.hexTriangles[i], block.normals[i], isWater, isTransparent, lightLevel);
+			_chunkMeshRenderer.AddUvs(blockID, block.hexUvs[i], i, isWater);
 		}
 	}
+
+	public BlockData GetBlock(BlockDataTypes blockDataType)
+    {
+		BlockData block;
+        switch (blockDataType)
+        {
+			case BlockDataTypes.Full:
+				block = new BlockData(FullBlockData.hexVertices, FullBlockData.hexUvs, FullBlockData.hexTriangles, HexData.normals, 8);
+				break;
+			case BlockDataTypes.Half:
+				block = new BlockData(HalfBlockData.hexVertices, HalfBlockData.hexUvs, HalfBlockData.hexTriangles, HexData.normals, 8);
+				break;
+			case BlockDataTypes.Grass:
+				block = new BlockData(GrassBlockData.hexVertices, GrassBlockData.hexUvs, GrassBlockData.hexTriangles,GrassBlockData.normals, 6);
+				break;
+			default:
+				block = new BlockData();
+				break;
+		}
+
+		return block;
+    }
 
 	private void CreateMesh()
     {

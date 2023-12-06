@@ -20,6 +20,8 @@ public static class Structure
                 return MakeIceSpike(position, minTrunkHeight, maxTrunkHeight);
             case 4:
                 return MakeSpruceFoliage(position);
+            case 5:
+                return MakeFoliage(position);
         }
 
         return new ConcurrentQueue<HexMod>();
@@ -162,6 +164,27 @@ public static class Structure
         for (int i = height/2; i < height; i++)
         {
             queue.Enqueue(new HexMod(new Vector3(position.x, position.y + i, position.z), 10));
+        }
+
+        return queue;
+    }
+
+    public static ConcurrentQueue<HexMod> MakeFoliage(Vector3 position)
+    {
+        ConcurrentQueue<HexMod> queue = new ConcurrentQueue<HexMod>();
+        int clumpSize = 20;
+
+        for(int i = 0; i < clumpSize; i++)
+        {
+           
+            int val1 = Noise.Map01Int(0, 16, Noise.Get2DPerlin(new Vector2(position.x  * position.z  * i, 
+                                                                position.x  + position.z  + i),200f,10f));
+            int val2 = Noise.Map01Int(0, 16, Noise.Get2DPerlin(new Vector2(position.z * HexData.ChunkWidth - position.x * HexData.ChunkWidth * i,
+                                                                position.x * HexData.ChunkWidth + position.z * HexData.ChunkWidth + i), 200f,10f));
+
+            //Debug.Log("foliage val1 for chunk:"+position.x +" " +val1 + " val2 for chunk:" + position.z+" "+ val2);
+
+            queue.Enqueue(new HexMod(new Vector3(val1, position.y + 1, val2), 18));
         }
 
         return queue;

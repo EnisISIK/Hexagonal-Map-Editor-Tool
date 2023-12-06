@@ -411,10 +411,11 @@ MonoBehaviour:
   transparentMaterial: {fileID: 2100000, guid: bc8e15b7747a98040bea722e81313eab, type: 2}
   waterMaterial: {fileID: 2100000, guid: f59fac318de8c62408e897ebef60dace, type: 2}
   blocktypes:
-  - blockTypeName: 1
+  - blockDataType: 0
+    blockTypeName: 1
     blockName: Air
     isSolid: 0
-    isTransparent: 1
+    isTransparent: 0
     renderNeighbourFaces: 0
     isWater: 0
     topFaceTexture: 7
@@ -425,7 +426,8 @@ MonoBehaviour:
     frontleftFaceTexture: 7
     backrightFaceTexture: 7
     backleftFaceTexture: 7
-  - blockTypeName: 5
+  - blockDataType: 0
+    blockTypeName: 5
     blockName: Stone
     isSolid: 1
     isTransparent: 0
@@ -439,7 +441,8 @@ MonoBehaviour:
     frontleftFaceTexture: 0
     backrightFaceTexture: 0
     backleftFaceTexture: 0
-  - blockTypeName: 2
+  - blockDataType: 0
+    blockTypeName: 2
     blockName: Grass
     isSolid: 1
     isTransparent: 0
@@ -453,7 +456,8 @@ MonoBehaviour:
     frontleftFaceTexture: 2
     backrightFaceTexture: 2
     backleftFaceTexture: 2
-  - blockTypeName: 6
+  - blockDataType: 0
+    blockTypeName: 6
     blockName: Wood
     isSolid: 1
     isTransparent: 0
@@ -467,7 +471,8 @@ MonoBehaviour:
     frontleftFaceTexture: 5
     backrightFaceTexture: 5
     backleftFaceTexture: 5
-  - blockTypeName: 3
+  - blockDataType: 0
+    blockTypeName: 3
     blockName: Dirt
     isSolid: 1
     isTransparent: 0
@@ -481,7 +486,8 @@ MonoBehaviour:
     frontleftFaceTexture: 1
     backrightFaceTexture: 1
     backleftFaceTexture: 1
-  - blockTypeName: 4
+  - blockDataType: 0
+    blockTypeName: 4
     blockName: Coal
     isSolid: 1
     isTransparent: 0
@@ -495,7 +501,8 @@ MonoBehaviour:
     frontleftFaceTexture: 9
     backrightFaceTexture: 9
     backleftFaceTexture: 9
-  - blockTypeName: 7
+  - blockDataType: 0
+    blockTypeName: 7
     blockName: Leaves
     isSolid: 1
     isTransparent: 1
@@ -509,7 +516,8 @@ MonoBehaviour:
     frontleftFaceTexture: 16
     backrightFaceTexture: 16
     backleftFaceTexture: 16
-  - blockTypeName: 10
+  - blockDataType: 0
+    blockTypeName: 10
     blockName: Sand
     isSolid: 1
     isTransparent: 0
@@ -523,7 +531,8 @@ MonoBehaviour:
     frontleftFaceTexture: 18
     backrightFaceTexture: 18
     backleftFaceTexture: 18
-  - blockTypeName: 9
+  - blockDataType: 1
+    blockTypeName: 9
     blockName: Water
     isSolid: 0
     isTransparent: 1
@@ -537,7 +546,8 @@ MonoBehaviour:
     frontleftFaceTexture: 17
     backrightFaceTexture: 17
     backleftFaceTexture: 17
-  - blockTypeName: 10
+  - blockDataType: 0
+    blockTypeName: 10
     blockName: Glass
     isSolid: 1
     isTransparent: 1
@@ -551,7 +561,8 @@ MonoBehaviour:
     frontleftFaceTexture: 3
     backrightFaceTexture: 3
     backleftFaceTexture: 3
-  - blockTypeName: 10
+  - blockDataType: 0
+    blockTypeName: 10
     blockName: Ice
     isSolid: 1
     isTransparent: 0
@@ -565,7 +576,8 @@ MonoBehaviour:
     frontleftFaceTexture: 20
     backrightFaceTexture: 20
     backleftFaceTexture: 20
-  - blockTypeName: 10
+  - blockDataType: 0
+    blockTypeName: 10
     blockName: Savannah
     isSolid: 1
     isTransparent: 0
@@ -579,7 +591,8 @@ MonoBehaviour:
     frontleftFaceTexture: 22
     backrightFaceTexture: 22
     backleftFaceTexture: 22
-  - blockTypeName: 10
+  - blockDataType: 0
+    blockTypeName: 10
     blockName: DesertOrange
     isSolid: 1
     isTransparent: 0
@@ -593,7 +606,8 @@ MonoBehaviour:
     frontleftFaceTexture: 24
     backrightFaceTexture: 24
     backleftFaceTexture: 24
-  - blockTypeName: 10
+  - blockDataType: 0
+    blockTypeName: 10
     blockName: SpruceWood
     isSolid: 1
     isTransparent: 0
@@ -607,7 +621,8 @@ MonoBehaviour:
     frontleftFaceTexture: 26
     backrightFaceTexture: 26
     backleftFaceTexture: 26
-  - blockTypeName: 10
+  - blockDataType: 0
+    blockTypeName: 10
     blockName: SpruceLeaves
     isSolid: 1
     isTransparent: 0
@@ -621,7 +636,8 @@ MonoBehaviour:
     frontleftFaceTexture: 30
     backrightFaceTexture: 30
     backleftFaceTexture: 30
-  - blockTypeName: 10
+  - blockDataType: 0
+    blockTypeName: 10
     blockName: Snow
     isSolid: 1
     isTransparent: 0
@@ -635,7 +651,8 @@ MonoBehaviour:
     frontleftFaceTexture: 28
     backrightFaceTexture: 28
     backleftFaceTexture: 28
-  - blockTypeName: 10
+  - blockDataType: 0
+    blockTypeName: 10
     blockName: TaigaGrass
     isSolid: 1
     isTransparent: 0
@@ -649,7 +666,8 @@ MonoBehaviour:
     frontleftFaceTexture: 33
     backrightFaceTexture: 33
     backleftFaceTexture: 33
-  - blockTypeName: 10
+  - blockDataType: 0
+    blockTypeName: 10
     blockName: TaigaDirt
     isSolid: 1
     isTransparent: 0
@@ -663,10 +681,11 @@ MonoBehaviour:
     frontleftFaceTexture: 32
     backrightFaceTexture: 32
     backleftFaceTexture: 32
-  - blockTypeName: 10
+  - blockDataType: 2
+    blockTypeName: 0
     blockName: Grass
-    isSolid: 1
-    isTransparent: 0
+    isSolid: 0
+    isTransparent: 1
     renderNeighbourFaces: 0
     isWater: 0
     topFaceTexture: 34

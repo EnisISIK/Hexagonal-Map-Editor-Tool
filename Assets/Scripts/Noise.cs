@@ -4,6 +4,23 @@ using UnityEngine;
 
 public static class Noise
 {
+    public static void NoiseTest()
+    {
+        for(int x = 0; x < HexData.ChunkWidth; x++)
+        {
+            for (int z = 0; z < HexData.ChunkWidth; z++)
+            {
+                float funcNoiseValue = Get2DPerlin(new Vector2(x, z), 0f, 10f);
+                float layFuncNoiseValue = EvaluateNoise(new Vector2(x, z), 1f, 1f, 0f, 1f, 1, 1f, 0f, 0f);
+                float perlNoiseValue = Mathf.PerlinNoise(x,z);
+                int funcMapValue = Map01Int(0,HexData.ChunkWidth,funcNoiseValue);
+                int perlMapValue = Map01Int(0, HexData.ChunkWidth, perlNoiseValue);
+                int layFuncMapValue = Map01Int(0, HexData.ChunkWidth, layFuncNoiseValue);
+
+                Debug.Log("x: "+x+ " z: " + z + " funcNoise: " + funcNoiseValue + " funcMap: " + funcMapValue + " perlNoise: " + perlNoiseValue + " perlMap: " + perlMapValue + " layFuncNoise: " + layFuncNoiseValue + " layFuncMap: " + layFuncMapValue);
+            }
+        }
+    }
     public static float Get2DPerlin(Vector2 position, float offset, float scale)
     {
         return Mathf.PerlinNoise((position.x+0.1f)/HexData.ChunkWidth*scale+offset, (position.y + 0.1f) / HexData.ChunkWidth * scale + offset);

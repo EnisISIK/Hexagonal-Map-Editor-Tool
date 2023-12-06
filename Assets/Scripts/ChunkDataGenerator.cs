@@ -163,8 +163,30 @@ public class ChunkDataGenerator
 
         return tempData;
     }
-    public HexState[,,] AddFinishGenTrees(Vector3 chunkPos, HexState[,,] tempData, BiomeSelector[,] biomeSelectionData)
+    public HexState[,,] AddFinishGenTrees(Vector3 chunkPos, HexState[,,] tempData, BiomeSelector[,] biomeSelectionData)  //tree değil de string ve biome olarak yap
     {
+        ConcurrentQueue<HexMod> teststructure = Structure.GenerateMajorFlora(5, chunkPos, 0, 0);
+        while (teststructure.Count > 0)
+        {
+            teststructure.TryDequeue(out HexMod block);
+            int x = (int) block.position.x;
+            int z = (int)block.position.z;
+            BiomeSelector biomeSelector = biomeSelectionData[x, z];
+            BiomeAttributes biome = biomeSelector.biomeAttributes;
+            int terrainHeight = biomeSelector.terrainSurfaceNoise.Value;
+            for (int y = 0; y < HexData.ChunkHeight; y++)
+            {
+                if (y != terrainHeight) continue;
+                if (y == terrainHeight && biome.placeFlora)
+                {
+                    if (tempData[x, y+1, z].id == 0)
+                        Debug.Log(block.id);
+
+                    tempData[x, y+1, z].id = block.id;
+                }
+            }
+
+        }
         for (int x = 0; x < HexData.ChunkWidth; x++)
         {
             for (int z = 0; z < HexData.ChunkWidth; z++)
@@ -200,6 +222,26 @@ public class ChunkDataGenerator
                                 }
                                 _world.finishersToAdd.Enqueue(queue);
                             }
+                            //else
+                            //{
+                            //    ConcurrentQueue<HexMod> queue = new ConcurrentQueue<HexMod>();
+                            //    ConcurrentQueue<HexMod> structure = Structure.GenerateMajorFlora(4, new Vector3(x, 0, z), biome.minFloraHeight, biome.maxFloraHeight);
+                            //    while (structure.Count > 0)
+                            //    {
+                            //        structure.TryDequeue(out HexMod mod);
+                            //        int modX = (int)mod.position.x;
+                            //        int modY = (int)mod.position.y;
+                            //        int modZ = (int)mod.position.z;
+
+                            //        if (modX > 0 && modX < HexData.ChunkWidth &&
+                            //            y + modY > 0 && y + modY < HexData.ChunkHeight &&
+                            //            modZ > 0 && modZ < HexData.ChunkWidth)
+                            //            tempData[modX, y + modY, modZ].id = mod.id;
+                            //        else
+                            //            queue.Enqueue(new HexMod(new Vector3(modX + chunkPos.x, y + modY, modZ + chunkPos.z), mod.id));
+                            //    }
+                            //    _world.finishersToAdd.Enqueue(queue);
+                            //}
                         }
                     }
                 }

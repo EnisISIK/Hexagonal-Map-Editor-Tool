@@ -64,6 +64,7 @@ public class World : MonoBehaviour
 
     private void Start()
     {
+        //Noise.NoiseTest();
         _chunkDataGenerator = new ChunkDataGenerator(this,domainWarping);
         chunksDictionary = new Dictionary<Vector3Int, Chunk>();
         chunksDataDictionary = new Dictionary<Vector3Int, HexState[,,]>();
@@ -146,7 +147,8 @@ public class World : MonoBehaviour
     private IEnumerator UpdateChunksCoroutine()
     {
         isUpdatingChunks = true;
-        while (chunksToUpdate.Count > 0)
+        int updateCount = chunksToUpdate.Count;
+        while (updateCount > 0)
         {
             if (chunksToUpdate.TryDequeue(out Chunk var))
             {
@@ -154,7 +156,8 @@ public class World : MonoBehaviour
                 if (chunksDataDictionary.TryGetValue(checkDirection, out HexState[,,] hexMap)&& 
                     DoesNeighbouringDataExists(checkDirection))
                 {
-                        yield return var.UpdateChunk(hexMap);
+                        //yield return var.UpdateChunk(hexMap);
+                        StartCoroutine(var.UpdateChunk(hexMap));
                 }
                 else
                 {
@@ -662,6 +665,7 @@ public class World : MonoBehaviour
 [System.Serializable]
 public class BlockType
 {
+    public BlockDataTypes blockDataType;
     public BlockTypes blockTypeName;
     public string blockName;
     public bool isSolid;
