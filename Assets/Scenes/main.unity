@@ -696,6 +696,51 @@ MonoBehaviour:
     frontleftFaceTexture: 34
     backrightFaceTexture: 34
     backleftFaceTexture: 34
+  - blockDataType: 2
+    blockTypeName: 0
+    blockName: Tullip
+    isSolid: 0
+    isTransparent: 1
+    renderNeighbourFaces: 0
+    isWater: 0
+    topFaceTexture: 35
+    bottomFaceTexture: 35
+    rightFaceTexture: 35
+    leftFaceTexture: 35
+    frontrightFaceTexture: 35
+    frontleftFaceTexture: 35
+    backrightFaceTexture: 35
+    backleftFaceTexture: 35
+  - blockDataType: 2
+    blockTypeName: 0
+    blockName: Dandelion
+    isSolid: 0
+    isTransparent: 1
+    renderNeighbourFaces: 0
+    isWater: 0
+    topFaceTexture: 36
+    bottomFaceTexture: 36
+    rightFaceTexture: 36
+    leftFaceTexture: 36
+    frontrightFaceTexture: 36
+    frontleftFaceTexture: 36
+    backrightFaceTexture: 36
+    backleftFaceTexture: 36
+  - blockDataType: 2
+    blockTypeName: 0
+    blockName: Daisy
+    isSolid: 0
+    isTransparent: 1
+    renderNeighbourFaces: 0
+    isWater: 0
+    topFaceTexture: 37
+    bottomFaceTexture: 37
+    rightFaceTexture: 37
+    leftFaceTexture: 37
+    frontrightFaceTexture: 37
+    frontleftFaceTexture: 37
+    backrightFaceTexture: 37
+    backleftFaceTexture: 37
   debugScreen: {fileID: 501965286}
   globalLightLevel: 0
 --- !u!4 &827900869

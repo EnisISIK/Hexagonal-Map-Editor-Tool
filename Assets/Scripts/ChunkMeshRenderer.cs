@@ -16,6 +16,15 @@ public class ChunkMeshRenderer
 	public readonly List<Vector2> uvs = new List<Vector2>();
 	private readonly Vector3Int chunkPosition;
 
+	public Vector3[] arrayvertices;
+	public int[] arraytriangles;
+	public int[] arraytransparentTriangles;
+	public int[] arraywaterTriangles;
+	public Color[] arraycolors;
+
+	public Vector3[] arraynormals;
+	public Vector2[] arrayuvs;
+
 	public ChunkMeshRenderer(World world, Vector3Int chunkPosition)
     {
 		_world = world;
@@ -83,5 +92,17 @@ public class ChunkMeshRenderer
 				uvs.Add(hexUV[i]);
 
 		}
+	}
+
+	public void SetListsToArrays()
+    {
+		arrayvertices = vertices.ToArray();
+		arrayuvs = uvs.ToArray();
+		arraynormals = normals.ToArray();
+		arraycolors = colors.ToArray();
+
+		arraytriangles = triangles.ToArray();
+		arraytransparentTriangles = transparentTriangles.ToArray();
+		arraywaterTriangles = waterTriangles.ToArray();
 	}
 }

@@ -12,7 +12,7 @@ public class Chunk
 
 	private GameObject chunkObject;
 
-	[SerializeField] private Material[] materials= new Material[3];
+	//[SerializeField] private Material[] materials= new Material[3];
 	private MeshRenderer meshRenderer;
 	private MeshFilter meshFilter;
 
@@ -48,6 +48,7 @@ public class Chunk
 		meshFilter = chunkObject.AddComponent<MeshFilter>();
 		meshRenderer = chunkObject.AddComponent<MeshRenderer>();
 
+		Material[] materials = new Material[3];
 		materials[0] = _world.material;
 		materials[1] = _world.transparentMaterial;
 		materials[2] = _world.waterMaterial;
@@ -130,6 +131,46 @@ public class Chunk
 
 	}
 
+	public IEnumerator UpdateChunkALTERNATIVE(HexState[,,] hexMap,System.Action onComplete )
+	{
+		if (!chunkUpdatingFlag)
+		{
+			chunkUpdatingFlag = true;
+			ClearMesh();
+			Task t = Task.Factory.StartNew(delegate
+			{
+				for (int y = 0; y < HexData.ChunkHeight; y++)
+				{
+					for (int z = 0; z < HexData.ChunkWidth; z++)
+					{
+						for (int x = 0; x < HexData.ChunkWidth; x++)
+						{
+							if (_world.blocktypes[hexMap[x, y, z].id].isSolid || _world.blocktypes[hexMap[x, y, z].id].isTransparent)
+							{
+								AddHexCell(x, y, z, hexMap);
+							}
+							else if (!_world.blocktypes[hexMap[x, y, z].id].isSolid && _world.blocktypes[hexMap[x, y, z].id].isWater)
+							{
+								AddHexCell(x, y, z, hexMap);
+							}
+						}
+					}
+				}
+				_chunkMeshRenderer.SetListsToArrays();
+			});
+			yield return new WaitUntil(() => {
+				return t.IsCompleted;
+			});
+			if (t.Exception != null)
+			{
+				Debug.LogError(t.Exception);
+			}
+			CreateMesh();
+			chunkUpdatingFlag = false;
+			onComplete?.Invoke();
+		}
+	}
+
 	public IEnumerator UpdateChunk(HexState[,,] hexMap)
 	{
         if (!chunkUpdatingFlag) {
@@ -152,6 +193,7 @@ public class Chunk
 						}
 					}
 				}
+				_chunkMeshRenderer.SetListsToArrays();
 			});
 			yield return new WaitUntil(() => {
 				return t.IsCompleted;
@@ -170,8 +212,8 @@ public class Chunk
 		byte blockID = hexMap[x, y, z].id; 
 		BlockData block = GetBlock(_world.blocktypes[blockID].blockDataType);
 
-		bool isTransparent = _world.blocktypes[hexMap[x, y, z].id].isTransparent;
-		bool isWater = _world.blocktypes[hexMap[x, y, z].id].isWater;
+		bool isTransparent = _world.blocktypes[blockID].isTransparent;
+		bool isWater = _world.blocktypes[blockID].isWater;
 		for (int i = 0; i < block.facesCount; i++)
         {
 			float faceX = x + HexData.faces[i].x;
@@ -183,18 +225,18 @@ public class Chunk
 			}
 
 			float lightLevel;
-			int yPos = y + 2;
+			//int yPos = y + 2;
 			bool inShade = false;
-			while (yPos < HexData.ChunkHeight)
-			{
-				if(hexMap[x,yPos,z].id!=0)
-				{ 
-					inShade = true;
-					break;
-				}
+			//while (yPos < HexData.ChunkHeight)
+			//{
+			//	if(hexMap[x,yPos,z].id!=0)
+			//	{ 
+			//		inShade = true;
+			//		break;
+			//	}
 
-				yPos++;
-			}
+			//	yPos++;
+			//}
 
 			if (inShade) lightLevel = 0.4f;
 			else lightLevel = 0f;
@@ -230,15 +272,15 @@ public class Chunk
     {
 		Mesh mesh = new Mesh();
 
-		mesh.vertices = _chunkMeshRenderer.vertices.ToArray();
-		mesh.uv = _chunkMeshRenderer.uvs.ToArray();
-		mesh.normals = _chunkMeshRenderer.normals.ToArray();
-		mesh.colors = _chunkMeshRenderer.colors.ToArray();
+		mesh.vertices = _chunkMeshRenderer.arrayvertices;//.ToArray();
+		mesh.uv = _chunkMeshRenderer.arrayuvs;//.ToArray();
+		mesh.normals = _chunkMeshRenderer.arraynormals;//.ToArray();
+		mesh.colors = _chunkMeshRenderer.arraycolors;//.ToArray();
 		mesh.subMeshCount = 3;
 
-		mesh.SetTriangles(_chunkMeshRenderer.triangles.ToArray(), 0);
-		mesh.SetTriangles(_chunkMeshRenderer.transparentTriangles.ToArray(), 1);
-		mesh.SetTriangles(_chunkMeshRenderer.waterTriangles.ToArray(), 2);
+		mesh.SetTriangles(_chunkMeshRenderer.arraytriangles, 0);
+		mesh.SetTriangles(_chunkMeshRenderer.arraytransparentTriangles, 1);
+		mesh.SetTriangles(_chunkMeshRenderer.arraywaterTriangles, 2);
 
 		//mesh.RecalculateNormals();
 
@@ -292,7 +334,7 @@ public class ChunkCoord{
 public class HexState
 {
 	public byte id;
-	public BiomeAttributes biome;
+	//public BiomeAttributes biome;
 
 	public HexState()
     {
@@ -304,9 +346,9 @@ public class HexState
 		id = _id;
 	}
 
-	public HexState(byte _id, BiomeAttributes _biome)
-	{
-		id = _id;
-		biome = _biome;
-	}
+	//public HexState(byte _id, BiomeAttributes _biome)
+	//{
+	//	id = _id;
+	//	biome = _biome;
+	//}
 }

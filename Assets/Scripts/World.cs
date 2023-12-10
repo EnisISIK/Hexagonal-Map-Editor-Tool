@@ -80,7 +80,7 @@ public class World : MonoBehaviour
         playerCurrentChunkCoord = PositionHelper.GetChunkCoordFromVector3(PositionHelper.PixelToHex(player.position));
         if (dataToCreate.Count > 0 && !isCreatingData)
         {
-            StartCoroutine(CreateDataCoroutine());
+            StartCoroutine(CreateDataCoroutineALTERNATIVE());
         }
         if (chunksToCreate.Count > 0 && !isCreatingChunks)
         {
@@ -88,7 +88,7 @@ public class World : MonoBehaviour
         }
         if (chunksToUpdate.Count > 0 && !isUpdatingChunks)
         {
-            StartCoroutine(UpdateChunksCoroutine());
+            StartCoroutine(UpdateChunksCoroutineALTERNATIVE());
         }
         if (finishersToAdd.Count > 0 && !isAddingFinishers)
             StartCoroutine(AddFinisherTaskedCoroutine());
@@ -131,7 +131,33 @@ public class World : MonoBehaviour
 
                 if (chunksDataDictionary.ContainsKey(chunkPosition) && !chunksDictionary.ContainsKey(chunkPosition))
                 {
-                    Chunk newChunk = new Chunk(new ChunkCoord(chunkPos.x, chunkPos.z), this);
+                    Chunk newChunk = new Chunk(chunkPos, this);
+                    chunksDictionary.Add(chunkPosition, newChunk);
+                    newChunk.Init();
+                    chunksToCreate.Remove(chunkPos);
+                }
+
+               
+            }
+            yield return null;
+        }
+
+        isCreatingChunks = false;
+    }
+
+    private IEnumerator CreateChunksCoroutineALTERNATIVE()
+    {
+        isCreatingChunks = true;
+
+            List<ChunkCoord> chunksToCreateList = new List<ChunkCoord>(chunksToCreate);
+
+            foreach (ChunkCoord chunkPos in chunksToCreateList)
+            {
+                Vector3Int chunkPosition = new Vector3Int(chunkPos.x, 0, chunkPos.z);
+
+                if (chunksDataDictionary.ContainsKey(chunkPosition) && !chunksDictionary.ContainsKey(chunkPosition))
+                { //buraya object pooling new chunk chunk pos yerine bir tane yarat oyle tekrar tekrar koy
+                    Chunk newChunk = new Chunk(chunkPos, this);
                     chunksDictionary.Add(chunkPosition, newChunk);
                     newChunk.Init();
                     chunksToCreate.Remove(chunkPos);
@@ -139,9 +165,29 @@ public class World : MonoBehaviour
 
                 yield return null;
             }
-        }
 
         isCreatingChunks = false;
+    }
+
+    private IEnumerator CreateChunk(Vector3Int chunkPosition, ChunkCoord chunkPos)
+    {
+        Task t = Task.Factory.StartNew(delegate
+        {
+            Chunk newChunk = new Chunk(chunkPos, this);
+            chunksDictionary.Add(chunkPosition, newChunk);
+            newChunk.Init();
+            chunksToCreate.Remove(chunkPos);
+        });
+
+        yield return new WaitUntil(() =>
+        {
+            return t.IsCompleted;
+        });
+
+        if (t.Exception != null)
+        {
+            Debug.LogError(t.Exception);
+        }
     }
 
     private IEnumerator UpdateChunksCoroutine()
@@ -169,6 +215,37 @@ public class World : MonoBehaviour
         isUpdatingChunks = false;
     }
 
+    private IEnumerator UpdateChunksCoroutineALTERNATIVE()
+    {
+        isUpdatingChunks = true;
+
+        int maxConcurrentCoroutines = 8;
+        int runningCoroutines = 0;
+
+        int updateCount = chunksToUpdate.Count;
+        while (updateCount > 0)
+        {
+            if (runningCoroutines < maxConcurrentCoroutines) {
+                if (chunksToUpdate.TryDequeue(out Chunk var))
+                {
+                    Vector3Int checkDirection = var.position / HexData.ChunkWidth;
+                    if (chunksDataDictionary.TryGetValue(checkDirection, out HexState[,,] hexMap) &&
+                        DoesNeighbouringDataExists(checkDirection))
+                    {
+                        //yield return var.UpdateChunk(hexMap);
+                        runningCoroutines++;
+                        StartCoroutine(var.UpdateChunkALTERNATIVE(hexMap, () => runningCoroutines--));
+                    }
+                    else
+                    {
+                        chunksToUpdate.Enqueue(var);
+                    }
+                }
+            }
+            yield return null;
+        }
+        isUpdatingChunks = false;
+    }
     private bool DoesNeighbouringDataExists(Vector3Int checkDirection)
     {
         List<Vector3Int> neighboringKeys = new List<Vector3Int>
@@ -194,6 +271,12 @@ public class World : MonoBehaviour
         return true;
     }
 
+    public bool DoesDataExists(Vector3Int chunkPosition)
+    {
+        if (!chunksDataDictionary.ContainsKey(chunkPosition)) return false;
+
+        return true;
+    }
     private IEnumerator AddFinishersCoroutine()
     {
         isAddingFinishers = true;
@@ -380,6 +463,8 @@ public class World : MonoBehaviour
     {
         isCreatingData = true;
 
+        int runningCoroutines = 0;
+
         while (dataToCreate.Count > 0)
         {
             int count = 0;
@@ -388,7 +473,7 @@ public class World : MonoBehaviour
             {
                 //if (count < 8)
                 //{
-                    StartCoroutine(PopulateDataCoroutine(chunkPos));
+                    StartCoroutine(PopulateDataCoroutine(chunkPos,()=>runningCoroutines--));
                     dataToCreate.Remove(chunkPos);
                     count++;
                 //}
@@ -398,7 +483,32 @@ public class World : MonoBehaviour
         isCreatingData = false;
     }
 
-    private IEnumerator PopulateDataCoroutine(Vector3Int chunkPos)
+    private IEnumerator CreateDataCoroutineALTERNATIVE()
+    {
+        isCreatingData = true;
+
+        int maxConcurrentCoroutines = 8;
+        int runningCoroutines = 0;
+
+        while (dataToCreate.Count > 0)
+        {
+            List<Vector3Int> chunksToCreateCopy = new List<Vector3Int>(dataToCreate);
+            foreach (Vector3Int chunkPos in chunksToCreateCopy)
+            {
+                if (runningCoroutines < maxConcurrentCoroutines)
+                {
+                    runningCoroutines++;
+                    StartCoroutine(PopulateDataCoroutine(chunkPos, () => runningCoroutines--));
+                    dataToCreate.Remove(chunkPos);
+                }
+            }
+            yield return null;
+
+        }
+        isCreatingData = false;
+    }
+
+    private IEnumerator PopulateDataCoroutine(Vector3Int chunkPos,System.Action onComplete)
     {
         HexState[,,] chunkData = null;
         //HexState[,,] chunkSurfaceData = null;
@@ -408,11 +518,8 @@ public class World : MonoBehaviour
         //StartCoroutine=>AddFoliage(chunkSurfaceData) or Function=>AddFoliage(chunkSurfaceData)
         if (!chunksDataDictionary.ContainsKey(chunkPos))
             chunksDataDictionary.Add(chunkPos, chunkData);
-    }
-
-    private void AddVegetation(HexState[,,] chunkSurfaceData)
-    {
-
+        
+        onComplete?.Invoke();
     }
 
     public HexState[,,] RequestChunk(Vector3 chunkPos)
@@ -528,7 +635,7 @@ public class World : MonoBehaviour
     //Biome Center Generatora taşınacak veya başka biyer
     private void GenerateVoronoiSeeds(ChunkCoord coord, int drawRange, int mapSize)
     {
-        Dictionary<Vector3Int, VoronoiSeed> tempTest = BiomeCenterFinder.CalculateBiomeCentersCopy(mapSize, drawRange, coord, this, 4);
+        Dictionary<Vector3Int, VoronoiSeed> tempTest = BiomeCenterFinder.CalculateBiomeCentersCopy(mapSize, HexData.MaxRenderChunks, coord, this, 4);
 
         foreach (var centerSeed in tempTest)
         {
@@ -753,9 +860,9 @@ public class BiomeSelector
 public struct VoronoiSeed
 {
     public BiomeAttributes voronoiBiome;
-    public Vector3 voronoiPosition;
+    public Vector3Int voronoiPosition;
 
-    public VoronoiSeed(BiomeAttributes voronoiBiome, Vector3 voronoiPosition)
+    public VoronoiSeed(BiomeAttributes voronoiBiome, Vector3Int voronoiPosition)
     {
         this.voronoiBiome = voronoiBiome;
         this.voronoiPosition = voronoiPosition;

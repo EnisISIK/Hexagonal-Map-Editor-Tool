@@ -49,7 +49,8 @@ public class Player : MonoBehaviour
 
     private void FixedUpdate()
     {
-
+        if (!world.DoesDataExists(PositionHelper.GetChunkFromVector3(PositionHelper.PixelToHex(cam.position)))) return;
+                
         CalculateVelocity();
         if (jumpRequest)
             Jump();

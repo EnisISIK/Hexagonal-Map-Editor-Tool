@@ -172,7 +172,7 @@ public static class Structure
     public static ConcurrentQueue<HexMod> MakeFoliage(Vector3 position)
     {
         ConcurrentQueue<HexMod> queue = new ConcurrentQueue<HexMod>();
-        int clumpSize = 20;
+        int clumpSize = 60;
 
         for(int i = 0; i < clumpSize; i++)
         {
