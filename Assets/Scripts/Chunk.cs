@@ -12,7 +12,6 @@ public class Chunk
 
 	private GameObject chunkObject;
 
-	//[SerializeField] private Material[] materials= new Material[3];
 	private MeshRenderer meshRenderer;
 	private MeshFilter meshFilter;
 
@@ -67,7 +66,7 @@ public class Chunk
 
 	}
 
-	private bool CheckHex(float _y, float _x, float _z, HexState[,,] hexMap)
+	private bool CheckHex(float _y, float _x, float _z, byte[,,] hexMap)
     {
 		int x = Mathf.FloorToInt(_x);
 		int y = Mathf.FloorToInt(_y);
@@ -78,9 +77,9 @@ public class Chunk
 			return _world.CheckForHex(new Vector3(x, y, z)+position);
         }
 
-		return _world.blocktypes[hexMap[x, y, z].id].isSolid;
+		return _world.blocktypes[hexMap[x, y, z]].isSolid;
 	}
-	private bool CheckWaterHex(float _y, float _x, float _z, HexState[,,] hexMap)
+	private bool CheckWaterHex(float _y, float _x, float _z, byte[,,] hexMap)
 	{
 		int x = Mathf.FloorToInt(_x);
 		int y = Mathf.FloorToInt(_y);
@@ -91,7 +90,7 @@ public class Chunk
 			return _world.CheckForWaterHex(new Vector3(x, y, z) + position);
 		}
 
-		return _world.blocktypes[hexMap[x, y, z].id].isWater;
+		return _world.blocktypes[hexMap[x, y, z]].isWater;
 	}
 
 	public IEnumerator UpdateSurroundingHex(int x, int y, int z,int blockID)
@@ -131,7 +130,7 @@ public class Chunk
 
 	}
 
-	public IEnumerator UpdateChunkALTERNATIVE(HexState[,,] hexMap,System.Action onComplete )
+	public IEnumerator UpdateChunk(byte[,,] hexMap,System.Action onComplete )
 	{
 		if (!chunkUpdatingFlag)
 		{
@@ -145,11 +144,11 @@ public class Chunk
 					{
 						for (int x = 0; x < HexData.ChunkWidth; x++)
 						{
-							if (_world.blocktypes[hexMap[x, y, z].id].isSolid || _world.blocktypes[hexMap[x, y, z].id].isTransparent)
+							if (_world.blocktypes[hexMap[x, y, z]].isSolid || _world.blocktypes[hexMap[x, y, z]].isTransparent)
 							{
 								AddHexCell(x, y, z, hexMap);
 							}
-							else if (!_world.blocktypes[hexMap[x, y, z].id].isSolid && _world.blocktypes[hexMap[x, y, z].id].isWater)
+							else if (!_world.blocktypes[hexMap[x, y, z]].isSolid && _world.blocktypes[hexMap[x, y, z]].isWater)
 							{
 								AddHexCell(x, y, z, hexMap);
 							}
@@ -171,7 +170,7 @@ public class Chunk
 		}
 	}
 
-	public IEnumerator UpdateChunk(HexState[,,] hexMap)
+	public IEnumerator UpdateChunk(byte[,,] hexMap)
 	{
         if (!chunkUpdatingFlag) {
 			chunkUpdatingFlag = true;
@@ -184,10 +183,10 @@ public class Chunk
 					{
 						for (int x = 0; x < HexData.ChunkWidth; x++)
 						{
-							if (_world.blocktypes[hexMap[x, y, z].id].isSolid || _world.blocktypes[hexMap[x, y, z].id].isTransparent) { 
+							if (_world.blocktypes[hexMap[x, y, z]].isSolid || _world.blocktypes[hexMap[x, y, z]].isTransparent) { 
 							AddHexCell(x, y, z, hexMap);
 							}
-							else if (!_world.blocktypes[hexMap[x, y, z].id].isSolid && _world.blocktypes[hexMap[x, y, z].id].isWater) { 
+							else if (!_world.blocktypes[hexMap[x, y, z]].isSolid && _world.blocktypes[hexMap[x, y, z]].isWater) { 
 							AddHexCell(x, y, z, hexMap); 
 							}
 						}
@@ -207,9 +206,9 @@ public class Chunk
 		}
 	}
 
-	private void AddHexCell(int x, int y, int z,HexState[,,] hexMap)
+	private void AddHexCell(int x, int y, int z, byte[,,] hexMap)
     {
-		byte blockID = hexMap[x, y, z].id; 
+		byte blockID = hexMap[x, y, z]; 
 		BlockData block = GetBlock(_world.blocktypes[blockID].blockDataType);
 
 		bool isTransparent = _world.blocktypes[blockID].isTransparent;
@@ -272,17 +271,15 @@ public class Chunk
     {
 		Mesh mesh = new Mesh();
 
-		mesh.vertices = _chunkMeshRenderer.arrayvertices;//.ToArray();
-		mesh.uv = _chunkMeshRenderer.arrayuvs;//.ToArray();
-		mesh.normals = _chunkMeshRenderer.arraynormals;//.ToArray();
-		mesh.colors = _chunkMeshRenderer.arraycolors;//.ToArray();
+		mesh.vertices = _chunkMeshRenderer.arrayvertices;
+		mesh.uv = _chunkMeshRenderer.arrayuvs;
+		mesh.normals = _chunkMeshRenderer.arraynormals;
+		mesh.colors = _chunkMeshRenderer.arraycolors;
 		mesh.subMeshCount = 3;
 
 		mesh.SetTriangles(_chunkMeshRenderer.arraytriangles, 0);
 		mesh.SetTriangles(_chunkMeshRenderer.arraytransparentTriangles, 1);
 		mesh.SetTriangles(_chunkMeshRenderer.arraywaterTriangles, 2);
-
-		//mesh.RecalculateNormals();
 
 		meshFilter.mesh = mesh;
 	}

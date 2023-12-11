@@ -173,7 +173,7 @@ public class Player : MonoBehaviour
             Vector3 pos = cam.position + (cam.forward * step);
             Vector3 checkPos = PositionHelper.PixelToHex(pos);
 
-            if (world.CheckForHex(checkPos))
+            if (world.CheckForHex(checkPos)||world.CheckForTransparentHex(checkPos))
             {
 
                 highlightBlock.position = new Vector3(pos.x, pos.y, pos.z);

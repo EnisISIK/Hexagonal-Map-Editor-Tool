@@ -37,33 +37,27 @@ public class ChunkMeshRenderer
 		_position.x += (chunkPosition.x * 2f * HexData.innerRadius - chunkPosition.x);
 		_position.z += (chunkPosition.z * 1.5f * HexData.outerRadius - chunkPosition.z);
 
-		//_position.x += chunkPosition.x;
-		//_position.z += chunkPosition.z;
-
 		int triangleOffsetValue = vertices.Count;
 
 		normals.AddRange(hexNormals);
 
-		if (!isWater&&!isTransparent) {
-			vertices.AddRange(hexVert.Select(v => v + _position));
-			triangles.AddRange(hexTri.Select(t => t + triangleOffsetValue));
-			colors.AddRange(hexVert.Select(v => new Color(0, 0, 0, lightLevel)));
+		vertices.AddRange(hexVert.Select(v => v + _position));
+		colors.AddRange(hexVert.Select(v => new Color(0, 0, 0, lightLevel)));
+
+        if (!isWater)
+        {
+			if (!isTransparent)
+			{
+				triangles.AddRange(hexTri.Select(t => t + triangleOffsetValue));
+			}
+			else
+			{
+				transparentTriangles.AddRange(hexTri.Select(t => t + triangleOffsetValue));
+			}
 		}
-		else if (!isWater && isTransparent)
+		else
 		{
-			vertices.AddRange(hexVert.Select(v => v + _position));
-			transparentTriangles.AddRange(hexTri.Select(t => t + triangleOffsetValue));
-			colors.AddRange(hexVert.Select(v => new Color(0, 0, 0, lightLevel)));
-		}
-		else if (isWater)
-		{
-            if (_position.y != 0.00f)
-            {
-				_position.y -= 0.20f;
-            }
-			vertices.AddRange(hexVert.Select(v => v + _position));
 			waterTriangles.AddRange(hexTri.Select(t => t + triangleOffsetValue));
-			colors.AddRange(hexVert.Select(v => new Color(0, 0, 0, lightLevel)));
 		}
 
 		if (hexTri.Length == 12) triangleOffsetValue += 6;

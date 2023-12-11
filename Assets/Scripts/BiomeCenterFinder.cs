@@ -31,9 +31,7 @@ public static class BiomeCenterFinder
                     float temperature = Mathf.PerlinNoise(x * 0.2f, z * 0.2f);
                     float humidity = Mathf.PerlinNoise((x + 160f) * 0.2f, (z + 160f) * 0.2f);
                     biomeCentersDict.Add(new Vector3Int(x, 0, z), new VoronoiSeed(world.SelectBiomes(temperature, humidity), new Vector3Int(x * cellSize + randomNumberX, 0, z * cellSize + randomNumberZ)));
-                    //if (x == 6 && z == 0) Debug.Log("center: " +temperature +"wow"+humidity+ world.SelectBiomes(temperature, humidity));
                 }
-                //if (x == 6 && z == 0) Debug.Log("center: " + biomeCentersDict[new Vector3Int(x, 0, z)].voronoiBiome);
             }
         }
 

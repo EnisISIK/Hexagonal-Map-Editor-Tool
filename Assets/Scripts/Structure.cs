@@ -30,8 +30,6 @@ public static class Structure
     public static ConcurrentQueue<HexMod> MakeTree(Vector3 position, int minTrunkHeight, int maxTrunkHeight)
     {
         ConcurrentQueue<HexMod> queue = new ConcurrentQueue<HexMod>();
-        //System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
-        //stopwatch.Start();
         int height = (int)(maxTrunkHeight * Noise.Get2DPerlin(new Vector2(position.x, position.z), 4005f, 2f));
 
         if (height < minTrunkHeight)
@@ -52,10 +50,6 @@ public static class Structure
                     }
                 }
             }
-        //stopwatch.Stop();
-        //long elapsedTime = stopwatch.ElapsedMilliseconds;
-
-        //Debug.Log($"Latency: {elapsedTime} milliseconds");
         return queue;
     }
     public static ConcurrentQueue<HexMod> MakeCactus(Vector3 position, int minTrunkHeight, int maxTrunkHeight)
@@ -78,8 +72,6 @@ public static class Structure
     public static ConcurrentQueue<HexMod> MakeSpruceTree(Vector3 position, int minTrunkHeight, int maxTrunkHeight)
     {
         ConcurrentQueue<HexMod> queue = new ConcurrentQueue<HexMod>();
-
-        //queue = MakeSpruceFoliage(position);
 
         int height = (int)(maxTrunkHeight * Noise.Get2DPerlin(new Vector2(position.x, position.z), 4005f, 2f));
 
@@ -182,7 +174,6 @@ public static class Structure
             int val2 = Noise.Map01Int(0, 16, Noise.Get2DPerlin(new Vector2(position.z * HexData.ChunkWidth - position.x * HexData.ChunkWidth * i,
                                                                 position.x * HexData.ChunkWidth + position.z * HexData.ChunkWidth + i), 200f,10f));
 
-            //Debug.Log("foliage val1 for chunk:"+position.x +" " +val1 + " val2 for chunk:" + position.z+" "+ val2);
 
             queue.Enqueue(new HexMod(new Vector3(val1, position.y + 1, val2), 18));
         }
