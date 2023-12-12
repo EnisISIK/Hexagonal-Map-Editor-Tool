@@ -6,24 +6,28 @@ using System.Linq;
 public class ChunkMeshRenderer
 {
 	private World _world;
+	private readonly Vector3Int chunkPosition;
+
 	public readonly List<Vector3> vertices = new List<Vector3>();
+
 	public readonly List<int> triangles = new List<int>();
 	public readonly List<int> transparentTriangles = new List<int>();
 	public readonly List<int> waterTriangles = new List<int>();
-	public readonly List<Color> colors = new List<Color>();
 
+	public readonly List<Color> colors = new List<Color>();
 	public readonly List<Vector3> normals = new List<Vector3>();
 	public readonly List<Vector2> uvs = new List<Vector2>();
-	private readonly Vector3Int chunkPosition;
 
-	public Vector3[] arrayvertices;
-	public int[] arraytriangles;
-	public int[] arraytransparentTriangles;
-	public int[] arraywaterTriangles;
-	public Color[] arraycolors;
+	public Vector3[] arrayVertices;
 
-	public Vector3[] arraynormals;
-	public Vector2[] arrayuvs;
+	public int[] arrayTriangles;
+	public int[] arrayTransparentTriangles;
+	public int[] arrayWaterTriangles;
+
+	public Color[] arrayColors;
+	public Vector3[] arrayNormals;
+	public Vector2[] arrayUvs;
+
 
 	public ChunkMeshRenderer(World world, Vector3Int chunkPosition)
     {
@@ -31,6 +35,8 @@ public class ChunkMeshRenderer
 		this.chunkPosition = chunkPosition;
     }
 
+
+	//Adds block vertices, triangles, normals and colors
 	internal void AddHex(Vector3 pos, Vector3[] hexVert, int[] hexTri, Vector3[] hexNormals, bool isWater,bool isTransparent, float lightLevel)
 	{
 		Vector3 _position = PositionHelper.HexToPixel(pos);
@@ -64,6 +70,7 @@ public class ChunkMeshRenderer
 		else if (hexTri.Length == 6) triangleOffsetValue += 4;
 	}
 
+	//Adds block UVs
 	internal void AddUvs(int blockID, Vector2[] hexUV, int textureIDNum,bool isWater)
 	{
 		for (int i = 0; i < hexUV.Length; i++)
@@ -88,15 +95,19 @@ public class ChunkMeshRenderer
 		}
 	}
 
-	public void SetListsToArrays()
-    {
-		arrayvertices = vertices.ToArray();
-		arrayuvs = uvs.ToArray();
-		arraynormals = normals.ToArray();
-		arraycolors = colors.ToArray();
 
-		arraytriangles = triangles.ToArray();
-		arraytransparentTriangles = transparentTriangles.ToArray();
-		arraywaterTriangles = waterTriangles.ToArray();
+	//Converts Mesh Lists to Arrays
+	internal void ConvertListsToArrays()
+    {
+		arrayVertices = vertices.ToArray();
+		arrayUvs = uvs.ToArray();
+		arrayNormals = normals.ToArray();
+		arrayColors = colors.ToArray();
+
+		arrayTriangles = triangles.ToArray();
+		arrayTransparentTriangles = transparentTriangles.ToArray();
+		arrayWaterTriangles = waterTriangles.ToArray();
 	}
+
+
 }

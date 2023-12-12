@@ -44,6 +44,8 @@ public class World : MonoBehaviour
 
     private HashSet<ChunkCoord> activeChunks = new HashSet<ChunkCoord>();
 
+    private List<ChunkCoord> previouslyActiveChunks = new List<ChunkCoord>();
+
     public ChunkCoord playerCurrentChunkCoord;
     private ChunkCoord playerLastChunkCoord;
 
@@ -64,7 +66,6 @@ public class World : MonoBehaviour
 
     private void Start()
     {
-        //Noise.NoiseTest();
         _chunkDataGenerator = new ChunkDataGenerator(this,domainWarping);
         chunksDictionary = new Dictionary<Vector3Int, Chunk>();
         chunksDataDictionary = new Dictionary<Vector3Int, byte[,,]>();
@@ -325,18 +326,23 @@ public class World : MonoBehaviour
     private void CheckViewDistance()
     {
 
-        ChunkCoord coord = PositionHelper.GetChunkCoordFromVector3(PositionHelper.PixelToHex(player.position));
-        GenerateVoronoiSeeds(coord, HexData.ViewDistanceinChunks, HexData.ChunkWidth);
-        List<ChunkCoord> previouslyActiveChunks = new List<ChunkCoord>(activeChunks);
+        ChunkCoord playerCoord = PositionHelper.GetChunkCoordFromVector3(PositionHelper.PixelToHex(player.position));
+        GenerateVoronoiCenters(playerCoord, HexData.ChunkWidth);
+        //List<ChunkCoord> previouslyActiveChunks = new List<ChunkCoord>(activeChunks);
+
+        if (previouslyActiveChunks.Count == 0)
+           previouslyActiveChunks = new List<ChunkCoord>(activeChunks);
+        else
+            previouslyActiveChunks.AddRange(activeChunks);
 
         activeChunks.Clear();
 
         Vector3Int chunkPos;
         ChunkCoord chunkCoord;
-        int lowerDistanceX = coord.x - HexData.ViewDistanceinChunks;
-        int higherDistanceX = coord.x + HexData.ViewDistanceinChunks;
-        int lowerDistanceZ = coord.z - HexData.ViewDistanceinChunks;
-        int higherDistanceZ = coord.z + HexData.ViewDistanceinChunks;
+        int lowerDistanceX = playerCoord.x - HexData.ViewDistanceinChunks;
+        int higherDistanceX = playerCoord.x + HexData.ViewDistanceinChunks;
+        int lowerDistanceZ = playerCoord.z - HexData.ViewDistanceinChunks;
+        int higherDistanceZ = playerCoord.z + HexData.ViewDistanceinChunks;
 
         for (int x = lowerDistanceX - 1; x < higherDistanceX + 1; x++)
         {
@@ -366,32 +372,45 @@ public class World : MonoBehaviour
             }
         }
 
-        foreach (ChunkCoord chunkCoord1 in activeChunks) { 
-            for (int i = 0; i < previouslyActiveChunks.Count; i++)
-                if (previouslyActiveChunks[i].Equals(chunkCoord1))
-                    previouslyActiveChunks.RemoveAt(i);
+        //foreach (ChunkCoord chunkCoord1 in activeChunks) { 
+        //    for (int i = 0; i < previouslyActiveChunks.Count; i++)
+        //        if (previouslyActiveChunks[i].Equals(chunkCoord1))
+        //            previouslyActiveChunks.RemoveAt(i);
+        //}
+        foreach (ChunkCoord chunkCoord1 in activeChunks)
+        {
+            previouslyActiveChunks.RemoveAll(coord => coord.Equals(chunkCoord1));
         }
 
-        foreach (ChunkCoord _chunk in previouslyActiveChunks)
+        //Deactivates the chunks Outside Render Distance
+        foreach (ChunkCoord chunkCoordToDeactivate in previouslyActiveChunks)
         {
-            if (chunksDictionary.TryGetValue(new Vector3Int(_chunk.x, 0, _chunk.z), out Chunk var)) var.isActive = false;
+            if (chunksDictionary.TryGetValue(new Vector3Int(chunkCoordToDeactivate.x, 0, chunkCoordToDeactivate.z), out Chunk chunk)) 
+                chunk.isActive = false;
 
-            activeChunks.Remove(new ChunkCoord(_chunk.x, _chunk.z));
+            activeChunks.Remove(new ChunkCoord(chunkCoordToDeactivate.x, chunkCoordToDeactivate.z));
         }
     }
 
+
+    //Destroys or places block
     public void EditHex(Vector3 pos, byte newID)
     {
         Vector3Int chunkPos = PositionHelper.GetChunkFromVector3(pos);
-        Vector3Int inChunkPosition = PositionHelper.GetInChunkPosition(pos,chunkPos);
+        if (!chunksDataDictionary.TryGetValue(chunkPos, out byte[,,] chunkMap)) 
+            return;
 
-        if (!chunksDataDictionary.TryGetValue(chunkPos, out byte[,,] chunkMap)) return;
+        Vector3Int inChunkPosition = PositionHelper.GetInChunkPosition(pos, chunkPos);
         chunkMap[inChunkPosition.x, inChunkPosition.y, inChunkPosition.z] = newID;
 
-        if (!chunksDictionary.TryGetValue(chunkPos, out Chunk chunk)) return;
+        if (!chunksDictionary.TryGetValue(chunkPos, out Chunk chunk)) 
+            return;
+
         StartCoroutine(chunk.UpdateSurroundingHex(inChunkPosition.x, inChunkPosition.y, inChunkPosition.z, newID));
     }
 
+
+    //Checks if Hexagon is a Solid Block
     public bool CheckForHex(Vector3 pos)
     {
         if (!IsHexInWorld(pos)) 
@@ -404,6 +423,9 @@ public class World : MonoBehaviour
         Vector3Int inChunkPos = PositionHelper.GetInChunkPosition(pos,chunkPos);
         return blocktypes[var[inChunkPos.x, inChunkPos.y, inChunkPos.z]].isSolid;
     }
+
+
+    //Checks if Hexagon is a Transparent Block
     public bool CheckForTransparentHex(Vector3 pos)
     {
         if (!IsHexInWorld(pos))
@@ -416,48 +438,63 @@ public class World : MonoBehaviour
         Vector3Int inChunkPos = PositionHelper.GetInChunkPosition(pos, chunkPos);
         return blocktypes[var[inChunkPos.x, inChunkPos.y, inChunkPos.z]].isTransparent;
     }
+
+
+    //Checks if Hexagon is a Water Block
     public bool CheckForWaterHex(Vector3 pos)
     {
-        if (!IsHexInWorld(pos)) return false;
+        if (!IsHexInWorld(pos)) 
+            return false;
 
         Vector3Int chunkPos = PositionHelper.GetChunkFromVector3(pos);
-        if (!chunksDataDictionary.TryGetValue(chunkPos, out byte[,,] var)) return false;
+        if (!chunksDataDictionary.TryGetValue(chunkPos, out byte[,,] var)) 
+            return false;
 
         Vector3Int inChunkPos = PositionHelper.GetInChunkPosition(pos, chunkPos);
         return blocktypes[var[inChunkPos.x, inChunkPos.y, inChunkPos.z]].isWater;
     }
 
-    //Biome Center Generatora taşınacak veya başka biyer
-    private void GenerateVoronoiSeeds(ChunkCoord coord, int drawRange, int mapSize)
+
+    //Scale of a a single biome. Calculated as biomeScale*ChunkWidth. Default is 4x16 -> 64
+    private const int biomeScale = 4;
+    //Generates Distorted Voronoi Centers
+    private void GenerateVoronoiCenters(ChunkCoord playerCoord, int pixelsPerChunk)
     {
-        Dictionary<Vector3Int, VoronoiSeed> tempTest = BiomeCenterFinder.CalculateBiomeCentersCopy(mapSize, HexData.MaxRenderChunks, coord, this, 4);
+        Dictionary<Vector3Int, VoronoiSeed> generatedBiomeCenters = BiomeCenterFinder.GenerateBiomeCenters(this, pixelsPerChunk, HexData.MaxRenderChunks, playerCoord, biomeScale);
 
-        foreach (var centerSeed in tempTest)
+        foreach (var seedCenter in generatedBiomeCenters)
         {
-            if (biomeCentersDictionary.ContainsKey(centerSeed.Key)) continue;
+            if (biomeCentersDictionary.ContainsKey(seedCenter.Key)) 
+                continue;
 
-            biomeCentersDictionary.Add(centerSeed.Key, centerSeed.Value);
+            biomeCentersDictionary.Add(seedCenter.Key, seedCenter.Value);
         }
     }
 
-    //Biome Center Generatora taşınacak veya başka biyer
-    public BiomeAttributes SelectBiomes(float temp, float moisture)
+
+    //Selects biome based on BiomeTable
+    public BiomeAttributes SelectBiomes(float temperature, float moisture)
     {
+        //return biome based on BiomeTable
         foreach (var data in biomeTable)
         {
-            if (temp >= data.temperatureStartThreshold && temp <= data.temperatureEndThreshold
+            if (temperature >= data.temperatureStartThreshold && temperature <= data.temperatureEndThreshold
                 && moisture >= data.humidityStartThreshold && moisture <= data.humidityEndThreshold)
             {
                 return data.Biome;
             }
         }
+        //return basic biome
         return biomeTable[0].Biome;
     }
 
+
+    //Checks if Hexagon's position is inside the world's boundaries
     private bool IsHexInWorld(Vector3 pos)
     {
         return pos.y >= 0 && pos.y < HexData.ChunkHeight;
     }
+
 
 }
 

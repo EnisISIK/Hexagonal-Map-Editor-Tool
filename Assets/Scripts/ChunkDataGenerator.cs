@@ -7,24 +7,28 @@ using System.Collections.Concurrent;
 
 public class ChunkDataGenerator
 {
-	public World _world;
+    //TODO: Turn 3D arrays to flat arrays. Extra calculation logic needed.
+
+    public World _world;
 
     public DomainWarping domainWarping;
+
 
     public ChunkDataGenerator(World world)
     {
 		_world = world;
     }
+
+
     public ChunkDataGenerator(World world, DomainWarping domainWarping)
     {
         _world = world;
         this.domainWarping = domainWarping;
     }
 
+
     private byte[,,] ComposableGenerator(Vector3Int chunkPos, Dictionary<Vector3Int, VoronoiSeed> biomeCenters,System.Action<BiomeSelector[,]> callback)
     {
-        System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
-
         byte[,,] tempData = new byte[HexData.ChunkWidth, HexData.ChunkHeight, HexData.ChunkWidth];
         BiomeSelector[,] biomeSelectionData = new BiomeSelector[HexData.ChunkWidth, HexData.ChunkWidth];
         
@@ -40,30 +44,19 @@ public class ChunkDataGenerator
                     
                     byte id = (byte)((y + chunkPos.y > biomeSelection.terrainSurfaceNoise.Value) ? 0 : 1);
 
-
-                    stopwatch.Start();
                     tempData[x, y, z] = id; //turn this 3d array to flatarrays in everywhere of the code
 
-                    stopwatch.Stop();
-                    //tempData[x, y, z] = new HexState(_world.GetHex(new Vector3(x, y, z) + chunkPos, biomeSelection));
-                    //if(tempData[x, y, z].id == 0 && tempSurfaceData[x, y, z] != null)
-                    //{
-                    //    tempSurfaceData[x, y, z] = new HexState(0,biomeSelection.biomeAttributes);
-                    //}
                 }
             }
         }
 
-        //long elapsedTime = stopwatch.ElapsedMilliseconds;
-
-        //Debug.Log($"Latency of ComposableGenerator: {elapsedTime} milliseconds");
         callback(biomeSelectionData);
         return tempData;
     }
+
+
     public byte[,,] ComposeTerrain(Vector3 chunkPos, byte[,,] tempData, BiomeSelector[,] biomeSelectionData)
     {
-        //System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
-        //stopwatch.Start();
         for (int x = 0; x < HexData.ChunkWidth; x++)
         {
             for (int z = 0; z < HexData.ChunkWidth; z++)
@@ -101,16 +94,14 @@ public class ChunkDataGenerator
                 }
             }
         }
-        //stopwatch.Stop();
-        //long elapsedTime = stopwatch.ElapsedMilliseconds;
 
-        //Debug.Log($"Latency of ComposeTerrain: {elapsedTime} milliseconds");
         return tempData;
     }
+
+
     public byte[,,] AddFinishGenTrees(Vector3 chunkPos, byte[,,] tempData, BiomeSelector[,] biomeSelectionData)  //tree değil de string ve biome olarak yap
     {
-        //System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
-        //stopwatch.Start();
+
         ConcurrentQueue<HexMod> teststructure = Structure.GenerateMajorFlora(5, chunkPos, 0, 0);
         while (teststructure.Count > 0)
         {
@@ -178,12 +169,10 @@ public class ChunkDataGenerator
                 }
             }
         }
-        //stopwatch.Stop();
-        //long elapsedTime = stopwatch.ElapsedMilliseconds;
 
-        //Debug.Log($"Latency of AddFinishGenTrees: {elapsedTime} milliseconds");
         return tempData;
     }
+
 
     public IEnumerator GenerateData(Vector3Int chunkPos, Dictionary<Vector3Int, VoronoiSeed> biomeCenters, System.Action<byte[,,]> callback)
     {
@@ -214,6 +203,7 @@ public class ChunkDataGenerator
         callback(tempData2);
     }
     
+
     private BiomeSelector SelectBiomeAttributesFromDict(Vector3Int position, Dictionary<Vector3Int, VoronoiSeed> biomeCenters)
     {
 
@@ -326,5 +316,6 @@ public class ChunkDataGenerator
 
         return new BiomeSelector(attributes1, terrainHeight);
     }
+
 
 }

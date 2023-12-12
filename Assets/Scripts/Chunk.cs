@@ -155,7 +155,7 @@ public class Chunk
 						}
 					}
 				}
-				_chunkMeshRenderer.SetListsToArrays();
+				_chunkMeshRenderer.ConvertListsToArrays();
 			});
 			yield return new WaitUntil(() => {
 				return t.IsCompleted;
@@ -167,42 +167,6 @@ public class Chunk
 			CreateMesh();
 			chunkUpdatingFlag = false;
 			onComplete?.Invoke();
-		}
-	}
-
-	public IEnumerator UpdateChunk(byte[,,] hexMap)
-	{
-        if (!chunkUpdatingFlag) {
-			chunkUpdatingFlag = true;
-			ClearMesh();
-			Task t = Task.Factory.StartNew(delegate
-			{
-				for (int y = 0; y < HexData.ChunkHeight; y++)
-				{
-					for (int z = 0; z < HexData.ChunkWidth; z++)
-					{
-						for (int x = 0; x < HexData.ChunkWidth; x++)
-						{
-							if (_world.blocktypes[hexMap[x, y, z]].isSolid || _world.blocktypes[hexMap[x, y, z]].isTransparent) { 
-							AddHexCell(x, y, z, hexMap);
-							}
-							else if (!_world.blocktypes[hexMap[x, y, z]].isSolid && _world.blocktypes[hexMap[x, y, z]].isWater) { 
-							AddHexCell(x, y, z, hexMap); 
-							}
-						}
-					}
-				}
-				_chunkMeshRenderer.SetListsToArrays();
-			});
-			yield return new WaitUntil(() => {
-				return t.IsCompleted;
-			});
-			if (t.Exception != null)
-			{
-				Debug.LogError(t.Exception);
-			}
-			CreateMesh();
-			chunkUpdatingFlag = false;
 		}
 	}
 
@@ -224,19 +188,7 @@ public class Chunk
 			}
 
 			float lightLevel;
-			//int yPos = y + 2;
 			bool inShade = false;
-			//while (yPos < HexData.ChunkHeight)
-			//{
-			//	if(hexMap[x,yPos,z].id!=0)
-			//	{ 
-			//		inShade = true;
-			//		break;
-			//	}
-
-			//	yPos++;
-			//}
-
 			if (inShade) lightLevel = 0.4f;
 			else lightLevel = 0f;
 			
@@ -271,15 +223,15 @@ public class Chunk
     {
 		Mesh mesh = new Mesh();
 
-		mesh.vertices = _chunkMeshRenderer.arrayvertices;
-		mesh.uv = _chunkMeshRenderer.arrayuvs;
-		mesh.normals = _chunkMeshRenderer.arraynormals;
-		mesh.colors = _chunkMeshRenderer.arraycolors;
+		mesh.vertices = _chunkMeshRenderer.arrayVertices;
+		mesh.uv = _chunkMeshRenderer.arrayUvs;
+		mesh.normals = _chunkMeshRenderer.arrayNormals;
+		mesh.colors = _chunkMeshRenderer.arrayColors;
 		mesh.subMeshCount = 3;
 
-		mesh.SetTriangles(_chunkMeshRenderer.arraytriangles, 0);
-		mesh.SetTriangles(_chunkMeshRenderer.arraytransparentTriangles, 1);
-		mesh.SetTriangles(_chunkMeshRenderer.arraywaterTriangles, 2);
+		mesh.SetTriangles(_chunkMeshRenderer.arrayTriangles, 0);
+		mesh.SetTriangles(_chunkMeshRenderer.arrayTransparentTriangles, 1);
+		mesh.SetTriangles(_chunkMeshRenderer.arrayWaterTriangles, 2);
 
 		meshFilter.mesh = mesh;
 	}
@@ -325,27 +277,4 @@ public class ChunkCoord{
 		else
 			return false;
     }
-}
-
-[System.Serializable]
-public class HexState
-{
-	public byte id;
-	//public BiomeAttributes biome;
-
-	public HexState()
-    {
-		id = 0;
-
-    }
-	public HexState(byte _id)
-	{
-		id = _id;
-	}
-
-	//public HexState(byte _id, BiomeAttributes _biome)
-	//{
-	//	id = _id;
-	//	biome = _biome;
-	//}
 }
