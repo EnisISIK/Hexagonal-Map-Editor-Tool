@@ -49,6 +49,7 @@ public class FlyCam : MonoBehaviour
 		velocity = Vector3.Lerp(velocity, Vector3.zero, dampingCoefficient * Time.deltaTime);
 		transform.position += velocity * Time.deltaTime;
 
+		GetPlayerInputs();
 		placeCursorBlocks();
 	}
 
