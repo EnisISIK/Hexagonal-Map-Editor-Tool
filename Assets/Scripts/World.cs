@@ -9,6 +9,10 @@ using System.Threading.Tasks;
 public class World : MonoBehaviour
 {
     private int seed = 45;
+
+    //Scale of a a single biome. Calculated as biomeScale*ChunkWidth. Default is 4x16 -> 64
+    private const int biomeScale = 4;
+
     private ChunkDataGenerator _chunkDataGenerator;
 
     [SerializeField]
@@ -61,12 +65,11 @@ public class World : MonoBehaviour
 
     // TODO: make blocktypes enum or a scriptable object
     // TODO: add creation stack
-    // TODO: remove some of the coroutines
-    // TODO: hash veya başka bir yapıya çevir hangisine bilmiyorum. Ve yield return null nereye koyduğun önemli. Blockingi önlemek için
+
 
     private void Start()
     {
-        _chunkDataGenerator = new ChunkDataGenerator(this,domainWarping);
+        _chunkDataGenerator = new ChunkDataGenerator(this,domainWarping,biomeScale);
         chunksDictionary = new Dictionary<Vector3Int, Chunk>();
         chunksDataDictionary = new Dictionary<Vector3Int, byte[,,]>();
         biomeCentersDictionary = new Dictionary<Vector3Int, VoronoiSeed>();
@@ -75,6 +78,7 @@ public class World : MonoBehaviour
         CheckViewDistance();
         playerLastChunkCoord = PositionHelper.GetChunkCoordFromVector3(PositionHelper.PixelToHex(player.position));
     }
+
 
     private void Update()
     {
@@ -89,7 +93,7 @@ public class World : MonoBehaviour
         }
         if (chunksToUpdate.Count > 0 && !isUpdatingChunks)
         {
-            StartCoroutine(UpdateChunksCoroutineALTERNATIVE());
+            StartCoroutine(UpdateChunksCoroutine());
         }
         if (finishersToAdd.Count > 0 && !isAddingFinishers)
             StartCoroutine(AddFinishersCoroutine());
@@ -104,6 +108,8 @@ public class World : MonoBehaviour
         }
     }
 
+
+    //Calculates the Player's spawn position
     private Vector3 CalculateSpawnPosition()
     {
         int centerChunk = (HexData.WorldSizeInChunks * HexData.ChunkWidth) / 2;
@@ -114,6 +120,8 @@ public class World : MonoBehaviour
         return new Vector3(x, y, z);
     }
 
+
+    //Processes the create chunk hashset
     private IEnumerator CreateChunksCoroutine()
     {
         isCreatingChunks = true;
@@ -139,7 +147,9 @@ public class World : MonoBehaviour
         isCreatingChunks = false;
     }
 
-    private IEnumerator UpdateChunksCoroutineALTERNATIVE()
+
+    //Processes the update chunk queue
+    private IEnumerator UpdateChunksCoroutine()
     {
         isUpdatingChunks = true;
 
@@ -156,7 +166,6 @@ public class World : MonoBehaviour
                     if (chunksDataDictionary.TryGetValue(checkDirection, out byte[,,] hexMap) &&
                         DoesNeighbouringDataExists(checkDirection))
                     {
-                        //yield return var.UpdateChunk(hexMap);
                         runningCoroutines++;
                         StartCoroutine(var.UpdateChunk(hexMap, () => runningCoroutines--));
                     }
@@ -170,6 +179,9 @@ public class World : MonoBehaviour
         }
         isUpdatingChunks = false;
     }
+    
+    
+    //Checks if the neighbouring chunk data is generated
     private bool DoesNeighbouringDataExists(Vector3Int checkDirection)
     {
         List<Vector3Int> neighboringKeys = new List<Vector3Int>
@@ -194,6 +206,9 @@ public class World : MonoBehaviour
 
         return true;
     }
+
+
+    //Checks if the chunk data is generated
     public bool DoesDataExists(Vector3Int chunkPosition)
     {
         if (!chunksDataDictionary.ContainsKey(chunkPosition)) return false;
@@ -201,6 +216,8 @@ public class World : MonoBehaviour
         return true;
     }
 
+
+    //Processes the finisher generation queue. Called when a structure is cross-chunk
     private IEnumerator AddFinishersCoroutine()
     {
         isAddingFinishers = true;
@@ -268,6 +285,8 @@ public class World : MonoBehaviour
         isAddingFinishers = false;
     }
 
+
+    //Processes the chunk data hashset
     private IEnumerator CreateDataCoroutine()
     {
         isCreatingData = true;
@@ -293,43 +312,49 @@ public class World : MonoBehaviour
         isCreatingData = false;
     }
 
+
+    //Generates data for a single chunk
     private IEnumerator PopulateDataCoroutine(Vector3Int chunkPos,System.Action onComplete)
     {
         byte[,,] chunkData = null;
-        //HexState[,,] chunkSurfaceData = null;
 
-        yield return _chunkDataGenerator.GenerateData(chunkPos * HexData.ChunkWidth, biomeCentersDictionary, x => chunkData = x);//,s=>chunkSurfaceData=s
+        yield return _chunkDataGenerator.GenerateData(chunkPos * HexData.ChunkWidth, biomeCentersDictionary, x => chunkData = x);
 
-        //StartCoroutine=>AddFoliage(chunkSurfaceData) or Function=>AddFoliage(chunkSurfaceData)
         if (!chunksDataDictionary.ContainsKey(chunkPos))
             chunksDataDictionary.Add(chunkPos, chunkData);
         
         onComplete?.Invoke();
     }
 
-    public byte[,,] RequestChunk(Vector3 chunkPos)
+
+    //Return chunk data based on its Hex Position
+    public byte[,,] GetChunkDataFromHexPosition(Vector3 hexPos)
     {
-        Vector3Int coord = PositionHelper.GetChunkFromVector3(chunkPos);
+        Vector3Int coord = PositionHelper.GetChunkFromVector3(hexPos);
+
         return chunksDataDictionary[coord];
     }
 
-    public Chunk GetChunkFromChunkVector3(Vector3 pos)
+
+    //Return chunk based on its Hex Position
+    public Chunk GetChunkFromHexPosition(Vector3 hexPos)
     {
+        Vector3Int chunkPosition = PositionHelper.GetChunkFromVector3(hexPos);
 
-        int x = Mathf.FloorToInt(pos.x / HexData.ChunkWidth);
-        int z = Mathf.FloorToInt(pos.z / HexData.ChunkWidth);
-
-        return chunksDictionary[new Vector3Int(x, 0, z)];
-
+        return chunksDictionary[chunkPosition];
     }
 
+
+    //Checks View Distance around the player
     private void CheckViewDistance()
     {
 
         ChunkCoord playerCoord = PositionHelper.GetChunkCoordFromVector3(PositionHelper.PixelToHex(player.position));
-        GenerateVoronoiCenters(playerCoord, HexData.ChunkWidth);
-        //List<ChunkCoord> previouslyActiveChunks = new List<ChunkCoord>(activeChunks);
 
+        //Generates Distorted Voronoi Centers Around the Player
+        GenerateVoronoiCenters(playerCoord, HexData.ChunkWidth);
+
+        //Adds activeChunks to previouslyActiveChunks
         if (previouslyActiveChunks.Count == 0)
            previouslyActiveChunks = new List<ChunkCoord>(activeChunks);
         else
@@ -339,20 +364,25 @@ public class World : MonoBehaviour
 
         Vector3Int chunkPos;
         ChunkCoord chunkCoord;
+
+        //cached render distance
         int lowerDistanceX = playerCoord.x - HexData.ViewDistanceinChunks;
         int higherDistanceX = playerCoord.x + HexData.ViewDistanceinChunks;
         int lowerDistanceZ = playerCoord.z - HexData.ViewDistanceinChunks;
         int higherDistanceZ = playerCoord.z + HexData.ViewDistanceinChunks;
 
+        //Checks Chunk Datas from 1 less to 1 more of render distance. If they do not exist adds them to dataToCreate queue
         for (int x = lowerDistanceX - 1; x < higherDistanceX + 1; x++)
         {
             for (int z = lowerDistanceZ - 1; z < higherDistanceZ + 1; z++)
             {
                 chunkPos = new Vector3Int(x, 0, z);
-                if (!chunksDataDictionary.ContainsKey(chunkPos)) dataToCreate.Add(chunkPos);
+                if (!chunksDataDictionary.ContainsKey(chunkPos)) 
+                    dataToCreate.Add(chunkPos);
             }
         }
 
+        //Checks Chunks in render distance. If they do not exist adds them to chunksToCreate queue
         for (int x = lowerDistanceX; x < higherDistanceX; x++)
         {
             for (int z = lowerDistanceZ; z < higherDistanceZ; z++)
@@ -372,11 +402,7 @@ public class World : MonoBehaviour
             }
         }
 
-        //foreach (ChunkCoord chunkCoord1 in activeChunks) { 
-        //    for (int i = 0; i < previouslyActiveChunks.Count; i++)
-        //        if (previouslyActiveChunks[i].Equals(chunkCoord1))
-        //            previouslyActiveChunks.RemoveAt(i);
-        //}
+        //Removes currently active chunks from previously active chunks list
         foreach (ChunkCoord chunkCoord1 in activeChunks)
         {
             previouslyActiveChunks.RemoveAll(coord => coord.Equals(chunkCoord1));
@@ -455,8 +481,6 @@ public class World : MonoBehaviour
     }
 
 
-    //Scale of a a single biome. Calculated as biomeScale*ChunkWidth. Default is 4x16 -> 64
-    private const int biomeScale = 4;
     //Generates Distorted Voronoi Centers
     private void GenerateVoronoiCenters(ChunkCoord playerCoord, int pixelsPerChunk)
     {

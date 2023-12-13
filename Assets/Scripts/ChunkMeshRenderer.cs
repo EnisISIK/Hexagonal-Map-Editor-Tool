@@ -36,6 +36,12 @@ public class ChunkMeshRenderer
     }
 
 
+	private const int verticalTriangleLength = 12;
+	private const int sideTriangleLength = 6;
+
+	private const int verticalTriangleOffset = 6;
+	private const int sideTriangleOffset = 4;
+
 	//Adds block vertices, triangles, normals and colors
 	internal void AddHex(Vector3 pos, Vector3[] hexVert, int[] hexTri, Vector3[] hexNormals, bool isWater,bool isTransparent, float lightLevel)
 	{
@@ -66,9 +72,12 @@ public class ChunkMeshRenderer
 			waterTriangles.AddRange(hexTri.Select(t => t + triangleOffsetValue));
 		}
 
-		if (hexTri.Length == 12) triangleOffsetValue += 6;
-		else if (hexTri.Length == 6) triangleOffsetValue += 4;
+		if (hexTri.Length == verticalTriangleLength) 
+			triangleOffsetValue += verticalTriangleOffset;
+		else if (hexTri.Length == sideTriangleLength) 
+			triangleOffsetValue += sideTriangleOffset;
 	}
+
 
 	//Adds block UVs
 	internal void AddUvs(int blockID, Vector2[] hexUV, int textureIDNum,bool isWater)

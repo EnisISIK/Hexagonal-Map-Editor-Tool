@@ -9,10 +9,11 @@ public class ChunkDataGenerator
 {
     //TODO: Turn 3D arrays to flat arrays. Extra calculation logic needed.
 
-    public World _world;
+    private World _world;
 
     public DomainWarping domainWarping;
 
+    private readonly int biomeScale = 4;
 
     public ChunkDataGenerator(World world)
     {
@@ -20,14 +21,16 @@ public class ChunkDataGenerator
     }
 
 
-    public ChunkDataGenerator(World world, DomainWarping domainWarping)
+    public ChunkDataGenerator(World world, DomainWarping domainWarping, int biomeScale)
     {
         _world = world;
         this.domainWarping = domainWarping;
+        this.biomeScale = biomeScale;
     }
 
 
-    private byte[,,] ComposableGenerator(Vector3Int chunkPos, Dictionary<Vector3Int, VoronoiSeed> biomeCenters,System.Action<BiomeSelector[,]> callback)
+    //Generates the shape with either a stone or air block based on the block's biome height
+    private byte[,,] GenerateShape(Vector3Int chunkPos, Dictionary<Vector3Int, VoronoiSeed> biomeCenters,System.Action<BiomeSelector[,]> callback)
     {
         byte[,,] tempData = new byte[HexData.ChunkWidth, HexData.ChunkHeight, HexData.ChunkWidth];
         BiomeSelector[,] biomeSelectionData = new BiomeSelector[HexData.ChunkWidth, HexData.ChunkWidth];
@@ -36,7 +39,7 @@ public class ChunkDataGenerator
         {
             for (int z = 0; z < HexData.ChunkWidth; z++)
             {
-                BiomeSelector biomeSelection = SelectBiomeAttributesFromDict(new Vector3Int(chunkPos.x + x, 0, chunkPos.z + z), biomeCenters);
+                BiomeSelector biomeSelection = SelectBiomeAttributes(new Vector3Int(chunkPos.x + x, 0, chunkPos.z + z), biomeCenters);
                 
                 biomeSelectionData[x, z] = biomeSelection;
                 for (int y = 0; y < HexData.ChunkHeight; y++)
@@ -44,8 +47,7 @@ public class ChunkDataGenerator
                     
                     byte id = (byte)((y + chunkPos.y > biomeSelection.terrainSurfaceNoise.Value) ? 0 : 1);
 
-                    tempData[x, y, z] = id; //turn this 3d array to flatarrays in everywhere of the code
-
+                    tempData[x, y, z] = id;
                 }
             }
         }
@@ -55,7 +57,8 @@ public class ChunkDataGenerator
     }
 
 
-    public byte[,,] ComposeTerrain(Vector3 chunkPos, byte[,,] tempData, BiomeSelector[,] biomeSelectionData)
+    //Converts stone blocks to biome blocks
+    private byte[,,] ComposeTerrain(Vector3 chunkPos, byte[,,] tempData, BiomeSelector[,] biomeSelectionData)
     {
         for (int x = 0; x < HexData.ChunkWidth; x++)
         {
@@ -99,7 +102,8 @@ public class ChunkDataGenerator
     }
 
 
-    public byte[,,] AddFinishGenTrees(Vector3 chunkPos, byte[,,] tempData, BiomeSelector[,] biomeSelectionData)  //tree değil de string ve biome olarak yap
+    //Adds structure to surface blocks
+    private byte[,,] AddFinishGen(Vector3 chunkPos, byte[,,] tempData, BiomeSelector[,] biomeSelectionData)  //tree değil de string ve biome olarak yap
     {
 
         ConcurrentQueue<HexMod> teststructure = Structure.GenerateMajorFlora(5, chunkPos, 0, 0);
@@ -174,6 +178,7 @@ public class ChunkDataGenerator
     }
 
 
+    //Generates terrain for single chunk
     public IEnumerator GenerateData(Vector3Int chunkPos, Dictionary<Vector3Int, VoronoiSeed> biomeCenters, System.Action<byte[,,]> callback)
     {
         byte[,,] tempData2 = null;
@@ -182,11 +187,11 @@ public class ChunkDataGenerator
         {
             BiomeSelector[,] biomeSelectionData = null;
 
-            tempData2 = ComposableGenerator(chunkPos, biomeCenters, x => biomeSelectionData = x);
+            tempData2 = GenerateShape(chunkPos, biomeCenters, x => biomeSelectionData = x);
 
             tempData2 = ComposeTerrain(chunkPos, tempData2, biomeSelectionData);
 
-            tempData2 = AddFinishGenTrees(chunkPos, tempData2, biomeSelectionData);
+            tempData2 = AddFinishGen(chunkPos, tempData2, biomeSelectionData);
 
         });
 
@@ -202,9 +207,10 @@ public class ChunkDataGenerator
 
         callback(tempData2);
     }
-    
 
-    private BiomeSelector SelectBiomeAttributesFromDict(Vector3Int position, Dictionary<Vector3Int, VoronoiSeed> biomeCenters)
+
+    //Selects biome for each block
+    private BiomeSelector SelectBiomeAttributes(Vector3Int position, Dictionary<Vector3Int, VoronoiSeed> biomeCenters)
     {
 
         int gridX = Mathf.FloorToInt(position.x / 64);
@@ -215,14 +221,14 @@ public class ChunkDataGenerator
 
         int distortedX = position.x + Noise.Map01Int(0, 16, Mathf.PerlinNoise(position.x * 0.1f, position.z * 0.1f));
         int distortedZ = position.z + Noise.Map01Int(0, 16, Mathf.PerlinNoise(position.x * 0.1f, position.z * 0.1f));
-        
+
         Dictionary<Vector3Int, float> distDict = new Dictionary<Vector3Int, float>();
         for (int a = -1; a < 2; a++)
         {
             for (int b = -1; b < 2; b++)
             {
 
-                int i = gridX + a;  //burayı incele 9.11
+                int i = gridX + a;
                 int j = gridZ + b;
 
                 Vector3Int currentVoronoiSeed = new Vector3Int(i, 0, j);
@@ -272,33 +278,34 @@ public class ChunkDataGenerator
 
             if (!biomeCenters.TryGetValue(localDistance.Key, out VoronoiSeed seed)) continue;
 
-            
-                attributes0 = seed.voronoiBiome;
-            
-                if (attributes0.biomeName == "Ocean")
+
+            attributes0 = seed.voronoiBiome;
+
+            if (attributes0.biomeName == "Ocean")
+            {
+                hasOceanBiome = true;
+                terrainHeightfloat += 4 * weight;
+            }
+            else
+            {
+                if (!hasLandBiome)
                 {
-                    hasOceanBiome = true;
-                    terrainHeightfloat += 4 * weight;
+                    secondClosestBiome = attributes0;
                 }
-                else
-                {
-                    if (!hasLandBiome)
-                    {
-                        secondClosestBiome = attributes0;
-                    }
-                    hasLandBiome = true;
-                    terrainHeightfloat += PositionHelper.GetSurfaceHeightNoise(position.x, position.z, attributes0, domainWarping) * weight;
-                } 
+                hasLandBiome = true;
+                terrainHeightfloat += GetSurfaceHeightNoise(position.x, position.z, attributes0, domainWarping) * weight;
+            }
 
         }
-       
+
         int terrainHeight = Mathf.RoundToInt(terrainHeightfloat / totalWeight);
 
         BiomeAttributes attributes1 = null;
         if (biomeCenters.TryGetValue(new Vector3Int(nearestPoint.x, 0, nearestPoint.z), out VoronoiSeed var1))
             attributes1 = var1.voronoiBiome;
 
-        if (attributes1.biomeName == "Ocean") {
+        if (attributes1.biomeName == "Ocean")
+        {
 
             if (hasLandBiome && terrainHeight > 4)
             {
@@ -309,7 +316,7 @@ public class ChunkDataGenerator
                 terrainHeight = 4;
             }
         }
-        else if(hasOceanBiome && terrainHeight <= 4)
+        else if (hasOceanBiome && terrainHeight <= 4)
         {
             terrainHeight = 4;
         }
@@ -317,5 +324,15 @@ public class ChunkDataGenerator
         return new BiomeSelector(attributes1, terrainHeight);
     }
 
+
+    //Generates terrain height for given column
+    public static int GetSurfaceHeightNoise(float x, float z, BiomeAttributes attributes_1, DomainWarping domainWarping)
+    {
+        float height = domainWarping.GenerateDomainNoise(new Vector2(x, z), attributes_1.noiseSettings[0]);
+        height = Noise.Redistribution(height, attributes_1.noiseSettings[0]);
+        int terrainHeight = Noise.Map01Int(0, HexData.ChunkHeight, height);
+
+        return terrainHeight;
+    }
 
 }

@@ -5,14 +5,6 @@ using System.Linq;
 
 public static class PositionHelper
 {
-    public static int GetSurfaceHeightNoise(float x, float z, BiomeAttributes attributes_1,DomainWarping domainWarping)
-    {
-        float height = domainWarping.GenerateDomainNoise(new Vector2(x, z), attributes_1.noiseSettings[0]);
-        height = Noise.Redistribution(height, attributes_1.noiseSettings[0]);
-        int terrainHeight = Noise.Map01Int(0, HexData.ChunkHeight, height);
-
-        return terrainHeight;
-    }
 
     public static bool IsHexInChunk(float _x, float _y, float _z)
     {
@@ -20,24 +12,27 @@ public static class PositionHelper
 
     }
 
+
     public static Vector3Int GetChunkFromVector3(Vector3 pos)
     {
 
         int x = Mathf.FloorToInt(pos.x / HexData.ChunkWidth);
         int z = Mathf.FloorToInt(pos.z / HexData.ChunkWidth);
 
-        return new Vector3Int(x, 0, z);//call as vector3 for chunksdictionary
+        return new Vector3Int(x, 0, z);
     }
+
 
     public static ChunkCoord GetChunkCoordFromVector3(Vector3 pos)
     {
 
         int x = Mathf.FloorToInt(pos.x / HexData.ChunkWidth);
         int z = Mathf.FloorToInt(pos.z / HexData.ChunkWidth);
-        //Debug.Log("lower: " + x + " higher: "+ Mathf.CeilToInt(pos.x / HexData.ChunkWidth));
+
         return new ChunkCoord(x, z);
 
     }
+
 
     public static Vector3Int GetInChunkPosition(Vector3 pos, Vector3 chunkPos)
     {
@@ -51,6 +46,7 @@ public static class PositionHelper
         return new Vector3Int(xCheck, yCheck, zCheck);
     }
 
+
     public static Vector3 AxialToOddr(Vector2 hex)
     {
         float x = hex.x;
@@ -58,6 +54,8 @@ public static class PositionHelper
 
         return new Vector3(y, 0, x);
     }
+
+
     public static Vector2 CubeToAxial(Vector3 hex)
     {
         float q = hex.z;
@@ -65,6 +63,8 @@ public static class PositionHelper
 
         return new Vector2(r, q);
     }
+
+
     public static Vector3 AxialToCube(Vector2 hex)
     {
         float q = hex.y;
@@ -74,6 +74,8 @@ public static class PositionHelper
         return new Vector3(r, s, q);
     }
 
+
+    //Converts Pixel Position to Hex Position
     public static Vector3 PixelToHex(Vector3 pos)
     {
         float q = (Mathf.Sqrt(3) / 3 * pos.x - 1.0f / 3 * pos.z);
@@ -84,6 +86,9 @@ public static class PositionHelper
 
         return hexPos;
     }
+
+
+    //Converts Hex Position to Pixel Position
     public static Vector3 HexToPixel(Vector3 pos)
     {
         int _x = Mathf.FloorToInt(pos.x);
@@ -99,6 +104,7 @@ public static class PositionHelper
 
         return pixelPos;
     }
+
 
     public static Vector3 CubeRound(Vector3 pos)
     {
@@ -120,9 +126,12 @@ public static class PositionHelper
         return new Vector3(r, s, q);
     }
 
+
     public static Vector2 AxialRound(Vector2 pos)
     {
         return CubeToAxial(CubeRound(AxialToCube(pos)));
     }
+
+
 
 }

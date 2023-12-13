@@ -6,6 +6,7 @@ using UnityEngine;
 
 public static class Structure
 {
+    //Generates Major Flora
     public static ConcurrentQueue<HexMod> GenerateMajorFlora(int index, Vector3 position, int minTrunkHeight, int maxTrunkHeight)
     {
         switch (index)
@@ -26,6 +27,7 @@ public static class Structure
     }
 
 
+    //Generates basic tree
     public static ConcurrentQueue<HexMod> MakeTree(Vector3 position, int minTrunkHeight, int maxTrunkHeight)
     {
         ConcurrentQueue<HexMod> queue = new ConcurrentQueue<HexMod>();
@@ -53,6 +55,7 @@ public static class Structure
     }
 
 
+    //Generates cactus
     public static ConcurrentQueue<HexMod> MakeCactus(Vector3 position, int minTrunkHeight, int maxTrunkHeight)
     {
         ConcurrentQueue<HexMod> queue = new ConcurrentQueue<HexMod>();
@@ -71,6 +74,7 @@ public static class Structure
     }
 
 
+    //Generates spruce tree
     public static ConcurrentQueue<HexMod> MakeSpruceTree(Vector3 position, int minTrunkHeight, int maxTrunkHeight)
     {
         ConcurrentQueue<HexMod> queue = new ConcurrentQueue<HexMod>();
@@ -103,6 +107,7 @@ public static class Structure
     }
 
 
+    //Generates ice spike
     public static ConcurrentQueue<HexMod> MakeIceSpike(Vector3 position, int minTrunkHeight, int maxTrunkHeight)
     {
         ConcurrentQueue<HexMod> queue = new ConcurrentQueue<HexMod>();
@@ -133,6 +138,7 @@ public static class Structure
     }
 
 
+    //Generates Foliage
     public static ConcurrentQueue<HexMod> MakeFoliage(Vector3 position)
     {
         ConcurrentQueue<HexMod> queue = new ConcurrentQueue<HexMod>();

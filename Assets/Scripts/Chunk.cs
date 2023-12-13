@@ -32,6 +32,7 @@ public class Chunk
 		}
 	}
 
+
 	public Chunk(ChunkCoord _chunkCoordinates ,World world)
     {
 
@@ -41,6 +42,7 @@ public class Chunk
 
 	}
 
+	//Initialization of chunk
 	public void Init()
     {
 		chunkObject = new GameObject();
@@ -66,6 +68,8 @@ public class Chunk
 
 	}
 
+
+	//Checks if the given block is solid
 	private bool CheckHex(float _y, float _x, float _z, byte[,,] hexMap)
     {
 		int x = Mathf.FloorToInt(_x);
@@ -79,6 +83,9 @@ public class Chunk
 
 		return _world.blocktypes[hexMap[x, y, z]].isSolid;
 	}
+
+
+	//Checks if the given block is water
 	private bool CheckWaterHex(float _y, float _x, float _z, byte[,,] hexMap)
 	{
 		int x = Mathf.FloorToInt(_x);
@@ -93,6 +100,8 @@ public class Chunk
 		return _world.blocktypes[hexMap[x, y, z]].isWater;
 	}
 
+
+	//Checks the block and neighbouring blocks and if needed adds to the update queue
 	public IEnumerator UpdateSurroundingHex(int x, int y, int z,int blockID)
 	{
 		Vector3Int thisHex = new Vector3Int(x, y, z);
@@ -109,8 +118,8 @@ public class Chunk
 
 				if (!PositionHelper.IsHexInChunk(currentHex.x, currentHex.y,currentHex.z))
 				{
-					if(!_world.chunksToUpdate.Contains(_world.GetChunkFromChunkVector3(currentHex + position)))
-							_world.chunksToUpdate.Enqueue(_world.GetChunkFromChunkVector3(currentHex + position));
+					if(!_world.chunksToUpdate.Contains(_world.GetChunkFromHexPosition(currentHex + position)))
+							_world.chunksToUpdate.Enqueue(_world.GetChunkFromHexPosition(currentHex + position));
 				}
 			}
 			if (blockID == 0)
@@ -130,6 +139,8 @@ public class Chunk
 
 	}
 
+
+	//Does the update chunk mesh logic
 	public IEnumerator UpdateChunk(byte[,,] hexMap,System.Action onComplete )
 	{
 		if (!chunkUpdatingFlag)
@@ -170,10 +181,12 @@ public class Chunk
 		}
 	}
 
+
+	//Adds or Updates block mesh data
 	private void AddHexCell(int x, int y, int z, byte[,,] hexMap)
     {
 		byte blockID = hexMap[x, y, z]; 
-		BlockData block = GetBlock(_world.blocktypes[blockID].blockDataType);
+		BlockData block = GetBlockType(_world.blocktypes[blockID].blockDataType);
 
 		bool isTransparent = _world.blocktypes[blockID].isTransparent;
 		bool isWater = _world.blocktypes[blockID].isWater;
@@ -197,7 +210,9 @@ public class Chunk
 		}
 	}
 
-	public BlockData GetBlock(BlockDataTypes blockDataType)
+
+	//Gets Block Type
+	public BlockData GetBlockType(BlockDataTypes blockDataType)
     {
 		BlockData block;
         switch (blockDataType)
@@ -219,6 +234,8 @@ public class Chunk
 		return block;
     }
 
+
+	//Creates or Updates the block mesh (Can only be called on the main thread)
 	private void CreateMesh()
     {
 		Mesh mesh = new Mesh();
@@ -236,6 +253,8 @@ public class Chunk
 		meshFilter.mesh = mesh;
 	}
 
+
+	//Clears Mesh
 	private void ClearMesh()
 	{
 		_chunkMeshRenderer.vertices.Clear();
@@ -246,6 +265,8 @@ public class Chunk
 		_chunkMeshRenderer.waterTriangles.Clear();
 		_chunkMeshRenderer.colors.Clear();
 	}
+
+
 }
 
 //Chunk's position in all of the Chunks
