@@ -16,6 +16,9 @@ public class BiomeAttributes : ScriptableObject
     public byte surfaceBlock;
     public byte subSurfaceBlock;
 
+    public BlockTypes surfaceBlockType;
+    public BlockTypes subSurfaceBlockType;
+
     [Header("Noise Settings")]
     public NoiseSettings[] noiseSettings;
 

@@ -3,24 +3,46 @@
 
 public class FlyCam : MonoBehaviour
 {
-	public float acceleration = 50; // how fast you accelerate
-	public float accSprintMultiplier = 4; // how much faster you go when "sprinting"
-	public float lookSensitivity = 1; // mouse look sensitivity
-	public float dampingCoefficient = 5; // how quickly you break to a halt after you stop your input
-	public bool focusOnEnable = true; // whether or not to focus and lock cursor immediately on enable
+	/*
+	/	A first person Free Fly Camera controller capable of destroying 
+	/	and placing blocks. Blocks dont have colliders, because of that 
+	/	fly camera controller uses methods for checking block data.
+	*/
 
-	public Transform highlightBlock;
-	public Transform placeBlock;
-	public float checkIncrement = 0.1f;
-	public float reach = 8f;
+	[SerializeField]
+	private float acceleration = 50;
+	[SerializeField]
+	private float sprintSpeed = 4;
+	[SerializeField]
+	private float lookSensitivity = 1;
+	[SerializeField]
+	private float damping = 5;
+	[SerializeField]
+	private float rayIncrement = 0.1f;
+	[SerializeField]
+	private float reach = 8f;
+	[SerializeField]
+	private bool focusOnEnable = true;
 
-	public World world;
+	[SerializeField]
+	private float playerWidth = 0.15f;
 
-	public byte selectedBlockIndex = 1;
+	[SerializeField]
+	private Transform highlightBlock;
+	[SerializeField]
+	private Transform placeBlock;
+	[SerializeField]
+	private World world;
 
-	Vector3 velocity; // current velocity
+	private Vector3 velocity = new Vector3(0,0,0);
+	private byte selectedBlockIndex = 1;
+	private float mouseHorizontal;
+	private float mouseVertical;
+	private Vector3 moveVector = new Vector3(0f, 0f, 0f);
 
-	static bool Focused
+	private bool IsSprinting = false;
+
+	private static bool IsFocused
 	{
 		get => Cursor.lockState == CursorLockMode.Locked;
 		set
@@ -30,71 +52,57 @@ public class FlyCam : MonoBehaviour
 		}
 	}
 
-	void OnEnable()
+
+	private void OnEnable()
 	{
-		if (focusOnEnable) Focused = true;
+		if (focusOnEnable) IsFocused = true;
 	}
 
-	void OnDisable() => Focused = false;
 
-	void Update()
+	private void OnDisable() 
+	{ 
+		IsFocused = false; 
+	}
+
+
+    private void Start()
+    {
+		world = GameObject.Find("World").GetComponent<World>();
+	}
+
+
+    private void Update()
 	{
-		// Input
-		if (Focused)
-			UpdateInput();
-		else if (Input.GetMouseButtonDown(0))
-			Focused = true;
-
-		// Physics
-		velocity = Vector3.Lerp(velocity, Vector3.zero, dampingCoefficient * Time.deltaTime);
-		transform.position += velocity * Time.deltaTime;
-
 		GetPlayerInputs();
-		placeCursorBlocks();
+		PlaceCursorBlocks();
+
+		if (IsFocused)
+			UpdateTransform();
 	}
 
-	void UpdateInput()
-	{
-		// Position
-		velocity += GetAccelerationVector() * Time.deltaTime;
-
-		// Rotation
-		Vector2 mouseDelta = lookSensitivity * new Vector2(Input.GetAxis("Mouse X"), -Input.GetAxis("Mouse Y"));
-		Quaternion rotation = transform.rotation;
-		Quaternion horiz = Quaternion.AngleAxis(mouseDelta.x, Vector3.up);
-		Quaternion vert = Quaternion.AngleAxis(mouseDelta.y, Vector3.right);
-		transform.rotation = horiz * rotation * vert;
-
-		// Leave cursor lock
-		if (Input.GetKeyDown(KeyCode.Escape))
-			Focused = false;
-	}
-
-	Vector3 GetAccelerationVector()
-	{
-		Vector3 moveInput = default;
-
-		void AddMovement(KeyCode key, Vector3 dir)
-		{
-			if (Input.GetKey(key))
-				moveInput += dir;
-		}
-
-		AddMovement(KeyCode.W, Vector3.forward);
-		AddMovement(KeyCode.S, Vector3.back);
-		AddMovement(KeyCode.D, Vector3.right);
-		AddMovement(KeyCode.A, Vector3.left);
-		AddMovement(KeyCode.Space, Vector3.up);
-		AddMovement(KeyCode.LeftControl, Vector3.down);
-		Vector3 direction = transform.TransformVector(moveInput.normalized);
-
-		if (Input.GetKey(KeyCode.LeftShift))
-			return direction * (acceleration * accSprintMultiplier); // "sprinting"
-		return direction * acceleration; // "walking"
-	}
 
 	private void GetPlayerInputs()
 	{
+		if (Input.GetKey(KeyCode.W))
+			moveVector += Vector3.forward;
+		if (Input.GetKey(KeyCode.S))
+			moveVector += Vector3.back;
+		if (Input.GetKey(KeyCode.D))
+			moveVector += Vector3.right;
+		if (Input.GetKey(KeyCode.A))
+			moveVector += Vector3.left;
+		if (Input.GetKey(KeyCode.Space))
+			moveVector += Vector3.up;
+		if (Input.GetKey(KeyCode.LeftControl))
+			moveVector += Vector3.down;
+		if (Input.GetKeyDown(KeyCode.Escape))
+			IsFocused = false;
+		if (Input.GetMouseButtonDown(0) && !IsFocused)
+			IsFocused = true;
+
+		mouseHorizontal = Input.GetAxis("Mouse X");
+		mouseVertical = Input.GetAxis("Mouse Y");
+
 		float scroll = Input.GetAxis("Mouse ScrollWheel");
 
 		if (scroll != 0)
@@ -114,21 +122,16 @@ public class FlyCam : MonoBehaviour
 
 		if (highlightBlock.gameObject.activeSelf)
 		{
-
 			// Destroy block.
 			if (Input.GetMouseButtonDown(0))
-			{//is this necessary check out &&!world.isUpdatingChunks){
-
+			{
 				Vector3 destroyPos = PositionHelper.PixelToHex(highlightBlock.position);
 				world.EditHex(destroyPos, 0);
-				Debug.Log(PositionHelper.PixelToHex(highlightBlock.position));
 			}
-			//destroy block positionu biraz kayık bir yandakini falan yokediyor bazen
 
 			// Place block.
 			if (Input.GetMouseButtonDown(1))
-			{//is this necessary check out &&!world.isUpdatingChunks){
-
+			{
 				Vector3 placePos = PositionHelper.PixelToHex(placeBlock.position);
 				world.EditHex(placePos, selectedBlockIndex);
 			}
@@ -136,10 +139,11 @@ public class FlyCam : MonoBehaviour
 
 	}
 
-	private void placeCursorBlocks()
+
+	private void PlaceCursorBlocks()
 	{
 
-		float step = checkIncrement;
+		float step = rayIncrement;
 		Vector3 lastPos = new Vector3();
 
 		while (step < reach)
@@ -163,7 +167,7 @@ public class FlyCam : MonoBehaviour
 
 			lastPos = new Vector3(pos.x, pos.y, pos.z);
 
-			step += checkIncrement;
+			step += rayIncrement;
 
 		}
 
@@ -171,4 +175,127 @@ public class FlyCam : MonoBehaviour
 		placeBlock.gameObject.SetActive(false);
 
 	}
+
+
+	private void UpdateTransform()
+	{
+		// Velocity
+		velocity += GetAcceleration() * Time.deltaTime;
+
+		if ((velocity.z > 0 && CheckFront) || (velocity.z < 0 && CheckBack))
+			velocity.z = 0;
+		if ((velocity.x > 0 && CheckRight) || (velocity.x < 0 && CheckLeft))
+			velocity.x = 0;
+		if (velocity.y < 0 && CheckDown())
+			velocity.y = 0;
+
+		velocity = Vector3.Lerp(velocity, Vector3.zero, damping * Time.deltaTime);
+		transform.position += velocity * Time.deltaTime;
+
+		moveVector = new Vector3(0f, 0f, 0f);
+
+		// Rotation
+		Vector2 mouseDelta = lookSensitivity * new Vector2(mouseHorizontal, - mouseVertical);
+		Quaternion rotation = transform.rotation;
+		Quaternion horizontalAngle = Quaternion.AngleAxis(mouseDelta.x, Vector3.up);
+		Quaternion verticalAngle = Quaternion.AngleAxis(mouseDelta.y, Vector3.right);
+		transform.rotation = horizontalAngle * rotation * verticalAngle;
+
+	}
+
+
+	private Vector3 GetAcceleration()
+	{
+		Vector3 direction = transform.TransformVector(moveVector.normalized);
+
+		if (Input.GetKey(KeyCode.LeftShift))
+			return direction * (acceleration * sprintSpeed); 
+		return direction * acceleration;
+	}
+
+
+	private bool CheckDown()
+	{
+
+		if (
+			world.CheckForHex(PositionHelper.PixelToHex(new Vector3(transform.position.x - playerWidth, transform.position.y - 1, transform.position.z - playerWidth))) ||
+			world.CheckForHex(PositionHelper.PixelToHex(new Vector3(transform.position.x + playerWidth, transform.position.y - 1, transform.position.z - playerWidth))) ||
+			world.CheckForHex(PositionHelper.PixelToHex(new Vector3(transform.position.x + playerWidth, transform.position.y - 1, transform.position.z + playerWidth))) ||
+			world.CheckForHex(PositionHelper.PixelToHex(new Vector3(transform.position.x - playerWidth, transform.position.y - 1, transform.position.z + playerWidth)))
+		   )
+			return true;
+		else
+			return false;
+
+	}
+
+
+	private bool CheckFront
+	{
+
+		get
+		{
+			if (
+				world.CheckForHex(PositionHelper.PixelToHex(new Vector3(transform.position.x, transform.position.y, transform.position.z + playerWidth))) ||
+				world.CheckForHex(PositionHelper.PixelToHex(new Vector3(transform.position.x, transform.position.y + 1f, transform.position.z + playerWidth)))
+				)
+				return true;
+			else
+				return false;
+		}
+
+	}
+
+
+	private bool CheckBack
+	{
+
+		get
+		{
+			if (
+				world.CheckForHex(PositionHelper.PixelToHex(new Vector3(transform.position.x, transform.position.y, transform.position.z - playerWidth))) ||
+				world.CheckForHex(PositionHelper.PixelToHex(new Vector3(transform.position.x, transform.position.y + 1f, transform.position.z - playerWidth)))
+				)
+				return true;
+			else
+				return false;
+		}
+
+	}
+
+
+	private bool CheckLeft
+	{
+
+		get
+		{
+			if (
+				world.CheckForHex(PositionHelper.PixelToHex(new Vector3(transform.position.x - playerWidth, transform.position.y, transform.position.z))) ||
+				world.CheckForHex(PositionHelper.PixelToHex(new Vector3(transform.position.x - playerWidth, transform.position.y + 1f, transform.position.z)))
+				)
+				return true;
+			else
+				return false;
+		}
+
+	}
+
+
+	private bool CheckRight
+	{
+
+		get
+		{
+			if (
+				world.CheckForHex(PositionHelper.PixelToHex(new Vector3(transform.position.x + playerWidth, transform.position.y, transform.position.z))) ||
+				world.CheckForHex(PositionHelper.PixelToHex(new Vector3(transform.position.x + playerWidth, transform.position.y + 1f, transform.position.z)))
+				)
+				return true;
+			else
+				return false;
+		}
+
+	}
+
+
 }

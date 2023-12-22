@@ -1,4 +1,4 @@
-﻿Shader "Minecraft/WaterShader" {
+﻿Shader "Hex/WaterShader" {
 
 	Properties {
 		_MainTex ("First Texture", 2D) = "white" {}
@@ -57,15 +57,15 @@
 				
 					i.uv.x += (_SinTime.x * 0.7);
 
-					fixed4 tex1 = tex2D(_MainTex, i.uv);
-					fixed4 tex2 = tex2D(_SecondaryTex, i.uv);
+					fixed4 texture1 = tex2D(_MainTex, i.uv);
+					fixed4 texture2 = tex2D(_SecondaryTex, i.uv);
 
-					fixed4 col = lerp(tex1, tex2, 0.5 + (_SinTime.w * 0.5));
+					fixed4 color1 = lerp(texture1, texture2, 0.5 + (_SinTime.w * 0.5));
 
-					clip(col.a - 0.2);
-					col.a = 0.7f;
+					clip(color1.a - 0.2);
+					color1.a = 0.7f;
 
-					return col;
+					return color1;
 
 				}
 

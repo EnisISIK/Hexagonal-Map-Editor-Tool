@@ -1,0 +1,631 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &6067874971058267994
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6067874971058267996}
+  - component: {fileID: 6067874971058267997}
+  - component: {fileID: 6067874971058267999}
+  - component: {fileID: 6067874971058267998}
+  m_Layer: 0
+  m_Name: World
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6067874971058267996
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6067874971058267994}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6067874971058267997
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6067874971058267994}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c757062e244a41643967c66b07ec9115, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  standartBiome: {fileID: 11400000, guid: 5c05da517e91b0d42a7a5b28099b76d7, type: 2}
+  OceanBiome: {fileID: 11400000, guid: cc54776d271c6c545bb5bf690b32711c, type: 2}
+  biomeNoiseSettings:
+    enabled: 0
+    useFirstLayerAsMask: 0
+    strength: 1
+    numLayers: 3
+    baseRoughness: 1
+    roughness: 1
+    persistence: 0.5
+    minValue: 0
+    centre: 0
+    offset: {x: 1000, y: 2000}
+    noiseZoom: 0.2
+    redistrubitionModifier: 1.2
+    exponent: 5
+  domainWarping: {fileID: 6067874971058267999}
+  biomeTable:
+  - temperatureStartThreshold: 0
+    temperatureEndThreshold: 0.4
+    humidityStartThreshold: 0
+    humidityEndThreshold: 0.2
+    Biome: {fileID: 11400000, guid: f44b01d049231014aaee7236b74d6f7f, type: 2}
+  - temperatureStartThreshold: 0
+    temperatureEndThreshold: 0.4
+    humidityStartThreshold: 0.2
+    humidityEndThreshold: 0.6
+    Biome: {fileID: 11400000, guid: c9956884b285f354f9c53792b9c3c08d, type: 2}
+  - temperatureStartThreshold: 0
+    temperatureEndThreshold: 0.4
+    humidityStartThreshold: 0.6
+    humidityEndThreshold: 1
+    Biome: {fileID: 11400000, guid: 70244107e2f8e6942be64cc4fcfa288b, type: 2}
+  - temperatureStartThreshold: 0.4
+    temperatureEndThreshold: 0.6
+    humidityStartThreshold: 0
+    humidityEndThreshold: 0.35
+    Biome: {fileID: 11400000, guid: 5c05da517e91b0d42a7a5b28099b76d7, type: 2}
+  - temperatureStartThreshold: 0.4
+    temperatureEndThreshold: 0.6
+    humidityStartThreshold: 0.353
+    humidityEndThreshold: 0.5
+    Biome: {fileID: 11400000, guid: 6edb4beeea9e3654baa82c339a865acd, type: 2}
+  - temperatureStartThreshold: 0.4
+    temperatureEndThreshold: 0.6
+    humidityStartThreshold: 0.5
+    humidityEndThreshold: 1
+    Biome: {fileID: 11400000, guid: 798eec3b195fe984288f56a5b7346a0f, type: 2}
+  - temperatureStartThreshold: 0.6
+    temperatureEndThreshold: 1
+    humidityStartThreshold: 0
+    humidityEndThreshold: 0.6
+    Biome: {fileID: 11400000, guid: f3b3edc8f63e6a344a5fb13e711e56ee, type: 2}
+  - temperatureStartThreshold: 0.6
+    temperatureEndThreshold: 1
+    humidityStartThreshold: 0.6
+    humidityEndThreshold: 1
+    Biome: {fileID: 11400000, guid: b23664bc7fbad0e40b922a774d9099ca, type: 2}
+  player: {fileID: 0}
+  material: {fileID: 2100000, guid: 5c06fc5a7d893244b8cd1c6c268ab79d, type: 2}
+  transparentMaterial: {fileID: 2100000, guid: bc8e15b7747a98040bea722e81313eab, type: 2}
+  waterMaterial: {fileID: 2100000, guid: f59fac318de8c62408e897ebef60dace, type: 2}
+  blocktypes:
+  - blockDataType: 0
+    blockTypeName: 1
+    blockName: Air
+    isSolid: 0
+    isTransparent: 0
+    renderNeighbourFaces: 0
+    isWater: 0
+    topFaceTexture: 7
+    bottomFaceTexture: 7
+    rightFaceTexture: 7
+    leftFaceTexture: 7
+    frontrightFaceTexture: 7
+    frontleftFaceTexture: 7
+    backrightFaceTexture: 7
+    backleftFaceTexture: 7
+  - blockDataType: 0
+    blockTypeName: 4
+    blockName: Stone
+    isSolid: 1
+    isTransparent: 0
+    renderNeighbourFaces: 1
+    isWater: 0
+    topFaceTexture: 0
+    bottomFaceTexture: 0
+    rightFaceTexture: 0
+    leftFaceTexture: 0
+    frontrightFaceTexture: 0
+    frontleftFaceTexture: 0
+    backrightFaceTexture: 0
+    backleftFaceTexture: 0
+  - blockDataType: 0
+    blockTypeName: 2
+    blockName: Grass
+    isSolid: 1
+    isTransparent: 0
+    renderNeighbourFaces: 0
+    isWater: 0
+    topFaceTexture: 7
+    bottomFaceTexture: 1
+    rightFaceTexture: 2
+    leftFaceTexture: 2
+    frontrightFaceTexture: 2
+    frontleftFaceTexture: 2
+    backrightFaceTexture: 2
+    backleftFaceTexture: 2
+  - blockDataType: 0
+    blockTypeName: 5
+    blockName: Wood
+    isSolid: 1
+    isTransparent: 0
+    renderNeighbourFaces: 0
+    isWater: 0
+    topFaceTexture: 6
+    bottomFaceTexture: 6
+    rightFaceTexture: 5
+    leftFaceTexture: 5
+    frontrightFaceTexture: 5
+    frontleftFaceTexture: 5
+    backrightFaceTexture: 5
+    backleftFaceTexture: 5
+  - blockDataType: 0
+    blockTypeName: 3
+    blockName: Dirt
+    isSolid: 1
+    isTransparent: 0
+    renderNeighbourFaces: 0
+    isWater: 0
+    topFaceTexture: 1
+    bottomFaceTexture: 1
+    rightFaceTexture: 1
+    leftFaceTexture: 1
+    frontrightFaceTexture: 1
+    frontleftFaceTexture: 1
+    backrightFaceTexture: 1
+    backleftFaceTexture: 1
+  - blockDataType: 0
+    blockTypeName: 8
+    blockName: Leaves
+    isSolid: 1
+    isTransparent: 1
+    renderNeighbourFaces: 0
+    isWater: 0
+    topFaceTexture: 16
+    bottomFaceTexture: 16
+    rightFaceTexture: 16
+    leftFaceTexture: 16
+    frontrightFaceTexture: 16
+    frontleftFaceTexture: 16
+    backrightFaceTexture: 16
+    backleftFaceTexture: 16
+  - blockDataType: 0
+    blockTypeName: 9
+    blockName: Sand
+    isSolid: 1
+    isTransparent: 0
+    renderNeighbourFaces: 0
+    isWater: 0
+    topFaceTexture: 10
+    bottomFaceTexture: 10
+    rightFaceTexture: 18
+    leftFaceTexture: 18
+    frontrightFaceTexture: 18
+    frontleftFaceTexture: 18
+    backrightFaceTexture: 18
+    backleftFaceTexture: 18
+  - blockDataType: 1
+    blockTypeName: 12
+    blockName: Water
+    isSolid: 0
+    isTransparent: 1
+    renderNeighbourFaces: 0
+    isWater: 1
+    topFaceTexture: 17
+    bottomFaceTexture: 17
+    rightFaceTexture: 17
+    leftFaceTexture: 17
+    frontrightFaceTexture: 17
+    frontleftFaceTexture: 17
+    backrightFaceTexture: 17
+    backleftFaceTexture: 17
+  - blockDataType: 0
+    blockTypeName: 13
+    blockName: Glass
+    isSolid: 1
+    isTransparent: 1
+    renderNeighbourFaces: 0
+    isWater: 0
+    topFaceTexture: 3
+    bottomFaceTexture: 3
+    rightFaceTexture: 3
+    leftFaceTexture: 3
+    frontrightFaceTexture: 3
+    frontleftFaceTexture: 3
+    backrightFaceTexture: 3
+    backleftFaceTexture: 3
+  - blockDataType: 0
+    blockTypeName: 14
+    blockName: Ice
+    isSolid: 1
+    isTransparent: 0
+    renderNeighbourFaces: 0
+    isWater: 0
+    topFaceTexture: 19
+    bottomFaceTexture: 19
+    rightFaceTexture: 20
+    leftFaceTexture: 20
+    frontrightFaceTexture: 20
+    frontleftFaceTexture: 20
+    backrightFaceTexture: 20
+    backleftFaceTexture: 20
+  - blockDataType: 0
+    blockTypeName: 15
+    blockName: Savannah
+    isSolid: 1
+    isTransparent: 0
+    renderNeighbourFaces: 0
+    isWater: 0
+    topFaceTexture: 23
+    bottomFaceTexture: 21
+    rightFaceTexture: 22
+    leftFaceTexture: 22
+    frontrightFaceTexture: 22
+    frontleftFaceTexture: 22
+    backrightFaceTexture: 22
+    backleftFaceTexture: 22
+  - blockDataType: 0
+    blockTypeName: 10
+    blockName: DesertOrange
+    isSolid: 1
+    isTransparent: 0
+    renderNeighbourFaces: 0
+    isWater: 0
+    topFaceTexture: 25
+    bottomFaceTexture: 25
+    rightFaceTexture: 24
+    leftFaceTexture: 24
+    frontrightFaceTexture: 24
+    frontleftFaceTexture: 24
+    backrightFaceTexture: 24
+    backleftFaceTexture: 24
+  - blockDataType: 0
+    blockTypeName: 16
+    blockName: SpruceWood
+    isSolid: 1
+    isTransparent: 0
+    renderNeighbourFaces: 0
+    isWater: 0
+    topFaceTexture: 27
+    bottomFaceTexture: 27
+    rightFaceTexture: 26
+    leftFaceTexture: 26
+    frontrightFaceTexture: 26
+    frontleftFaceTexture: 26
+    backrightFaceTexture: 26
+    backleftFaceTexture: 26
+  - blockDataType: 0
+    blockTypeName: 17
+    blockName: SpruceLeaves
+    isSolid: 1
+    isTransparent: 1
+    renderNeighbourFaces: 0
+    isWater: 0
+    topFaceTexture: 30
+    bottomFaceTexture: 30
+    rightFaceTexture: 30
+    leftFaceTexture: 30
+    frontrightFaceTexture: 30
+    frontleftFaceTexture: 30
+    backrightFaceTexture: 30
+    backleftFaceTexture: 30
+  - blockDataType: 0
+    blockTypeName: 20
+    blockName: Snow
+    isSolid: 1
+    isTransparent: 0
+    renderNeighbourFaces: 0
+    isWater: 0
+    topFaceTexture: 29
+    bottomFaceTexture: 29
+    rightFaceTexture: 28
+    leftFaceTexture: 28
+    frontrightFaceTexture: 28
+    frontleftFaceTexture: 28
+    backrightFaceTexture: 28
+    backleftFaceTexture: 28
+  - blockDataType: 0
+    blockTypeName: 18
+    blockName: TaigaGrass
+    isSolid: 1
+    isTransparent: 0
+    renderNeighbourFaces: 0
+    isWater: 0
+    topFaceTexture: 31
+    bottomFaceTexture: 32
+    rightFaceTexture: 33
+    leftFaceTexture: 33
+    frontrightFaceTexture: 33
+    frontleftFaceTexture: 33
+    backrightFaceTexture: 33
+    backleftFaceTexture: 33
+  - blockDataType: 0
+    blockTypeName: 19
+    blockName: TaigaDirt
+    isSolid: 1
+    isTransparent: 0
+    renderNeighbourFaces: 0
+    isWater: 0
+    topFaceTexture: 32
+    bottomFaceTexture: 32
+    rightFaceTexture: 32
+    leftFaceTexture: 32
+    frontrightFaceTexture: 32
+    frontleftFaceTexture: 32
+    backrightFaceTexture: 32
+    backleftFaceTexture: 32
+  - blockDataType: 2
+    blockTypeName: 21
+    blockName: Grass
+    isSolid: 0
+    isTransparent: 1
+    renderNeighbourFaces: 0
+    isWater: 0
+    topFaceTexture: 34
+    bottomFaceTexture: 34
+    rightFaceTexture: 34
+    leftFaceTexture: 34
+    frontrightFaceTexture: 34
+    frontleftFaceTexture: 34
+    backrightFaceTexture: 34
+    backleftFaceTexture: 34
+  - blockDataType: 2
+    blockTypeName: 22
+    blockName: Tullip
+    isSolid: 0
+    isTransparent: 1
+    renderNeighbourFaces: 0
+    isWater: 0
+    topFaceTexture: 35
+    bottomFaceTexture: 35
+    rightFaceTexture: 35
+    leftFaceTexture: 35
+    frontrightFaceTexture: 35
+    frontleftFaceTexture: 35
+    backrightFaceTexture: 35
+    backleftFaceTexture: 35
+  - blockDataType: 2
+    blockTypeName: 23
+    blockName: Dandelion
+    isSolid: 0
+    isTransparent: 1
+    renderNeighbourFaces: 0
+    isWater: 0
+    topFaceTexture: 36
+    bottomFaceTexture: 36
+    rightFaceTexture: 36
+    leftFaceTexture: 36
+    frontrightFaceTexture: 36
+    frontleftFaceTexture: 36
+    backrightFaceTexture: 36
+    backleftFaceTexture: 36
+  - blockDataType: 2
+    blockTypeName: 24
+    blockName: Daisy
+    isSolid: 0
+    isTransparent: 1
+    renderNeighbourFaces: 0
+    isWater: 0
+    topFaceTexture: 37
+    bottomFaceTexture: 37
+    rightFaceTexture: 37
+    leftFaceTexture: 37
+    frontrightFaceTexture: 37
+    frontleftFaceTexture: 37
+    backrightFaceTexture: 37
+    backleftFaceTexture: 37
+  - blockDataType: 0
+    blockTypeName: 11
+    blockName: Cactus
+    isSolid: 1
+    isTransparent: 0
+    renderNeighbourFaces: 0
+    isWater: 0
+    topFaceTexture: 14
+    bottomFaceTexture: 14
+    rightFaceTexture: 17
+    leftFaceTexture: 17
+    frontrightFaceTexture: 14
+    frontleftFaceTexture: 14
+    backrightFaceTexture: 14
+    backleftFaceTexture: 14
+  - blockDataType: 0
+    blockTypeName: 25
+    blockName: Cobblestone
+    isSolid: 1
+    isTransparent: 0
+    renderNeighbourFaces: 0
+    isWater: 0
+    topFaceTexture: 8
+    bottomFaceTexture: 8
+    rightFaceTexture: 8
+    leftFaceTexture: 8
+    frontrightFaceTexture: 8
+    frontleftFaceTexture: 8
+    backrightFaceTexture: 8
+    backleftFaceTexture: 8
+  - blockDataType: 0
+    blockTypeName: 6
+    blockName: CoalOre
+    isSolid: 1
+    isTransparent: 0
+    renderNeighbourFaces: 0
+    isWater: 0
+    topFaceTexture: 9
+    bottomFaceTexture: 9
+    rightFaceTexture: 9
+    leftFaceTexture: 9
+    frontrightFaceTexture: 9
+    frontleftFaceTexture: 9
+    backrightFaceTexture: 9
+    backleftFaceTexture: 9
+  - blockDataType: 0
+    blockTypeName: 7
+    blockName: IronOre
+    isSolid: 1
+    isTransparent: 0
+    renderNeighbourFaces: 0
+    isWater: 0
+    topFaceTexture: 11
+    bottomFaceTexture: 11
+    rightFaceTexture: 11
+    leftFaceTexture: 11
+    frontrightFaceTexture: 11
+    frontleftFaceTexture: 11
+    backrightFaceTexture: 11
+    backleftFaceTexture: 11
+  - blockDataType: 0
+    blockTypeName: 26
+    blockName: VinyStone
+    isSolid: 1
+    isTransparent: 0
+    renderNeighbourFaces: 0
+    isWater: 0
+    topFaceTexture: 12
+    bottomFaceTexture: 12
+    rightFaceTexture: 12
+    leftFaceTexture: 12
+    frontrightFaceTexture: 12
+    frontleftFaceTexture: 12
+    backrightFaceTexture: 12
+    backleftFaceTexture: 12
+  - blockDataType: 0
+    blockTypeName: 27
+    blockName: MossyCobblestone
+    isSolid: 1
+    isTransparent: 0
+    renderNeighbourFaces: 0
+    isWater: 0
+    topFaceTexture: 13
+    bottomFaceTexture: 13
+    rightFaceTexture: 13
+    leftFaceTexture: 13
+    frontrightFaceTexture: 13
+    frontleftFaceTexture: 13
+    backrightFaceTexture: 13
+    backleftFaceTexture: 13
+  - blockDataType: 0
+    blockTypeName: 28
+    blockName: FlowerLeaves
+    isSolid: 1
+    isTransparent: 0
+    renderNeighbourFaces: 0
+    isWater: 0
+    topFaceTexture: 14
+    bottomFaceTexture: 14
+    rightFaceTexture: 14
+    leftFaceTexture: 14
+    frontrightFaceTexture: 14
+    frontleftFaceTexture: 14
+    backrightFaceTexture: 14
+    backleftFaceTexture: 14
+  - blockDataType: 0
+    blockTypeName: 29
+    blockName: RedBrick
+    isSolid: 1
+    isTransparent: 0
+    renderNeighbourFaces: 0
+    isWater: 0
+    topFaceTexture: 19
+    bottomFaceTexture: 19
+    rightFaceTexture: 19
+    leftFaceTexture: 19
+    frontrightFaceTexture: 19
+    frontleftFaceTexture: 19
+    backrightFaceTexture: 19
+    backleftFaceTexture: 19
+  debugScreen: {fileID: 0}
+  globalLightLevel: 0
+--- !u!114 &6067874971058267999
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6067874971058267994}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2355584d9b23c5a4d882095287454db9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  noiseDomainX:
+    enabled: 1
+    useFirstLayerAsMask: 0
+    strength: 1
+    numLayers: 3
+    baseRoughness: 1
+    roughness: 1
+    persistence: 0.5
+    minValue: 0
+    centre: 0
+    offset: {x: 900, y: 1500}
+    noiseZoom: 0.01
+    redistrubitionModifier: 1.2
+    exponent: 5
+  noiseDomainY:
+    enabled: 1
+    useFirstLayerAsMask: 0
+    strength: 1
+    numLayers: 3
+    baseRoughness: 1
+    roughness: 1
+    persistence: 0.5
+    minValue: 0
+    centre: 0
+    offset: {x: 600, y: 350}
+    noiseZoom: 0.01
+    redistrubitionModifier: 1.2
+    exponent: 5
+  amplitudex: 80
+  amplitudey: 80
+--- !u!114 &6067874971058267998
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6067874971058267994}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2355584d9b23c5a4d882095287454db9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  noiseDomainX:
+    enabled: 1
+    useFirstLayerAsMask: 0
+    strength: 1
+    numLayers: 3
+    baseRoughness: 1
+    roughness: 1
+    persistence: 0.5
+    minValue: 0
+    centre: 0
+    offset: {x: 900, y: 1500}
+    noiseZoom: 0.01
+    redistrubitionModifier: 1.2
+    exponent: 5
+  noiseDomainY:
+    enabled: 1
+    useFirstLayerAsMask: 0
+    strength: 1
+    numLayers: 3
+    baseRoughness: 1
+    roughness: 1
+    persistence: 0.5
+    minValue: 0
+    centre: 0
+    offset: {x: 600, y: 350}
+    noiseZoom: 0.01
+    redistrubitionModifier: 1.2
+    exponent: 5
+  amplitudex: 90
+  amplitudey: 50

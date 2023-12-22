@@ -5,70 +5,112 @@ using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
+    /*
+    /    A first person character controller with gravity, acceleration, 
+    /    jump abilities and capable of destroying and placing blocks.
+    /    Blocks dont have colliders, because of that character controller 
+    /    uses methods for checking block data.
+    */
 
-    public bool isGrounded;
-    public bool isSprinting;
+    [SerializeField]
+    private bool isGrounded;
+
+    private bool isSprinting;
 
     private Transform cam;
     private World world;
 
-    public float walkSpeed = 3f;
-    public float sprintSpeed = 6f;
-    public float jumpForce = 5f;
-    public float gravity = -9.8f;
+    [SerializeField]
+    private float walkSpeed = 3f;
+    [SerializeField]
+    private float sprintSpeed = 6f;
+    [SerializeField]
+    private float jumpForce = 5f;
+    [SerializeField]
+    private float gravity = -9.8f;
+    [SerializeField]
+    private float rayIncrement = 0.1f;
+    [SerializeField]
+    private float reach = 8f;
+    [SerializeField]
+    private bool focusOnEnable = true;
 
-    public float playerWidth = 0.15f;
-    public float boundsTolerance = 0.1f;
+    [SerializeField]
+    private float playerWidth = 0.15f;
+    [SerializeField]
+    private float playerHeight = 1.8f;
 
-    private float horizontal;
-    private float vertical;
-    private float mouseHorizontal;
-    private float mouseVertical;
-    private Vector3 velocity;
+    [SerializeField]
+    private Transform highlightBlock;
+    [SerializeField]
+    private Transform placeBlock;
+
     private float verticalMomentum = 0;
     private bool jumpRequest;
 
-    public Transform highlightBlock;
-    public Transform placeBlock;
-    public float checkIncrement = 0.1f;
-    public float reach = 8f;
+    private Vector3 velocity;
+    private byte selectedBlockIndex = 1;
+    private float mouseHorizontal;
+    private float mouseVertical;
+    private Vector3 moveVector = new Vector3(0f, 0f, 0f);
 
-    public byte selectedBlockIndex = 1;
+    [SerializeField]
+    private bool isInteracting;
 
-    public bool isInteracting;
+    private static bool IsFocused
+    {
+        get => Cursor.lockState == CursorLockMode.Locked;
+        set
+        {
+            Cursor.lockState = value ? CursorLockMode.Locked : CursorLockMode.None;
+            Cursor.visible = value == false;
+        }
+    }
+
+
+    private void OnEnable()
+    {
+        if (focusOnEnable) IsFocused = true;
+    }
+
+
+    private void OnDisable()
+    {
+        IsFocused = false;
+    }
+
 
     private void Start()
     {
 
         cam = GameObject.Find("Main Camera").transform;
+        cam.localPosition = new Vector3(0, playerHeight, 0);
         world = GameObject.Find("World").GetComponent<World>();
 
-        Cursor.lockState = CursorLockMode.Locked;
-
     }
+
 
     private void FixedUpdate()
     {
         if (!world.DoesDataExists(PositionHelper.GetChunkFromVector3(PositionHelper.PixelToHex(cam.position)))) return;
-                
+        if (!IsFocused) return;
+
         CalculateVelocity();
         if (jumpRequest)
             Jump();
 
-        transform.Rotate(Vector3.up * mouseHorizontal);
-        cam.Rotate(Vector3.right * -mouseVertical);
-        transform.Translate(velocity, Space.World);
-
+        UpdateTransform();
     }
+
 
     private void Update()
     {
-
         GetPlayerInputs();
-        placeCursorBlocks();
+        PlaceCursorBlocks();
     }
 
-    void Jump()
+
+    private void Jump()
     {
 
         verticalMomentum = jumpForce;
@@ -77,8 +119,11 @@ public class Player : MonoBehaviour
 
     }
 
+
     private void CalculateVelocity()
     {
+
+        Vector3 direction = transform.TransformVector(moveVector.normalized);
 
         // Affect vertical momentum with gravity.
         if (verticalMomentum > gravity)
@@ -86,41 +131,52 @@ public class Player : MonoBehaviour
 
         // if we're sprinting, use the sprint multiplier.
         if (isSprinting)
-            velocity = ((transform.forward * vertical) + (transform.right * horizontal)) * Time.fixedDeltaTime * sprintSpeed;
+            velocity = (direction) * Time.fixedDeltaTime * sprintSpeed;
         else
-            velocity = ((transform.forward * vertical) + (transform.right * horizontal)) * Time.fixedDeltaTime * walkSpeed;
+            velocity = (direction) * Time.fixedDeltaTime * walkSpeed;
 
         // Apply vertical momentum (falling/jumping).
         velocity += Vector3.up * verticalMomentum * Time.fixedDeltaTime;
 
-        if ((velocity.z > 0 && front) || (velocity.z < 0 && back))
+        if ((velocity.z > 0 && CheckFront) || (velocity.z < 0 && CheckBack))
             velocity.z = 0;
-        if ((velocity.x > 0 && right) || (velocity.x < 0 && left))
+        if ((velocity.x > 0 && CheckRight) || (velocity.x < 0 && CheckLeft))
             velocity.x = 0;
 
         if (velocity.y < 0)
-            velocity.y = checkDownSpeed(velocity.y);
+            velocity.y = CheckDownSpeed(velocity.y);
         else if (velocity.y > 0)
-            velocity.y = checkUpSpeed(velocity.y);
+            velocity.y = CheckUpSpeed(velocity.y);
 
+        moveVector = new Vector3(0, 0, 0);
 
     }
 
+
     private void GetPlayerInputs()
     {
+        if (Input.GetKey(KeyCode.W))
+            moveVector += Vector3.forward;
+        if (Input.GetKey(KeyCode.S))
+            moveVector += Vector3.back;
+        if (Input.GetKey(KeyCode.D))
+            moveVector += Vector3.right;
+        if (Input.GetKey(KeyCode.A))
+            moveVector += Vector3.left;
+        if (Input.GetKeyDown(KeyCode.Escape))
+            IsFocused = false;
+        if (Input.GetMouseButtonDown(0) && !IsFocused)
+            IsFocused = true;
+        if (Input.GetKeyDown(KeyCode.LeftShift))
+            isSprinting = true;
+        if (Input.GetKeyUp(KeyCode.LeftShift))
+            isSprinting = false;
+        if (isGrounded && Input.GetKeyDown(KeyCode.Space))
+            jumpRequest = true;
 
-        horizontal = Input.GetAxis("Horizontal");
-        vertical = Input.GetAxis("Vertical");
         mouseHorizontal = Input.GetAxis("Mouse X");
         mouseVertical = Input.GetAxis("Mouse Y");
 
-        if (Input.GetButtonDown("Sprint"))
-            isSprinting = true;
-        if (Input.GetButtonUp("Sprint"))
-            isSprinting = false;
-
-        if (isGrounded && Input.GetButtonDown("Jump"))
-            jumpRequest = true;
 
         float scroll = Input.GetAxis("Mouse ScrollWheel");
 
@@ -143,16 +199,14 @@ public class Player : MonoBehaviour
         {
 
             // Destroy block.
-            if (Input.GetMouseButtonDown(0)){//is this necessary check out &&!world.isUpdatingChunks){
+            if (Input.GetMouseButtonDown(0)){
 
                 Vector3 destroyPos = PositionHelper.PixelToHex(highlightBlock.position);
                 world.EditHex(destroyPos, 0);
-                Debug.Log(PositionHelper.PixelToHex(highlightBlock.position));
             }
-            //destroy block positionu biraz kayık bir yandakini falan yokediyor bazen
 
             // Place block.
-            if (Input.GetMouseButtonDown(1)){//is this necessary check out &&!world.isUpdatingChunks){
+            if (Input.GetMouseButtonDown(1)){
 
                 Vector3 placePos = PositionHelper.PixelToHex(placeBlock.position);
                 world.EditHex(placePos, selectedBlockIndex);
@@ -161,10 +215,11 @@ public class Player : MonoBehaviour
 
     }
 
-    private void placeCursorBlocks()
+
+    private void PlaceCursorBlocks()
     {
 
-        float step = checkIncrement;
+        float step = rayIncrement;
         Vector3 lastPos = new Vector3();
 
         while (step < reach)
@@ -188,7 +243,7 @@ public class Player : MonoBehaviour
 
             lastPos = new Vector3(pos.x, pos.y, pos.z);
 
-            step += checkIncrement;
+            step += rayIncrement;
 
         }
 
@@ -197,7 +252,16 @@ public class Player : MonoBehaviour
 
     }
 
-    private float checkDownSpeed(float downSpeed)
+
+    private void UpdateTransform()
+    {
+        transform.Rotate(Vector3.up * mouseHorizontal);
+        cam.Rotate(Vector3.right * -mouseVertical);
+        transform.Translate(velocity, Space.World);
+    }
+
+
+    private float CheckDownSpeed(float downSpeed)
     {
 
         if (
@@ -222,7 +286,8 @@ public class Player : MonoBehaviour
 
     }
 
-    private float checkUpSpeed(float upSpeed)
+
+    private float CheckUpSpeed(float upSpeed)
     {
 
         if (
@@ -245,7 +310,8 @@ public class Player : MonoBehaviour
 
     }
 
-    public bool front
+
+    private bool CheckFront
     {
 
         get
@@ -260,7 +326,9 @@ public class Player : MonoBehaviour
         }
 
     }
-    public bool back
+
+
+    private bool CheckBack
     {
 
         get
@@ -275,7 +343,9 @@ public class Player : MonoBehaviour
         }
 
     }
-    public bool left
+
+
+    private bool CheckLeft
     {
 
         get
@@ -290,7 +360,9 @@ public class Player : MonoBehaviour
         }
 
     }
-    public bool right
+
+
+    private bool CheckRight
     {
 
         get
@@ -305,5 +377,6 @@ public class Player : MonoBehaviour
         }
 
     }
+
 
 }

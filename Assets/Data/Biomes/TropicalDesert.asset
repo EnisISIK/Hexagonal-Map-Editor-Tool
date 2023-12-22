@@ -19,6 +19,8 @@ MonoBehaviour:
   terrainHeight: 20
   surfaceBlock: 12
   subSurfaceBlock: 12
+  surfaceBlockType: 10
+  subSurfaceBlockType: 10
   noiseSettings:
   - enabled: 1
     useFirstLayerAsMask: 0

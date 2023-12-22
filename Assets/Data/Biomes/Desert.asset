@@ -17,16 +17,10 @@ MonoBehaviour:
   scale: 0.058
   solidGroundHeight: 42
   terrainHeight: 10
-  terrainScale: 0.05
   surfaceBlock: 7
   subSurfaceBlock: 7
-  strength: 6
-  numLayers: 1
-  baseRoughness: 1
-  roughness: 1
-  persistence: 0.5
-  minValue: 0
-  centre: 1
+  surfaceBlockType: 9
+  subSurfaceBlockType: 9
   noiseSettings:
   - enabled: 1
     useFirstLayerAsMask: 0

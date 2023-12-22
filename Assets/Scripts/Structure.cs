@@ -38,7 +38,7 @@ public static class Structure
 
             for (int i = 1; i < height; i++)
             {
-                queue.Enqueue(new HexMod(new Vector3(position.x, position.y + i, position.z), 3));
+                queue.Enqueue(new HexMod(new Vector3(position.x, position.y + i, position.z), BlockHelper.GetBlock(BlockTypes.E_BLOCK_OAK_WOOD)));
             }
 
             for (int x = -2; x < 3; x++)
@@ -47,7 +47,7 @@ public static class Structure
                 {
                     for (int z = -2; z < 3; z++)
                     {
-                        queue.Enqueue(new HexMod(new Vector3(position.x + x, position.y + height + y, position.z + z), 6));
+                        queue.Enqueue(new HexMod(new Vector3(position.x + x, position.y + height + y, position.z + z), BlockHelper.GetBlock(BlockTypes.E_BLOCK_OAK_LEAF)));
                     }
                 }
             }
@@ -67,7 +67,7 @@ public static class Structure
 
         for (int i = 1; i <= height; i++)
         {
-            queue.Enqueue(new HexMod(new Vector3(position.x, position.y + i, position.z), 6));
+            queue.Enqueue(new HexMod(new Vector3(position.x, position.y + i, position.z), BlockHelper.GetBlock(BlockTypes.E_BLOCK_CACTUS)));
         }
 
         return queue;
@@ -92,16 +92,16 @@ public static class Structure
                 if (i >= 4 && i % 2 == 0 && Mathf.FloorToInt(position.z) % 2 == 0) faceX = position.x;
                 if (i >= 4 && i % 2 == 1 && Mathf.FloorToInt(position.z) % 2 == 1) faceX = position.x;
 
-                queue.Enqueue(new HexMod(new Vector3(faceX, position.y + a, position.z + HexData.faces[i].z), 14));
+                queue.Enqueue(new HexMod(new Vector3(faceX, position.y + a, position.z + HexData.faces[i].z), BlockHelper.GetBlock(BlockTypes.E_BLOCK_SPRUCE_LEAF)));
             }
         }
 
         for (int i = 1; i < height; i++)
         {
-            queue.Enqueue(new HexMod(new Vector3(position.x, position.y + i, position.z), 13));
+            queue.Enqueue(new HexMod(new Vector3(position.x, position.y + i, position.z), BlockHelper.GetBlock(BlockTypes.E_BLOCK_SPRUCE_WOOD)));
         }
 
-        queue.Enqueue(new HexMod(new Vector3(position.x, position.y + height, position.z), 14));
+        queue.Enqueue(new HexMod(new Vector3(position.x, position.y + height, position.z), BlockHelper.GetBlock(BlockTypes.E_BLOCK_SPRUCE_LEAF)));
 
         return queue;
     }
@@ -125,13 +125,13 @@ public static class Structure
                 if (i >= 4 && i % 2 == 0 && Mathf.FloorToInt(position.z) % 2 == 0) faceX = position.x;
                 if (i >= 4 && i % 2 == 1 && Mathf.FloorToInt(position.z) % 2 == 1) faceX = position.x;
 
-                queue.Enqueue(new HexMod(new Vector3(faceX, position.y + a, position.z + HexData.faces[i].z), 10));
+                queue.Enqueue(new HexMod(new Vector3(faceX, position.y + a, position.z + HexData.faces[i].z), BlockHelper.GetBlock(BlockTypes.E_BLOCK_ICE)));
             }
         }
 
         for (int i = height/2; i < height; i++)
         {
-            queue.Enqueue(new HexMod(new Vector3(position.x, position.y + i, position.z), 10));
+            queue.Enqueue(new HexMod(new Vector3(position.x, position.y + i, position.z), BlockHelper.GetBlock(BlockTypes.E_BLOCK_ICE)));
         }
 
         return queue;
@@ -153,7 +153,7 @@ public static class Structure
                                                                 position.x * HexData.ChunkWidth + position.z * HexData.ChunkWidth + i), 200f,10f));
 
 
-            queue.Enqueue(new HexMod(new Vector3(val1, position.y + 1, val2), 18));
+            queue.Enqueue(new HexMod(new Vector3(val1, position.y + 1, val2), BlockHelper.GetBlock(BlockTypes.E_BLOCK_GRASS_BLADE)));
         }
 
         return queue;

@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 public class World : MonoBehaviour
 {
+    // TODO: add creation stack
+    // TODO: insert destroy-place block to the front of update queue
+
     private int seed = 45;
 
     //Scale of a a single biome. Calculated as biomeScale*ChunkWidth. Default is 4x16 -> 64
@@ -62,9 +65,6 @@ public class World : MonoBehaviour
 
     [Range(0.95f, 0f)]
     public float globalLightLevel;
-
-    // TODO: make blocktypes enum or a scriptable object
-    // TODO: add creation stack
 
 
     private void Start()
@@ -484,7 +484,7 @@ public class World : MonoBehaviour
     //Generates Distorted Voronoi Centers
     private void GenerateVoronoiCenters(ChunkCoord playerCoord, int pixelsPerChunk)
     {
-        Dictionary<Vector3Int, VoronoiSeed> generatedBiomeCenters = BiomeCenterFinder.GenerateBiomeCenters(this, pixelsPerChunk, HexData.MaxRenderChunks, playerCoord, biomeScale);
+        Dictionary<Vector3Int, VoronoiSeed> generatedBiomeCenters = BiomeCenterGenerator.GenerateBiomeCenters(this, pixelsPerChunk, HexData.MaxRenderChunks, playerCoord, biomeScale);
 
         foreach (var seedCenter in generatedBiomeCenters)
         {

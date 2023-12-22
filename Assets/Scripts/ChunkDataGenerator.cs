@@ -44,8 +44,7 @@ public class ChunkDataGenerator
                 biomeSelectionData[x, z] = biomeSelection;
                 for (int y = 0; y < HexData.ChunkHeight; y++)
                 {
-                    
-                    byte id = (byte)((y + chunkPos.y > biomeSelection.terrainSurfaceNoise.Value) ? 0 : 1);
+                    byte id =  BlockHelper.GetBlock((y + chunkPos.y > biomeSelection.terrainSurfaceNoise.Value) ? BlockTypes.E_BLOCK_AIR : BlockTypes.E_BLOCK_STONE);
 
                     tempData[x, y, z] = id;
                 }
@@ -70,15 +69,15 @@ public class ChunkDataGenerator
                 for (int y = 0; y < HexData.ChunkHeight; y++)
                 {
                     byte block = tempData[x,y,z];
-                    if (block == 1)
+                    if (block == BlockHelper.GetBlock(BlockTypes.E_BLOCK_STONE))
                     {
                         if(y == terrainHeight)
                         {
-                            tempData[x, y, z] = biome.surfaceBlock;
+                            tempData[x, y, z] = BlockHelper.GetBlock(biome.surfaceBlockType);
                         }
                         else if (y < terrainHeight && y > terrainHeight-4)
                         {
-                            tempData[x, y, z] = biome.subSurfaceBlock;
+                            tempData[x, y, z] = BlockHelper.GetBlock(biome.subSurfaceBlockType);
                         }
                         else
                         {
@@ -88,7 +87,7 @@ public class ChunkDataGenerator
                                 {
                                     if (Noise.Get3DPerlin(new Vector3(x, y, z) + chunkPos, lode.noiseOffset, lode.scale, lode.threshold))
                                     {
-                                        tempData[x, y, z] = lode.blockID;
+                                        tempData[x, y, z] = lode.blockID; // bunu da değiştir sonra surfaceBlock kaldır we good ve belki .id olanları değiştir
                                     }
                                 }
                             }
@@ -126,9 +125,9 @@ public class ChunkDataGenerator
 
                     float flowerThreshold = Noise.Get2DPerlin(new Vector2(x, z), 0f, 10f);
 
-                    if (flowerThreshold > 0.2f && flowerThreshold < 0.3f) tempData[x, y + 1, z] = 19;
-                    else if(flowerThreshold>0.5f&& flowerThreshold < 0.6f) tempData[x, y + 1, z] = 20;
-                    else if(flowerThreshold > 0.7f&& flowerThreshold < 0.8f) tempData[x, y + 1, z] = 21;
+                    if (flowerThreshold > 0.2f && flowerThreshold < 0.3f) tempData[x, y + 1, z] = BlockHelper.GetBlock(BlockTypes.E_BLOCK_TULLIP);
+                    else if(flowerThreshold>0.5f&& flowerThreshold < 0.6f) tempData[x, y + 1, z] = BlockHelper.GetBlock(BlockTypes.E_BLOCK_DAISY);
+                    else if(flowerThreshold > 0.7f&& flowerThreshold < 0.8f) tempData[x, y + 1, z] = BlockHelper.GetBlock(BlockTypes.E_BLOCK_DANDELION);
                 }
             }
 

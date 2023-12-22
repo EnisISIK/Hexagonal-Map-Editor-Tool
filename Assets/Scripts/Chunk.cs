@@ -197,7 +197,10 @@ public class Chunk
 			if (isWater && CheckWaterHex(y + HexData.faces[i].y, faceX, z + HexData.faces[i].z, hexMap)) continue; //if the neighbour IS water, dont render the face
 			if (CheckHex(y + HexData.faces[i].y, faceX, z + HexData.faces[i].z, hexMap)&&!isTransparent)  //if the neighbour IS a block(and not transparent but its not implemented yet), dont render the face 
 			{
-				continue;
+				if (_world.blocktypes[blockID].isSolid && !_world.CheckForTransparentHex(new Vector3(faceX, y + HexData.faces[i].y, z + HexData.faces[i].z) + position))
+				{
+					continue;
+				}
 			}
 
 			float lightLevel;
